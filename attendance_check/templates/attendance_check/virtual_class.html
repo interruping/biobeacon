@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>BioBeacon 출석인증 시스템</title>
+	<script>
+		var mySidebar;
+		function doOnLoad() {
+			mySidebar = new dhtmlXSideBar({
+				parent: "sidebarObj",
+				icons_path: "../../common/icons_material/",
+				width: 160,
+				items: [
+					{id: "recent", text: "Recent", icon: "recent.png", selected: true},
+					{id: "desktop", text: "Desktop", icon: "desktop.png"},
+					{id: "downloads", text: "Downloads", icon: "downloads.png"},
+					{type: "separator"},
+					{id: "documents", text: "Documents", icon: "documents.png"},
+					{id: "music", text: "Music", icon: "music.png"},
+					{id: "pictures", text: "Pictures", icon: "pictures.png"},
+					{id: "video", text: "Video", icon: "video.png"},
+					{type: "separator"},
+					{id: "disk_c", text: "Windows (C:)", icon: "disk_c.png"},
+					{id: "disk_d", text: "Data (D:)", icon: "disk_d.png"},
+					{id: "disk_e", text: "DVD RW (E:)", icon: "disk_e.png"}
+				]
+			});
+		}
+	</script>
+	<style>
+		div#sidebarObj {
+			position: relative;
+			width: 300px;
+			height: 300px;
+			z-index: 9999;
+            margin: 0 auto;
+            top: 0;
+            transform: translateY(50%);
+            left: 0;
+            right: 0;
+
+
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
+<div id="sidebarObj"></div>
+<script>doOnLoad();</script>
+<div id="particles-js"></div>
+{% endblock %}

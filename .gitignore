@@ -1,0 +1,10 @@
+;;extensions to ignore
+*.log
+*.pot
+*.pyc
+
+;;directories to ignore
+.idea/
+
+;;sqlite3 file
+*.sqlite3z

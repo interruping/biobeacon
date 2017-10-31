@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block head %}
+    <title></title>
+    {% endblock %}
+        <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'attendance_check/css/style.css' %}" type="text/css"/>
+    <link rel="stylesheet" href="{% static 'codebase/dhtmlxsidebar.css' %}" type="text/css"/>
+    <script src="{% static 'codebase/dhtmlxsidebar.js' %}"></script>
+    <script src="{% static 'attendance_check/js/script.js' %}"></script>
+</head>
+    <body>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+            {% block body %}
+            {% endblock %}
+    </body>
+</html>
