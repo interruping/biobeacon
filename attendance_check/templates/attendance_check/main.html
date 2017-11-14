@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>BioBeacon 출석인증 시스템</title>
+
+{% endblock %}
+
+{% block body %}\
+<div id="biobeaon-web-app" ng-app="BioBeaconApp"  ng-controller="BioBeaconController">
+  <div class="root-panel container"  ng-show="LoginPage" ng-init='LoginPage=true' ng-include="'../login'">
+
+  </div><  <!-- LoginPage -->
+
+
+  <div id="virtual-class-container"class="root-panel container"  ng-show="VirtualClassPage"  ng-if="VirtualClassPage" ng-include="'../virtual_class'">
+
+
+  </div> <!-- UserControllPage -->
+
+</div><!--bio-beacon-webapp-->
+
+<div id="particles-js"></div>
+{% endblock %}

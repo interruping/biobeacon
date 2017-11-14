@@ -1,50 +1,100 @@
-{% extends 'base.html' %}
 
-{% block head %}
-<title>BioBeacon 출석인증 시스템</title>
-	<script>
-		var mySidebar;
-		function doOnLoad() {
-			mySidebar = new dhtmlXSideBar({
-				parent: "sidebarObj",
-				icons_path: "../../common/icons_material/",
-				width: 160,
-				items: [
-					{id: "recent", text: "Recent", icon: "recent.png", selected: true},
-					{id: "desktop", text: "Desktop", icon: "desktop.png"},
-					{id: "downloads", text: "Downloads", icon: "downloads.png"},
-					{type: "separator"},
-					{id: "documents", text: "Documents", icon: "documents.png"},
-					{id: "music", text: "Music", icon: "music.png"},
-					{id: "pictures", text: "Pictures", icon: "pictures.png"},
-					{id: "video", text: "Video", icon: "video.png"},
-					{type: "separator"},
-					{id: "disk_c", text: "Windows (C:)", icon: "disk_c.png"},
-					{id: "disk_d", text: "Data (D:)", icon: "disk_d.png"},
-					{id: "disk_e", text: "DVD RW (E:)", icon: "disk_e.png"}
-				]
+<script >
+
+
+var myDataView;
+
+function loadDataView(){
+
+    myDataView = new dhtmlXDataView({
+				container:"data_container",
+				type:{
+					template
+					:"<div class='panel panel-default' style='width:130px'><div class='panel-body'><img src='#ImgSRC#' style='width:100px;height:100px'></div><div class='panel-footer'>#Content#</div></div>",
+					height:200,
+					width:150
+				}
 			});
-		}
-	</script>
-	<style>
-		div#sidebarObj {
-			position: relative;
-			width: 300px;
-			height: 300px;
-			z-index: 9999;
-            margin: 0 auto;
-            top: 0;
-            transform: translateY(50%);
-            left: 0;
-            right: 0;
 
+}
 
-		}
-	</style>
-{% endblock %}
+</script>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">BioBeacon 출석인증 시스템</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a data-toggle="tab" href="#myinfo">내 정보</a></li>
+      <li><a data-toggle="tab" href="#attendance_check">출석체크</a></li>
+      <li><a data-toggle="tab" href="#"></a></li>
+    </ul>
+    <form class="navbar-form navbar-left">
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Search">
+      </div>
+      <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+  </div>
+</nav>
 
-{% block body %}
-<div id="sidebarObj"></div>
-<script>doOnLoad();</script>
-<div id="particles-js"></div>
-{% endblock %}
+<div class="tab-content biobeacon-content container">
+	<div id="myinfo" class="tab-pane fade in active">
+		<div class="panel panel-default" ng-controller="ProfileController" ng-init="loadProfile()">
+  			<div class="panel-heading">사용자 프로파일</div>
+  			<div class="panel-body">
+			{% verbatim %}
+            구분 : {{ user_type }} <br/>
+            아이디 : {{ username }} <br/>
+			학번/사번 : {{ id }} <br/>
+            소속학과 : {{ department }} <br/>
+            이메일 : {{ email }} <br />
+
+			{% endverbatim %}
+			</div>
+		</div>
+        <div class="panel panel-default" ng-controller="LectureController" ng-init="loadLectureList()">
+  			<div class="panel-heading">담당 강좌
+
+            </div>
+  			<div class="panel-body">
+                <div class="row" >
+                    <div class="col-md-10">
+                         <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture()">
+                    </div>
+
+                </div>
+			{% verbatim %}
+                <div class="well" ng-repeat="lecture in lectures">강좌명 : {{lecture.title}}</div>
+                <hr>
+                <p style="float:right">총 {{lectures.length}}개의 강좌 담당 중</p>
+			{% endverbatim %}
+			</div>
+		</div>
+	</div>
+	<div id="attendance_check" class="tab-pane fade" ng-controller="LectureAttendanceCheckController" ng-init="loadLectureList()">
+        <div class="panel panel-default">
+            <div class="panel-heading">강좌선택</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()">
+
+                        {% verbatim %}
+                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">{{lecture.title}}</option>
+                        {% endverbatim %}
+
+                        <input type="button" class="btn btn-success" style="width:100%;margin-top:10px" value="출석 시작" ng-click="startLecture()">
+                        <hr>
+                        <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;" ></div>
+                        <script>
+                        loadDataView();
+                        </script>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

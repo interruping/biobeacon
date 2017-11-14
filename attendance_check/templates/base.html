@@ -16,13 +16,18 @@
 
     {% load static %}
     <link rel="stylesheet" href="{% static 'attendance_check/css/style.css' %}" type="text/css"/>
-    <link rel="stylesheet" href="{% static 'codebase/dhtmlxsidebar.css' %}" type="text/css"/>
-    <script src="{% static 'codebase/dhtmlxsidebar.js' %}"></script>
-    <script src="{% static 'attendance_check/js/script.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'codebase/dhtmlxdataview.css' %}"/>
+
+    <script src="{% static 'codebase/dhtmlxdataview.js' %}"></script>
+    <script src="{% static 'attendance_check/js/anime_script.js' %}"></script>
 </head>
     <body>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
             {% block body %}
             {% endblock %}
+
+    <script src="{% static 'attendance_check/js/particle_setting_script.js' %}"></script>
+    <script src="{% static 'attendance_check/js/angular_script.js' %}"></script>
     </body>
 </html>

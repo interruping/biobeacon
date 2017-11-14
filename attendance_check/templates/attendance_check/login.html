@@ -1,72 +1,115 @@
-{% extends 'base.html' %}
-
-{% block head %}
-<title>BioBeacon 출석인증 시스템</title>
-
-{% endblock %}
-
-{% block body %}
-<div id="root-container" class="container">
-   <div class="row">
+<div id="login-page-panel" class="row">
     <div class="col-md-6 col-md-offset-3">
-      <div class="panel panel-login">
-        <div class="panel-body">
-          <div class="row">
-            <div class="col-lg-12">
-              <form id="login-form" action="#" method="post" role="form" style="display: block;">
-                <h2>LOGIN</h2>
-                  <div class="form-group">
-                    <input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
-                  </div>
-                  <div class="form-group">
-                    <input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">
-                  </div>
-                  <div class="col-xs-6 form-group pull-left checkbox">
-                    <input id="checkbox1" type="checkbox" name="remember">
-                    <label for="checkbox1">Remember Me</label>
-                  </div>
-                  <div class="col-xs-6 form-group pull-right">
-                        <input type="submit" name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" value="Log In">
-                  </div>
-              </form>
-              <form id="register-form" action="#" method="post" role="form" style="display: none;">
-                <h2>REGISTER</h2>
-                  <div class="form-group">
-                    <input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
-                  </div>
-                  <div class="form-group">
-                    <input type="email" name="email" id="email" tabindex="1" class="form-control" placeholder="Email Address" value="">
-                  </div>
-                  <div class="form-group">
-                    <input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">
-                  </div>
-                  <div class="form-group">
-                    <input type="password" name="confirm-password" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password">
-                  </div>
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-sm-6 col-sm-offset-3">
-                        <input type="submit" name="register-submit" id="register-submit" tabindex="4" class="form-control btn btn-register" value="Register Now">
-                      </div>
+        <div class="panel panel-login">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form id="login-form" action="#" method="post" role="form" style="display: block;" ng-controller="LoginController">
+                            <h2>로그인</h2>
+                            <div class="form-group">
+                                <input type="text" name="username" id="login_username" tabindex="1" class="form-control" placeholder="아이디" value="" ng-model="login_username">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="password" id="login_password" tabindex="2" class="form-control" placeholder="비밀번호" ng-model="login_password">
+                            </div>
+                            <div class="col-xs-6 form-group pull-left checkbox">
+                                <input id="checkbox1" type="checkbox" name="remember">
+                                <label for="checkbox1">Remember Me</label>
+                            </div>
+                            <div class="col-xs-6 form-group pull-right">
+                                <input name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" value="로그인" ng-click="doLogin()" onclick="void()">
+                            </div>
+                        </form>
+                        <form id="register-form" action="#" method="post" role="form" style="display: none;" ng-init="user_type='true'" ng-controller="RegisterController">
+                            <h2>회원가입</h2>
+                            <div class="form-group">
+                                <input type="text" name="username" id="reg_username" tabindex="1" class="form-control" placeholder="아이디" value="" ng-model="reg_username">
+                            </div>
+                            <div class="form-group">
+                                <input type="email" name="email" id="email" tabindex="1" class="form-control" placeholder="이메일 주소" value="" ng-model="email">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="password" id="reg_password" tabindex="2" class="form-control" placeholder="비밀번호" ng-model="reg_password">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="confirm-password" id="confirm-password" tabindex="2" class="form-control" placeholder="비밀번호 확인" ng-model="reg_password_confirm">
+                            </div>
+                            <h3>사용자 </h3>
+                                <label>
+                                    <input type="radio"  name="user_type" ng-model="user_type" value="true" style="margin-left: 30px" />
+                                    교수
+                                </label>
+                                <label>
+                                    <input type="radio"  name="user_type" ng-model="user_type" value="false" style="margin-left: 30px"/>
+                                    학생
+                                </label>
+                            <div class="form-group">
+                                <input type="text" name="organization_id" id="organization_id" tabindex="2" class="form-control" placeholder="학번/사번" ng-model="organization_id">
+                            </div>
+                            <div class="form-group">
+                                <select ng-model="selectedDepartment" style="width:100%;">
+                                    <option value="0" selected>소속 학과를 선택해주세요.</option>
+                                    {% verbatim %}
+                                     <option ng-repeat="x in departments" value="{{x.id}}">{{x.name}}</option>
+                                    {% endverbatim %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-6 col-sm-offset-3">
+                                        <input name="register-submit" id="register-submit" tabindex="4" class="form-control btn btn-register" value="지금 등록하기" onclick="void()" ng-click="doRegister()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                  </div>
-              </form>
+                </div>
             </div>
-          </div>
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-6 tabs">
+                        <a href="#" class="active" id="login-form-link"><div class="login">로그인</div></a>
+                    </div>
+                    <div class="col-xs-6 tabs">
+                        <a href="#" id="register-form-link"><div class="register">회원가입</div></a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="panel-heading">
-          <div class="row">
-            <div class="col-xs-6 tabs">
-              <a href="#" class="active" id="login-form-link"><div class="login">LOGIN</div></a>
-            </div>
-            <div class="col-xs-6 tabs">
-              <a href="#" id="register-form-link"><div class="register">REGISTER</div></a>
-            </div>
-          </div>
-        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="registration-complete-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">회원가입 성공</h4>
+      </div>
+      <div class="modal-body">
+        <p>회원가입이 완료되었습니다. 로그인 해주십시오.</p>
+      </div>
+      <div class="modal-footer">
+          <script>
+              function transToLogin() {
+
+                $("#login-form").delay(100).fadeIn(100);
+ 		        $("#register-form").fadeOut(100);
+		        $('#register-form-link').removeClass('active');
+		        $(this).addClass('active');
+
+              }
+
+          </script>
+        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="transToLogin()">확인</button>
       </div>
     </div>
+
   </div>
-</div><!-- /.container -->
-<div id="particles-js"></div>
-{% endblock %}
+</div>
+{% load static %}
+<script src="{% static 'attendance_check/js/login_page_script.js' %}"></script>
