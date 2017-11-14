@@ -33,6 +33,7 @@ from django.utils import timezone
 import datetime
 # Create your views here.
 
+# 메인뷰
 def mainView(request):
 
     return render(request, 'attendance_check/main.html')
