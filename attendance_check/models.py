@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 # Create your models here.
 
-
+#주석추추
 class Department(models.Model):
     name = models.TextField(max_length=64, unique=True)
 
