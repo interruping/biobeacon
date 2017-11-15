@@ -11,7 +11,7 @@ class Department(models.Model):
 
     def __str__(self):
         return str(self.pk)
-
+# 주석 추가함
 class ProfessorProfile(models.Model):
     user = models.OneToOneField(User)
     employee_id = models.IntegerField(unique=True)
