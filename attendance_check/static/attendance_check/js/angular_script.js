@@ -127,7 +127,7 @@ app.controller('LectureController', function($scope, $http){
     };
 
     $scope.registNewLecture = function () {
-        $http.post('/attendance_check/api/lecture/create/', {"title": $scope.newLectureTitle},
+        $http.post('/attendance_check/api/lecture/create/', {"title": $scope.newLectureTitle, "lecture_num": $scope.newLectureNum},
         {
             headers: {
                 'Authorization' : token

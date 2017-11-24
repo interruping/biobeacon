@@ -39,7 +39,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 class LectureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
-        fields = ('title',)
+        fields = ('title', 'lecturer_num')
 
     def create(self, validated_data):
 
@@ -49,6 +49,8 @@ class LectureListSerializer(serializers.Serializer):
 
 class LectureCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=128)
+    lecture_num = serializers.CharField(max_length=5)
+
 
 class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()
