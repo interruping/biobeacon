@@ -42,7 +42,7 @@ class StudentProfile(models.Model):
     student_id = models.IntegerField(unique=True)
     Lectures = models.ManyToManyField(Lecture)
     department = models.ForeignKey(Department)
-
+    Crypt_rand_N = models.CharField(max_length=6, default='')
     def __str__(self):
         return str(self.student_id)
 
