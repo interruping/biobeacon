@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.views import Response
 
+
 from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateSerializer,
                                            LectureStartSerializer,
@@ -130,6 +131,7 @@ class LectureCreateView(APIView):
 
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
+                lecture_num=serializer.validated_data['lecture_num'],
                 lecturer=professorProfile,
             )
             lec.save()
