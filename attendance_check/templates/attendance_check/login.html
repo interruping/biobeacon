@@ -48,10 +48,6 @@
                             <div class="form-group">
                                 <select ng-model="selectedDepartment" style="height:25px; width:100%;">
                                     <option value="0" selected>소속 학과를 선택해주세요.</option>
-                                    <option value="1" >정보보안학과</option>
-                                    <option value="2" >컴퓨터공학과</option>
-                                    <option value="3" >간호학과</option>
-                                    <option value="4" >경영학과</option>
                                     {% verbatim %}
                                      <option ng-repeat="x in departments" value="{{x.id}}">{{x.name}}</option>
                                     {% endverbatim %}
