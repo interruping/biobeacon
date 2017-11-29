@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.views import Response
 
+
 from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateSerializer,
                                            LectureStartSerializer,
@@ -31,6 +32,8 @@ from django.contrib.auth.hashers import make_password
 
 from django.utils import timezone
 import datetime
+import random#난수생성
+
 # Create your views here.
 
 
@@ -55,11 +58,15 @@ class RegistrationView(APIView):
     def put(self, request):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
+            ##########난수 N값 생성#########
+            Crypt_rand_N = Create_rand_N()
+            ################
             newUser = User.objects.create(
                 username=serializer.validated_data['username'],
                 email=serializer.validated_data['email'],
                 password=make_password(serializer.validated_data['password']),
                 is_staff=serializer.validated_data['is_staff'],
+
             )
             newUser.save()
             if serializer.validated_data['is_staff']:
@@ -75,6 +82,7 @@ class RegistrationView(APIView):
                     user=newUser,
                     student_id=serializer.validated_data['id'],
                     department=Department.objects.get(pk=serializer.validated_data['department']),
+                    Crypt_rand_N=Crypt_rand_N
                 )
                 newStudentProfile.save()
 
@@ -130,6 +138,7 @@ class LectureCreateView(APIView):
 
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
+                lecture_num=serializer.validated_data['lecture_num'],
                 lecturer=professorProfile,
             )
             lec.save()
@@ -383,3 +392,10 @@ class DepartmentListView(APIView):
 
 
         return Response(departments)
+
+###난수생성 소수로나누어지면 안 나누어질 때 까지 생성함###
+def Create_rand_N():
+    N = random.randint(1,99999)
+    while(N%99991==0):
+        N = random.randint(1, 99999)
+    return N
