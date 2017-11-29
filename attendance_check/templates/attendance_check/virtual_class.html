@@ -29,11 +29,12 @@ function loadDataView(){
       <li><a data-toggle="tab" href="#attendance_check">출석체크</a></li>
       <li><a data-toggle="tab" href="#"></a></li>
     </ul>
-    <form class="navbar-form navbar-left">
+    <form class="navbar-form navbar-left" ng-app="BioBeaconApp" ng-controller="LogoutController">
       <div class="form-group">
         <input type="text" class="form-control" placeholder="Search">
       </div>
       <button type="submit" class="btn btn-default">Submit</button>
+        <input name="logout" class="form-control btn btn-login" tabindex="4" value="로그아웃" ng-click="doLogout()" onclick="void()">
     </form>
   </div>
 </nav>

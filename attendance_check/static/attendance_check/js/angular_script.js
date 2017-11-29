@@ -5,14 +5,25 @@ var token;
 var app = angular.module('BioBeaconApp', []);
 app.controller('BioBeaconController', function($scope, $http){
 
-
-
     $scope.completeLogin = function (){
         $scope.LoginPage = false;
         $scope.VirtualClassPage = true;
 
     }
 
+     $scope.completeLogout = function (){
+        $scope.LoginPage = true;
+        $scope.VirtualClassPage = false;
+
+    }
+
+});
+
+app.controller('LogoutController', function($scope, $http){
+
+    $scope.doLogout = function(){
+            $scope.completeLogout();
+        }
 });
 
 app.controller('LoginController', function($scope, $http){
