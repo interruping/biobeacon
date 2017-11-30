@@ -3,6 +3,7 @@
 var token;
 
 var app = angular.module('BioBeaconApp', ['ngFileUpload']);
+
 app.controller('BioBeaconController', function($scope, $http){
 
     $scope.completeLogin = function (){
@@ -11,6 +12,18 @@ app.controller('BioBeaconController', function($scope, $http){
 
     }
 
+     $scope.completeLogout = function (){
+        $scope.LoginPage = true;
+        $scope.VirtualClassPage = false;
+    }
+
+});
+
+app.controller('LogoutController', function($scope, $http){
+
+    $scope.doLogout = function(){
+            $scope.completeLogout();
+        }
 });
 
 app.controller('LoginController', function($scope, $http){
@@ -27,6 +40,8 @@ app.controller('LoginController', function($scope, $http){
         //success
             token = "JWT " + response.data.token;
             $scope.completeLogin();
+            $scope.login_username = "";
+            $scope.login_password = "";
 
         }, function (response){
         //error
