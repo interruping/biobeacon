@@ -32,6 +32,7 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
+import random
 from django.utils import timezone
 import datetime
 
@@ -59,6 +60,7 @@ class RegistrationView(APIView):
 
     def put(self, request):
         serializer = RegistrationSerializer(data=request.data)
+        Crypt_rand_N = Create_rand_N()
         if serializer.is_valid():
             newUser = User.objects.create(
                 username=serializer.validated_data['username'],
@@ -85,6 +87,7 @@ class RegistrationView(APIView):
                     user=newUser,
                     student_id=serializer.validated_data['id'],
                     department=Department.objects.get(pk=serializer.validated_data['department']),
+                    Crypt_rand_N=Crypt_rand_N,
                 )
                 newStudentProfile.save()
 
@@ -417,3 +420,9 @@ class ProfileImageUploadView(APIView):
         return Response({
             'uploaded_url': profile_image.image.url,
             'image_id' : profile_image.pk})
+
+def Create_rand_N():
+    N = random.randint(1, 99999)
+    while (N % 99991 == 0):
+        N = random.randint(1, 99999)
+    return N
