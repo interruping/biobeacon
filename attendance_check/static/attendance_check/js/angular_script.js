@@ -70,27 +70,114 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
             "username" : $scope.reg_username,
             "email" : $scope.email,
             "password" : $scope.reg_password,
+            "confirm-password" : $scope.reg_password_confirm,
             "is_staff" : $scope.user_type,
             "id" : $scope.organization_id,
             "department" : $scope.selectedDepartment,
             "profile_image_id" : $scope.image_id,
         };
 
-        $http.put("/attendance_check/api/user_register/", regist_form)
-        .then(function(response){
-            $scope.reg_username = '';
-            $scope.email = '';
-            $scope.reg_password = '';
-            $scope.reg_password_confirm = '';
-            $scope.user_type = 'true';
-            $scope.organization_id = '';
-            $scope.selectedDepartment = '0';
-            $('#registration-complete-modal').css("z-index", "99999");
-            $('#registration-complete-modal').appendTo("body").modal();
+        if($scope.reg_username ==""){
+            $scope.reg_username = null;
+            }
+        if($scope.email == ""){
+            $scope.email = null;
+            }
+        if($scope.reg_password == ""){
+            $scope.reg_password = null;
+            }
+        if($scope.reg_password_confirm == ""){
+            $scope.reg_password_confirm = null;
+            }
+        if($scope.organization_id == ""){
+            $scope.organization_id = null;
+            }
 
-        }, function(response) {
+       if($scope.reg_username !=null && $scope.email != null && $scope.reg_password != null && $scope.reg_password_confirm != null && $scope.organization_id !=null && $scope.selectedDepartment != '0' ){
+            if($scope.reg_password == $scope.reg_password_confirm){
+                $http.put("/attendance_check/api/user_register/", regist_form)
+                .then(function(response){
+                    $scope.reg_username = '';
+                    $scope.email = '';
+                    $scope.reg_password = '';
+                    $scope.reg_password_confirm = '';
+                    $scope.user_type = 'true';
+                    $scope.organization_id = '';
+                    $scope.selectedDepartment = '0';
+                    $('#registration-complete-modal').css("z-index", "99999");
+                    $('#registration-complete-modal').appendTo("body").modal();
 
-        });
+                }, function(response) {
+
+                });
+            }
+            else {
+                   var hole_error ="비밀번호 확인 일치하지 않습니다.";
+                    $('#error_code').html(hole_error);
+                    $("#error_dialog").appendTo('body').modal();
+
+            }
+       } else {
+            var hole_error= "";
+            var subject_error="";
+            var count = 0;
+
+            if( $scope.reg_username == null ||
+                $scope.email == null ||
+                $scope.reg_password == null ||
+                $scope.reg_password_confirm == null ||
+                 $scope.organization_id == null) {
+
+                if($scope.reg_username ==null){
+                  hole_error +="아이디";
+                  count=1;
+                }
+
+                if($scope.email == null){
+                  if(count ==1){
+                    hole_error +=",";
+                  } else {
+                    count=1;
+                  }
+                  hole_error +="메일";
+                }
+                if($scope.reg_password == null){
+                    if(count ==1){
+                        hole_error +=",";
+                    } else {
+                        count=1;
+                    }
+                    hole_error +="비밀번호";
+                }
+                if($scope.reg_password_confirm == null){
+                    if(count ==1){
+                        hole_error +=",";
+                    } else {
+                        count=1;
+                    }
+                    hole_error += "비밀번호 확인"
+                }
+                if($scope.organization_id == null){
+                    if(count ==1){
+                        hole_error +=",";
+                    } else {
+                        count=1;
+                    }
+                    hole_error += "학번"
+                }
+                hole_error +="의 값이 올바르지 않습니다. ";
+            }
+
+            if($scope.selectedDepartment == '0'){
+                subject_error += "학과를 선택하십시오.";
+            }
+
+
+            $('#error_code').html(hole_error);
+            $("#sub_error_code").html(subject_error);
+            $("#error_dialog").appendTo('body').modal();
+
+        }
     };
 
     $scope.submitImage = function () {
