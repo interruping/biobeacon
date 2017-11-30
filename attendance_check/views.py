@@ -15,7 +15,8 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureReceiveApplySerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
-                                           StudentProfileSerializer )
+                                           StudentProfileSerializer,
+                                           )
 
 from django.utils import timezone
 from .models import ( ProfessorProfile,
@@ -25,15 +26,17 @@ from .models import ( ProfessorProfile,
                       AttendanceRecord,
                       AttendanceCard,
                       LectureReceiveCard,
+                      ProfileImage,
                       )
 
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
+import random
 from django.utils import timezone
 import datetime
-import random#난수생성
 
+from django.core.files import File
 # Create your views here.
 
 
@@ -57,16 +60,13 @@ class RegistrationView(APIView):
 
     def put(self, request):
         serializer = RegistrationSerializer(data=request.data)
+        Crypt_rand_N = Create_rand_N()
         if serializer.is_valid():
-            ##########난수 N값 생성#########
-            Crypt_rand_N = Create_rand_N()
-            ################
             newUser = User.objects.create(
                 username=serializer.validated_data['username'],
                 email=serializer.validated_data['email'],
                 password=make_password(serializer.validated_data['password']),
                 is_staff=serializer.validated_data['is_staff'],
-
             )
             newUser.save()
             if serializer.validated_data['is_staff']:
@@ -77,14 +77,23 @@ class RegistrationView(APIView):
                 )
                 newProf.save()
 
+                profile_img = ProfileImage.objects.get(pk=serializer.validated_data['profile_image_id'])
+                profile_img.user = newUser
+                profile_img.save()
+
+
             else :
                 newStudentProfile = StudentProfile.objects.create(
                     user=newUser,
                     student_id=serializer.validated_data['id'],
                     department=Department.objects.get(pk=serializer.validated_data['department']),
-                    Crypt_rand_N=Crypt_rand_N
+                    Crypt_rand_N=Crypt_rand_N,
                 )
                 newStudentProfile.save()
+
+                profile_img = ProfileImage.objects.get(pk=serializer.validated_data['profile_image_id'])
+                profile_img.user = newUser
+                profile_img.save()
 
             return Response(serializer.validated_data['department'])
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -98,26 +107,28 @@ class ProfileView(APIView):
 
         if request.user.is_staff:
             prof = ProfessorProfile.objects.get(user=request.user)
-
+            prof_img = ProfileImage.objects.get(user=request.user)
             result = {
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'교수',
                 'id' : prof.employee_id,
                 'department' : prof.department.name,
+                'profile_image' : prof_img.image.url,
             }
 
 
             return Response(result)
         else:
             sdt = StudentProfile.objects.get(user=request.user)
-
+            std_img = ProfileImage.objects.get(user=request.user)
             result = {
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'학생',
                 'id' : sdt.student_id,
                 'department' : sdt.department.name,
+                'profile_image' : std_img.image.url,
             }
 
             return Response(result)
@@ -369,7 +380,8 @@ class LectureReceiveApplyListView(APIView):
                 for card in cards:
                     student_info = {
                         "student_id" : card.card_owner.student_id,
-                        "id" : card.card_owner.pk
+                        "id" : card.card_owner.pk,
+                        "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
                     }
                     student_infos.append(student_info)
 
@@ -393,9 +405,24 @@ class DepartmentListView(APIView):
 
         return Response(departments)
 
-###난수생성 소수로나누어지면 안 나누어질 때 까지 생성함###
+
+class ProfileImageUploadView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+        profile_image = ProfileImage()
+
+        profile_image.save()
+        profile_image.image = request.FILES['file']
+        profile_image.save()
+
+        return Response({
+            'uploaded_url': profile_image.image.url,
+            'image_id' : profile_image.pk})
+
 def Create_rand_N():
-    N = random.randint(1,99999)
-    while(N%99991==0):
+    N = random.randint(1, 99999)
+    while (N % 99991 == 0):
         N = random.randint(1, 99999)
     return N

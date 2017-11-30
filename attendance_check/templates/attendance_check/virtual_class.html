@@ -44,6 +44,7 @@ function loadDataView(){
   			<div class="panel-heading">사용자 프로파일</div>
   			<div class="panel-body">
 			{% verbatim %}
+                <img ng-src="{{ profile_image }}" width="100px" height="120px"><br/>
             구분 : {{ user_type }} <br/>
             아이디 : {{ username }} <br/>
 			학번/사번 : {{ id }} <br/>
@@ -86,7 +87,7 @@ function loadDataView(){
                     <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()">
 
                         {% verbatim %}
-                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">{{lecture.title}}</option>
+                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">{{ lecture.title }}</option>
                         {% endverbatim %}
 
                         <input type="button" class="btn btn-success" style="width:100%;margin-top:10px" value="출석 시작" ng-click="startLecture()">

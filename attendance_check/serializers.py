@@ -23,6 +23,7 @@ class RegistrationSerializer(serializers.Serializer):
     is_staff = serializers.BooleanField(default=False)
     id = serializers.IntegerField()
     department = serializers.IntegerField()
+    profile_image_id = serializers.IntegerField()
 
 class ProfessorProfileSerializer(serializers.ModelSerializer):
     class Meta:

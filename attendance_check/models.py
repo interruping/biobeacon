@@ -12,6 +12,19 @@ class Department(models.Model):
     def __str__(self):
         return str(self.pk)
 
+def ImageUploadNameBind(instance, filename):
+    ext = filename.split('.')[-1]
+    if instance.pk:
+        return 'profile_image/{}.{}'.format(instance.pk, ext)
+    else:
+        pass
+     # do something if pk is not there yet
+
+
+class ProfileImage(models.Model):
+    user = models.OneToOneField(User, null=True)
+    image = models.ImageField(upload_to=ImageUploadNameBind)
+
 class ProfessorProfile(models.Model):
     user = models.OneToOneField(User)
     employee_id = models.IntegerField(unique=True)
@@ -29,8 +42,6 @@ class Lecture(models.Model):
     def __str__(self):
         return self.title
 
-
-
 class AttendanceRecord(models.Model):
     activate = models.BooleanField(default=False)
     start_time = models.DateTimeField(editable=False)
@@ -40,9 +51,9 @@ class AttendanceRecord(models.Model):
 class StudentProfile(models.Model):
     user = models.OneToOneField(User)
     student_id = models.IntegerField(unique=True)
-    Lectures = models.ManyToManyField(Lecture)
     department = models.ForeignKey(Department)
     Crypt_rand_N = models.CharField(max_length=6, default='')
+
     def __str__(self):
         return str(self.student_id)
 
