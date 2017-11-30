@@ -34,7 +34,6 @@
                             <div class="form-group">
                                 <input type="password" name="confirm-password" id="confirm-password" tabindex="2" class="form-control" placeholder="비밀번호 확인" ng-model="reg_password_confirm">
                             </div>
-                            <h3>사용자 </h3>
                                 <label>
                                     <input type="radio"  name="user_type" ng-model="user_type" value="true" style="margin-left: 30px" />
                                     교수
@@ -47,12 +46,24 @@
                                 <input type="text" name="organization_id" id="organization_id" tabindex="2" class="form-control" placeholder="학번/사번" ng-model="organization_id">
                             </div>
                             <div class="form-group">
-                                <select ng-model="selectedDepartment" style="width:100%;">
+                                <select ng-model="selectedDepartment" style="height:25px; width:100%;">
                                     <option value="0" selected>소속 학과를 선택해주세요.</option>
                                     {% verbatim %}
                                      <option ng-repeat="x in departments" value="{{x.id}}">{{x.name}}</option>
                                     {% endverbatim %}
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="file" ng-model="profile_image" name="profile_image" ngf-select="submitImage()" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="2MB"></input>
+                                <div id="upload_progress_container" class="progress" style=" height:20px;margin-top:10px;margin-bottom:10px;">
+                                    <div id="upload_progress" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+                                         aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
+                                </div>
+                                <div id="image_confirm" class="collapse">
+                                    <img id="uploaded_image" width="100px" height="120px" style="margin-top: 10px;">
+
+                                </div>
+                                <input ng-model="image_id" style="display: none;">
                             </div>
 
                             <div class="form-group">

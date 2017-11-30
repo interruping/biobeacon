@@ -7,7 +7,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'password', 'email', 'is_staff')
-
     def create(self, validated_data):
         user = User.objects.create(
             email= validated_data['email'],
@@ -24,6 +23,7 @@ class RegistrationSerializer(serializers.Serializer):
     is_staff = serializers.BooleanField(default=False)
     id = serializers.IntegerField()
     department = serializers.IntegerField()
+    profile_image_id = serializers.IntegerField()
 
 class ProfessorProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,7 +40,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 class LectureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
-        fields = ('title',)
+        fields = ('title', 'lecturer_num')
 
     def create(self, validated_data):
 
@@ -50,6 +50,8 @@ class LectureListSerializer(serializers.Serializer):
 
 class LectureCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=128)
+    lecture_num = serializers.CharField(max_length=5)
+
 
 class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()

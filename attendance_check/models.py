@@ -6,12 +6,24 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 # Create your models here.
 
-
 class Department(models.Model):
     name = models.TextField(max_length=64, unique=True)
 
     def __str__(self):
         return str(self.pk)
+
+def ImageUploadNameBind(instance, filename):
+    ext = filename.split('.')[-1]
+    if instance.pk:
+        return 'profile_image/{}.{}'.format(instance.pk, ext)
+    else:
+        pass
+     # do something if pk is not there yet
+
+
+class ProfileImage(models.Model):
+    user = models.OneToOneField(User, null=True)
+    image = models.ImageField(upload_to=ImageUploadNameBind)
 
 class ProfessorProfile(models.Model):
     user = models.OneToOneField(User)
@@ -26,11 +38,9 @@ class ProfessorProfile(models.Model):
 class Lecture(models.Model):
     title = models.CharField(max_length=256, default='')
     lecturer = models.ForeignKey(ProfessorProfile)
-
+    lecture_num = models.CharField(max_length=5, default='')
     def __str__(self):
         return self.title
-
-
 
 class AttendanceRecord(models.Model):
     activate = models.BooleanField(default=False)
@@ -41,8 +51,8 @@ class AttendanceRecord(models.Model):
 class StudentProfile(models.Model):
     user = models.OneToOneField(User)
     student_id = models.IntegerField(unique=True)
-    Lectures = models.ManyToManyField(Lecture)
     department = models.ForeignKey(Department)
+    Crypt_rand_N = models.CharField(max_length=6, default='')
 
     def __str__(self):
         return str(self.student_id)

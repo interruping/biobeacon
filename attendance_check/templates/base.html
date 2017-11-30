@@ -24,9 +24,16 @@
     <body>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
+    <script>
+    window.FileAPI = {
+        jsUrl: 'https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/FileAPI.min.js',
+        flashUrl: 'https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/FileAPI.flash.swf',
+    };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload-shim.min.js"></script> <!-- html5을 지원하지 못하는 브라우저를 위해서 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload.min.js"></script>
             {% block body %}
             {% endblock %}
-
     <script src="{% static 'attendance_check/js/particle_setting_script.js' %}"></script>
     <script src="{% static 'attendance_check/js/angular_script.js' %}"></script>
     </body>
