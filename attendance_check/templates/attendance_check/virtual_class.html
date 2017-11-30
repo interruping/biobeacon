@@ -34,7 +34,31 @@ function loadDataView(){
         <input type="text" class="form-control" placeholder="Search">
       </div>
       <button type="submit" class="btn btn-default">Submit</button>
-        <input name="logout" class="form-control btn btn-login" tabindex="4" value="로그아웃" ng-click="doLogout()" onclick="void()">
+    <!--    <input name="logout" class="form-control btn btn-login" tabindex="4" value="로그아웃" ng-click="doLogout()" onclick="void()"> -->
+        <button type="button" class="btn btn-danger" id="myBtn">Logout</button>
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="logoutCheck" role="dialog">
+    <div class="modal-dialog" >
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">경고</h4>
+        </div>
+        <div class="modal-body">
+          <p>정말 로그아웃 하시겠습니까?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="doLogout()">네</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">아니요</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
     </form>
   </div>
 </nav>
@@ -91,6 +115,12 @@ function loadDataView(){
                         <hr>
                         <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;" ></div>
                         <script>
+    $(document).ready(function(){
+        $("#myBtn").click(function(){
+            $("#logoutCheck").css("z-index", "9999");
+            $("#logoutCheck").appendTo("body").modal();
+        });
+    });
                         loadDataView();
                         </script>
                     </select>
