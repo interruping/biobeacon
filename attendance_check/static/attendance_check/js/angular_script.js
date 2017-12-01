@@ -57,7 +57,7 @@ app.controller('LoginController', function($scope, $http){
 
         }, function (response){
         //error
-            alert(response);
+            $("#registration-failed-modal").appendTo("body").modal();
         });
 
     };
