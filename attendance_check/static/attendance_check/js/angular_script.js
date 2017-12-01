@@ -105,7 +105,7 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
                       $scope.user_type = 'true';
                       $scope.organization_id = '';
                       $scope.selectedDepartment = '0';
-                      
+
                       $('#registration-complete-modal').css("z-index", "99999");
                       $('#registration-complete-modal').appendTo("body").modal();
 
@@ -332,4 +332,11 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
 
 
     };
+
 });
+
+
+function onEnterSubmit(){
+     var keyCode = window.event.keyCode;
+     document.getElementById("login-submit").click();
+   }
