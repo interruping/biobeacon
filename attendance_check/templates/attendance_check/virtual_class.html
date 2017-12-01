@@ -10,8 +10,20 @@ function loadDataView(){
 				container:"data_container",
 				type:{
 					template
-					:"<div class='panel panel-default' style='width:130px'><div class='panel-body'><img src='#ImgSRC#' style='width:100px;height:100px'></div><div class='panel-footer'>#Content#</div></div>",
-					height:200,
+					:
+
+					"<div class='panel panel-#PanelStatus#' style='width:130px'>" +
+					    "<div class='panel-heading' style='text-align: center'>#AttendanceCheckStatus#</div>" +
+					    "<div class='panel-body'>" +
+					        "<img src='#ImgSRC#' style='width:100px;height:100px'>" +
+					    "</div>" +
+					    "<div class='panel-footer' style='text-align: center'>"+
+					    "#Name# <br>" +
+					    "#IdNum#" +
+					    "</div>" +
+					"</div>"
+					,
+					height:280,
 					width:150
 				}
 			});
@@ -109,13 +121,25 @@ function loadDataView(){
             <div class="panel-body">
                 <div class="form-group">
                     <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()">
-
+                        <option ng-selected="selected" value="0">강좌를 선택하여 주세요</option>
                         {% verbatim %}
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">{{ lecture.title }}</option>
                         {% endverbatim %}
 
                         <input type="button" class="btn btn-success" style="width:100%;margin-top:10px" value="출석 시작" ng-click="startLecture()">
                         <hr>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">일괄 출석</div>
+                            <div id="entire_controll_panel" class="panel-body">
+                                <select ng-model="select_entire_control" style="height:25px; width:100%;" ng-change="updateEntireControl()">
+                                    <option value="0" ng-selected="selected" >선택하세요</option>
+                                    <option value="1" >전체 결석</option>
+                                    <option value="2" >전체 지각</option>
+                                    <option value="3" >전체 공결</option>
+                                    <option value="4" >전체 출석</option>
+                                </select>
+                            </div>
+                        </div>
                         <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;" ></div>
                         <script>
     $(document).ready(function(){
