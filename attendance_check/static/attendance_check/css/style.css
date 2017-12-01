@@ -250,3 +250,7 @@ label {
 
     align: center;
 }
+
+.local-Storage {
+    display: none;
+}
