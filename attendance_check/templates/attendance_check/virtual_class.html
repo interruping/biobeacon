@@ -87,7 +87,10 @@ function loadDataView(){
                 <div class="row" >
                     <div class="col-md-3">
                       <!-- <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="강의실 번호" ng-model="newLectureNum"> -->
-                        <input type="text" onkeydown='return onlyNumber(event)' onkeyup='removeChar(event)' style='ime-mode:disabled;'  class=" form-control"style="margin-bottom:10px" placeholder="강의실 번호" ng-model="newLectureNum">
+                        <input type="text" id="lectureroom_number" data-toggle="onlyNumber" title="주의" data-content="오직 숫자만 입력해주십시오." onkeydown='return onlyNumber(event)'
+                               data-placement="top"
+                               onkeyup='removeChar(event)' style='ime-mode:disabled;'  class=" form-control"style="margin-bottom:10px"
+                               placeholder="강의실 번호" ng-model="newLectureNum">
                     </div>
                     <div class="col-md-7">
                         <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
@@ -128,7 +131,7 @@ function loadDataView(){
     });
                         loadDataView();
 
-    function onlyNumber(event){
+     function onlyNumber(event){
 			event = event || window.event;
 			var keyID = (event.which) ? event.which : event.keyCode;
 			if ( (keyID >= 48 && keyID <= 57) || (keyID >= 96 && keyID <= 105) || keyID == 8 || keyID == 46 || keyID == 37 || keyID == 39 )
@@ -137,14 +140,40 @@ function loadDataView(){
 				return false;
 		}
 
+    var flag = false;
+
     function removeChar(event) {
 			event = event || window.event;
 			var keyID = (event.which) ? event.which : event.keyCode;
 			if ( keyID == 8 || keyID == 46 || keyID == 37 || keyID == 39 )
 				return;
-			else
-				event.target.value = event.target.value.replace(/[^0-9]/g, "");
+			else{
+
+                            var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+
+                             if(check.test(event.target.value))
+                            	{
+                            	if (flag == false ){
+                                	flag = true;
+                                	$("#lectureroom_number").popover('show');
+                                    setTimeout(function() {
+                                        $("#lectureroom_number").popover('hide');
+                                    	flag = false;
+
+                                    }, 1000);
+                                }
+
+                            }
+                            event.target.value = event.target.value.replace(/[^0-9]/g, "");
+
+                 }
 		}
+
+
+
+
+
+
                         </script>
                     </select>
                 </div>
