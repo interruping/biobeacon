@@ -4,6 +4,15 @@ var token;
 
 var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
+localStorage.setItem('storedUserAuthData',"no_token");
+
+app.controller('localStorage', function($scope, $http){
+    const loggedInfo = localStorage.getItem('storedUserAuthData');
+    if (loggedInfo != "no_token") {
+        $scope.completeLogin();
+    }
+});
+
 app.controller('BioBeaconController', function($scope, $http){
 
     $scope.completeLogin = function (){
@@ -42,6 +51,7 @@ app.controller('LoginController', function($scope, $http){
             $scope.completeLogin();
             $scope.login_username = "";
             $scope.login_password = "";
+            localStorage.setItem('storedUserAuthData',token);
 
         }, function (response){
         //error
