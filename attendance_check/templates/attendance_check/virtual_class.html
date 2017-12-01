@@ -131,7 +131,7 @@ function loadDataView(){
                         <div class="panel panel-default">
                             <div class="panel-heading">일괄 출석</div>
                             <div id="entire_controll_panel" class="panel-body">
-                                <select ng-model="select_entire_control" style="height:25px; width:100%;" ng-change="updateEntireControl()">
+                                <select ng-model="select_entire_control" ng-disabled="seletedLecture == '0'" style="height:25px; width:100%;" ng-change="updateEntireControl()">
                                     <option value="0" ng-selected="selected" >선택하세요</option>
                                     <option value="1" >전체 결석</option>
                                     <option value="2" >전체 지각</option>
