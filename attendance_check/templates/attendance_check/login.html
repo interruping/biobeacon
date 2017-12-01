@@ -144,5 +144,37 @@
     </div>
   </div>
 
+<!-- Modal -->
+<div id="registration-failed-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">로그인 실패</h4>
+      </div>
+      <div class="modal-body">
+        <p>ID와 PASSWORD를 확인하세요.</p>
+      </div>
+      <div class="modal-footer">
+          <script>
+              function transToLogin() {
+
+                $("#login-form").delay(100).fadeIn(100);
+ 		        $("#register-form").fadeOut(100);
+		        $('#register-form-link').removeClass('active');
+		        $(this).addClass('active');
+
+              }
+
+          </script>
+        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="transToLogin()">확인</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% load static %}
 <script src="{% static 'attendance_check/js/login_page_script.js' %}"></script>
