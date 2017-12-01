@@ -381,6 +381,7 @@ class LectureReceiveApplyListView(APIView):
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
+                        "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
                     }
                     student_infos.append(student_info)
