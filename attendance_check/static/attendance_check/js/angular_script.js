@@ -95,24 +95,34 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
 
        if($scope.reg_username !=null && $scope.email != null && $scope.reg_password != null && $scope.reg_password_confirm != null && $scope.organization_id !=null && $scope.selectedDepartment != '0' ){
             if($scope.reg_password == $scope.reg_password_confirm){
-                $http.put("/attendance_check/api/user_register/", regist_form)
-                .then(function(response){
-                    $scope.reg_username = '';
-                    $scope.email = '';
-                    $scope.reg_password = '';
-                    $scope.reg_password_confirm = '';
-                    $scope.user_type = 'true';
-                    $scope.organization_id = '';
-                    $scope.selectedDepartment = '0';
-                    $('#registration-complete-modal').css("z-index", "99999");
-                    $('#registration-complete-modal').appendTo("body").modal();
+                if($scope.profile_image  != null){
+                   $http.put("/attendance_check/api/user_register/", regist_form)
+                     .then(function(response){
+                      $scope.reg_username = '';
+                      $scope.email = '';
+                      $scope.reg_password = '';
+                      $scope.reg_password_confirm = '';
+                      $scope.user_type = 'true';
+                      $scope.organization_id = '';
+                      $scope.selectedDepartment = '0';
+                      
+                      $('#registration-complete-modal').css("z-index", "99999");
+                      $('#registration-complete-modal').appendTo("body").modal();
 
-                }, function(response) {
+                   },  function(response) {
 
-                });
+                         });
+                 }
+                 else{
+                        var subject_error='';
+                        var hole_error ="사진을 첨부해주세요.";
+                        $('#sub_error_code').html(subject_error);
+                        $('#error_code').html(hole_error);
+                        $("#error_dialog").appendTo('body').modal();
+                  }
             }
             else {
-                   var hole_error ="비밀번호 확인 일치하지 않습니다.";
+                   var hole_error ="비밀번호 확인이 일치하지 않습니다.";
                     $('#error_code').html(hole_error);
                     $("#error_dialog").appendTo('body').modal();
 
