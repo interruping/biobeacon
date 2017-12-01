@@ -33,6 +33,7 @@ app.controller('LogoutController', function($scope, $http){
 
     $scope.doLogout = function(){
             $scope.completeLogout();
+            localStorage.removeItem('storedUserAuthData');
         }
 });
 
