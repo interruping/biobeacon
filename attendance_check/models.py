@@ -39,13 +39,16 @@ class Lecture(models.Model):
     title = models.CharField(max_length=256, default='')
     lecturer = models.ForeignKey(ProfessorProfile)
     lecture_num = models.CharField(max_length=5, default='')
+    absence_time_set = models.CharField(max_length=2, default=30)
     def __str__(self):
         return self.title
 
 class AttendanceRecord(models.Model):
     activate = models.BooleanField(default=False)
-    start_time = models.DateTimeField(editable=False)
-    end_time = models.DateTimeField(editable=False)
+    activate_absence = models.BooleanField(default=False)
+    start_time = models.DateTimeField(editable=True)
+    end_time = models.DateTimeField(editable=True)
+    absence_time = models.DateTimeField(editable=True)
     lecture = models.ForeignKey(Lecture)
 
 class StudentProfile(models.Model):
