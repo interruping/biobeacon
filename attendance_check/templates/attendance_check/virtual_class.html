@@ -1,5 +1,5 @@
 
-<script >
+<script>
 
 
 var myDataView;
@@ -10,8 +10,20 @@ function loadDataView(){
 				container:"data_container",
 				type:{
 					template
-					:"<div class='panel panel-default' style='width:130px'><div class='panel-body'><img src='#ImgSRC#' style='width:100px;height:100px'></div><div class='panel-footer'>#Content#</div></div>",
-					height:200,
+					:
+
+					"<div class='panel panel-#PanelStatus#' style='width:130px'>" +
+					    "<div class='panel-heading' style='text-align: center'>#AttendanceCheckStatus#</div>" +
+					    "<div class='panel-body'>" +
+					        "<img src='#ImgSRC#' style='width:100px;height:100px'>" +
+					    "</div>" +
+					    "<div class='panel-footer' style='text-align: center'>"+
+					    "#Name# <br>" +
+					    "#IdNum#" +
+					    "</div>" +
+					"</div>"
+					,
+					height:280,
 					width:150
 				}
 			});
@@ -22,18 +34,38 @@ function loadDataView(){
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">BioBeacon 출석인증 시스템</a>
+      <a class="navbar-brand" href="JavaScript:window.location.reload()">BioBeacon 출석인증 시스템</a>
     </div>
     <ul class="nav navbar-nav">
       <li class="active"><a data-toggle="tab" href="#myinfo">내 정보</a></li>
-      <li><a data-toggle="tab" href="#attendance_check">출석체크</a></li>
+      <li><a data-toggle="tab" href="#attendance_check" onclick="activeChulCheck()">출석체크</a></li>
       <li><a data-toggle="tab" href="#"></a></li>
     </ul>
-    <form class="navbar-form navbar-left">
-      <div class="form-group">
-        <input type="text" class="form-control" placeholder="Search">
+    <form class="navbar-form navbar-left" ng-controller="LogoutController">
+    <!--    <input name="logout" class="form-control btn btn-login" tabindex="4" value="로그아웃" ng-click="doLogout()" onclick="void()"> -->
+        <button type="button" class="btn btn-danger" id="myBtn">Logout</button>
+        
+  <!-- Modal -->
+  <div class="modal fade" id="logoutCheck" role="dialog">
+    <div class="modal-dialog" >
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">경고</h4>
+        </div>
+        <div class="modal-body">
+          <p>정말 로그아웃 하시겠습니까?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="doLogout()">네</button>
+          <button type="submit" class="btn btn-default" data-dismiss="modal">아니요</button>
+        </div>
       </div>
-      <button type="submit" class="btn btn-default">Submit</button>
+
+    </div>
+  </div>
     </form>
   </div>
 </nav>
@@ -44,6 +76,7 @@ function loadDataView(){
   			<div class="panel-heading">사용자 프로파일</div>
   			<div class="panel-body">
 			{% verbatim %}
+                <img ng-src="{{ profile_image }}" width="100px" height="120px"><br/>
             구분 : {{ user_type }} <br/>
             아이디 : {{ username }} <br/>
 			학번/사번 : {{ id }} <br/>
@@ -59,8 +92,15 @@ function loadDataView(){
             </div>
   			<div class="panel-body">
                 <div class="row" >
-                    <div class="col-md-10">
-                         <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
+                    <div class="col-md-3">
+                      <!-- <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="강의실 번호" ng-model="newLectureNum"> -->
+                        <input type="text" id="lectureroom_number" data-toggle="onlyNumber" title="주의" data-content="오직 숫자만 입력해주십시오." onkeydown='return onlyNumber(event)'
+                               data-placement="top"
+                               onkeyup='removeChar(event)' style='ime-mode:disabled;'  class=" form-control"style="margin-bottom:10px"
+                               placeholder="강의실 번호" ng-model="newLectureNum">
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
                     </div>
                     <div class="col-md-2">
                         <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture()">
@@ -81,16 +121,77 @@ function loadDataView(){
             <div class="panel-body">
                 <div class="form-group">
                     <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()">
-
+                        <option ng-selected="selected" value="0">강좌를 선택하여 주세요</option>
                         {% verbatim %}
-                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">{{lecture.title}}</option>
+                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">{{ lecture.title }}</option>
                         {% endverbatim %}
 
                         <input type="button" class="btn btn-success" style="width:100%;margin-top:10px" value="출석 시작" ng-click="startLecture()">
                         <hr>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">일괄 출석</div>
+                            <div id="entire_controll_panel" class="panel-body">
+                                <select ng-model="select_entire_control" ng-disabled="seletedLecture == '0'" style="height:25px; width:100%;" ng-change="updateEntireControl()">
+                                    <option value="0" ng-selected="selected" >선택하세요</option>
+                                    <option value="1" >전체 결석</option>
+                                    <option value="2" >전체 지각</option>
+                                    <option value="3" >전체 공결</option>
+                                    <option value="4" >전체 출석</option>
+                                </select>
+                            </div>
+                        </div>
                         <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;" ></div>
                         <script>
+    $(document).ready(function(){
+        $("#myBtn").click(function(){
+            $("#logoutCheck").css("z-index", "9999");
+            $("#logoutCheck").appendTo("body").modal();
+        });
+    });
                         loadDataView();
+
+     function onlyNumber(event){
+			event = event || window.event;
+			var keyID = (event.which) ? event.which : event.keyCode;
+			if ( (keyID >= 48 && keyID <= 57) || (keyID >= 96 && keyID <= 105) || keyID == 8 || keyID == 46 || keyID == 37 || keyID == 39 )
+				return;
+			else
+				return false;
+		}
+
+    var flag = false;
+
+    function removeChar(event) {
+			event = event || window.event;
+			var keyID = (event.which) ? event.which : event.keyCode;
+			if ( keyID == 8 || keyID == 46 || keyID == 37 || keyID == 39 )
+				return;
+			else{
+
+                            var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+
+                             if(check.test(event.target.value))
+                            	{
+                            	if (flag == false ){
+                                	flag = true;
+                                	$("#lectureroom_number").popover('show');
+                                    setTimeout(function() {
+                                        $("#lectureroom_number").popover('hide');
+                                    	flag = false;
+                                    }, 1000);
+                                }
+
+                            }
+                            event.target.value = event.target.value.replace(/[^0-9]/g, "");
+
+                 }
+		}
+
+
+
+
+
+
                         </script>
                     </select>
                 </div>

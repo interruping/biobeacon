@@ -5,7 +5,8 @@ from attendance_check.models import (Lecture,
                                      ProfessorProfile,
                                      StudentProfile,
                                      LectureReceiveCard,
-                                     Department)
+                                     Department,
+                                     ProfileImage)
 
 # Register your models here.
 admin.site.register(Lecture)
@@ -15,3 +16,4 @@ admin.site.register(Department)
 admin.site.register(AttendanceRecord)
 admin.site.register(AttendanceCard)
 admin.site.register(LectureReceiveCard)
+admin.site.register(ProfileImage)

@@ -10,7 +10,7 @@
                                 <input type="text" name="username" id="login_username" tabindex="1" class="form-control" placeholder="아이디" value="" ng-model="login_username">
                             </div>
                             <div class="form-group">
-                                <input type="password" name="password" id="login_password" tabindex="2" class="form-control" placeholder="비밀번호" ng-model="login_password">
+                                <input type="password" name="password" id="login_password" tabindex="2" class="form-control" placeholder="비밀번호" onkeydown="if(event.keyCode==13)javascript:onEnterSubmit()"ng-model="login_password">
                             </div>
                             <div class="col-xs-6 form-group pull-left checkbox">
                                 <input id="checkbox1" type="checkbox" name="remember">
@@ -52,6 +52,18 @@
                                      <option ng-repeat="x in departments" value="{{x.id}}">{{x.name}}</option>
                                     {% endverbatim %}
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <input id="profile_image_input" type="file" ng-model="profile_image" name="profile_image" ngf-select="submitImage()" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="2MB"></input>
+                                <div id="upload_progress_container" class="progress" style=" height:20px;margin-top:10px;margin-bottom:10px;">
+                                    <div id="upload_progress" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+                                         aria-valuemin="0" aria-valuemax="100" style="width:0%;"></div>
+                                </div>
+                                <div id="image_confirm" class="collapse">
+                                    <img id="uploaded_image" width="100px" height="120px" style="margin-top: 10px;">
+
+                                </div>
+                                <input ng-model="image_id" style="display: none;">
                             </div>
 
                             <div class="form-group">
@@ -110,5 +122,59 @@
 
   </div>
 </div>
+<div class="modal fade" id="error_dialog" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">오류</h4>
+        </div>
+        <div class="modal-body">
+          <p id ="error_code"></p>
+
+            <p id = "sub_error_code"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">확인</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<!-- Modal -->
+<div id="registration-failed-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">로그인 실패</h4>
+      </div>
+      <div class="modal-body">
+        <p>ID와 PASSWORD를 확인하세요.</p>
+      </div>
+      <div class="modal-footer">
+          <script>
+              function transToLogin() {
+
+                $("#login-form").delay(100).fadeIn(100);
+ 		        $("#register-form").fadeOut(100);
+		        $('#register-form-link').removeClass('active');
+		        $(this).addClass('active');
+
+              }
+
+          </script>
+        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="transToLogin()">확인</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% load static %}
 <script src="{% static 'attendance_check/js/login_page_script.js' %}"></script>
