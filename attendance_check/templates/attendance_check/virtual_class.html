@@ -37,9 +37,8 @@ function loadDataView(){
       <a class="navbar-brand" href="JavaScript:window.location.reload()">BioBeacon 출석인증 시스템</a>
     </div>
     <ul class="nav navbar-nav">
-      <li class="active"><a data-toggle="tab" href="#myinfo">내 정보</a></li>
-      <li><a data-toggle="tab" href="#attendance_check" onclick="activeChulCheck()">출석체크</a></li>
-      <li><a data-toggle="tab" href="#"></a></li>
+      <li onclick="activeMyInfo()" class="active"><a data-toggle="tab" href="#myinfo" id="chul1">내 정보</a></li>
+      <li onclick="activeChulCheck()"><a data-toggle="tab" href="#attendance_check" id="chul2">출석체크</a></li>
     </ul>
     <form class="navbar-form navbar-left" ng-controller="LogoutController">
     <!--    <input name="logout" class="form-control btn btn-login" tabindex="4" value="로그아웃" ng-click="doLogout()" onclick="void()"> -->
@@ -199,3 +198,5 @@ function loadDataView(){
         </div>
     </div>
 </div>
+
+<script>chulcheckJS();</script>

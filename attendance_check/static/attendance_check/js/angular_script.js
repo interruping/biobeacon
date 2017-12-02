@@ -8,15 +8,10 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
-    const chulCheckInfo = localStorage.getItem('chulCheckActived');
 
     if (loggedInfo != null) {
         token = loggedInfo;
         $scope.completeLogin();
-    }
-
-    if (chulCheckInfo == "20132307") {
-
     }
 });
 
@@ -430,6 +425,23 @@ function onEnterSubmit(){
      document.getElementById("login-submit").click();
 }
 
+function activeMyInfo() {
+    localStorage.setItem('chulCheckActived',"20132308");
+}
 function activeChulCheck() {
     localStorage.setItem('chulCheckActived',"20132307");
+}
+function chulcheckJS() {
+    const chulCheckInfo = localStorage.getItem('chulCheckActived');
+
+    if (chulCheckInfo == "20132307") {
+        $(document).ready(function(){
+            $('#chul2').tab('show');
+        });
+    }
+    else if (myInfoInfo == "20132308") {
+        $(document).ready(function(){
+            $('#chul1').tab('show');
+        });
+    }
 }
