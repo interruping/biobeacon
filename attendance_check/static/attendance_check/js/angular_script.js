@@ -310,6 +310,17 @@ app.controller('LectureController', function($scope, $http){
 
 app.controller('LectureAttendanceCheckController', function($scope, $http){
 
+	myDataView.attachEvent("onItemClick", function (id, ev, html){
+	    $('#specificControlTitle').html(
+	    myDataView.get(id).Name  + '(' + myDataView.get(id).IdNum + ')' +
+	    "의 출석");
+
+
+        $('#specificControl').appendTo('body').modal();
+
+        return true;
+    });
+
     var waitStatus = "default";
     var absentStatus = "danger";
     var lateStatus = "warning";
@@ -356,8 +367,8 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
                 myDataView
                 .add({id: student.id,
                 ImgSRC: student.profile_image,
-                Name: student.student_id,
-                IdNum: student.name,
+                Name: student.name,
+                IdNum: student.student_id,
                 PanelStatus: waitStatus,
                 AttendanceCheckStatus: waitText });
             }
@@ -383,6 +394,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
                 break;
             case 1:
                 myDataView.set(id, {
+                    id: id,
                     ImgSRC: myDataView.get(id).ImgSRC,
                     Name:  myDataView.get(id).Name,
                     IdNum:  myDataView.get(id).IdNum,
@@ -392,6 +404,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
                 break;
             case 2:
                 myDataView.set(id, {
+                    id: id,
                     ImgSRC: myDataView.get(id).ImgSRC,
                     Name:  myDataView.get(id).Name,
                     IdNum:  myDataView.get(id).IdNum,
@@ -401,6 +414,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
                 break;
             case 3:
                 myDataView.set(id, {
+                    id: id,
                     ImgSRC: myDataView.get(id).ImgSRC,
                     Name:  myDataView.get(id).Name,
                     IdNum:  myDataView.get(id).IdNum,
@@ -410,18 +424,73 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
                 break;
             case 4:
                 myDataView.set(id, {
+                    id: id,
                     ImgSRC: myDataView.get(id).ImgSRC,
                     Name:  myDataView.get(id).Name,
                     IdNum:  myDataView.get(id).IdNum,
                     PanelStatus : checkCompleteStatus,
                     AttendanceCheckStatus : checkCompleteText
-                });
+                    });
                 break;
 
             }
 
 
         }
+    };
+
+
+
+    $scope.doCheck = function() {
+        var id = myDataView.getSelected();
+        myDataView.set(id, {
+            id: id,
+            ImgSRC: myDataView.get(id).ImgSRC,
+            Name:  myDataView.get(id).Name,
+            IdNum:  myDataView.get(id).IdNum,
+            PanelStatus : checkCompleteStatus,
+            AttendanceCheckStatus : checkCompleteText
+        });
+
+
+   };
+
+    $scope.doAbsent = function() {
+        var id = myDataView.getSelected();
+        myDataView.set(id, {
+            id: id,
+            ImgSRC: myDataView.get(id).ImgSRC,
+            Name:  myDataView.get(id).Name,
+            IdNum:  myDataView.get(id).IdNum,
+            PanelStatus : absentStatus,
+            AttendanceCheckStatus : absentText
+        });
+
+    };
+
+    $scope.doReasonableAbsent = function() {
+        var id = myDataView.getSelected();
+        myDataView.set(id, {
+            id: id,
+            ImgSRC: myDataView.get(id).ImgSRC,
+            Name:  myDataView.get(id).Name,
+            IdNum:  myDataView.get(id).IdNum,
+            PanelStatus : reasonableAbsentStatus,
+            AttendanceCheckStatus : reasonableAbsentText
+        });
+    };
+
+    $scope.doLate = function  () {
+        var id = myDataView.getSelected();
+
+        myDataView.set(id, {
+            id: id,
+            ImgSRC: myDataView.get(id).ImgSRC,
+            Name:  myDataView.get(id).Name,
+            IdNum:  myDataView.get(id).IdNum,
+            PanelStatus : lateStatus,
+            AttendanceCheckStatus : lateText
+        });
     };
 });
 
