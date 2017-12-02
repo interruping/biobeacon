@@ -177,7 +177,8 @@ class LectureListView(APIView):
             for lecture in lecture_set:
                 lectures.append({
                     "id": lecture.pk,
-                    "title": lecture.title
+                    "title": lecture.title,
+                    "lecture_num": lecture.lecture_num
                 })
             result = {"lectures": lectures}
             return Response(result)
@@ -198,15 +199,37 @@ class LectureStartView(APIView):
             return Response("Lecture only can started by staff user.", status=status.HTTP_403_FORBIDDEN)
 
         serializer = LectureStartSerializer(data=request.data)
+
         if serializer.is_valid():
             lecture = Lecture.objects.get(pk=serializer.validated_data['id'])
-            record = AttendanceRecord.objects.create(
-                activate = True,
-                start_time = timezone.now(),
-                end_time = timezone.now()  + datetime.timedelta(minutes = serializer.validated_data['minute']),
-                lecture = lecture
-            )
 
+            # 해당 강의의 활성화 여부 찾기
+            record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+            #해당 강의의 활성화유무 판단 활성화되면
+            if record:
+                record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                if (record.end_time<timezone.now()):
+                    record.activate = False
+                    record.save()
+
+            #해당 강의의 활성화 여부 재검색
+            record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+            # 활성화된 강좌가 있으면
+            if record:
+                record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                record.end_time=timezone.now() + datetime.timedelta(minutes=serializer.validated_data['minute'])
+
+            #활성화된 강좌가 없으면
+            else:
+                record = AttendanceRecord.objects.create(
+                    activate = True,
+                    start_time = timezone.now(),
+                    end_time = timezone.now()  + datetime.timedelta(minutes = serializer.validated_data['minute']),
+                    lecture = lecture,
+                    absence_time=timezone.now() + datetime.timedelta(minutes=(int)(lecture.absence_time_set))
+                    #lecture_num = lecture.lecture_num
+                )
             record.save()
 
             return Response(serializer.data)

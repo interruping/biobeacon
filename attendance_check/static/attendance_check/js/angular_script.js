@@ -308,7 +308,7 @@ app.controller('LectureController', function($scope, $http){
 
 });
 
-app.controller('LectureAttendanceCheckController', function($scope, $http){
+app.controller('LectureAttendanceCheckController', function($scope, $http, $interval){
 
     var waitStatus = "default";
     var absentStatus = "danger";
@@ -423,6 +423,45 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
 
         }
     };
+
+
+//강의시작기록
+    $scope.startLecture = function () {
+        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "minute" : $scope.selectedTimeMin},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        },function(response){
+        });
+    };
+
+
+//남은시간갱신
+    var timeInterval;
+    $scope.realTimeReset = function () {
+        if ($scope.realTime=!null)
+            $interval.cancel(timeInterval);
+        $scope.realTime = $scope.selectedTimeMin * 60;
+        $scope.strColon = " : ";
+            timeInterval = $interval(function () {
+                $scope.realTime = $scope.realTime -1;
+                $scope.realTimeMin = parseInt($scope.realTime/60);
+                $scope.realTimeSec = $scope.realTime%60;
+
+        }, 1000,[$scope.selectedTimeMin*60]);
+    };
+
+//시간선택
+    $scope.selectedTime = {
+    1 : {str : "1분", int : 1},
+    3 : {str : "3분", int : 3},
+    5 : {str : "5분", int : 5},
+    10 :{str : "10분", int : 10}
+    }
 });
 
 function onEnterSubmit(){
