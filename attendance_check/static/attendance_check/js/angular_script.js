@@ -8,9 +8,15 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
+    const chulCheckInfo = localStorage.getItem('chulCheckActived');
+
     if (loggedInfo != null) {
         token = loggedInfo;
         $scope.completeLogin();
+    }
+
+    if (chulCheckInfo == "20132307") {
+
     }
 });
 
@@ -419,10 +425,11 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
     };
 });
 
-
-
 function onEnterSubmit(){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
 }
 
+function activeChulCheck() {
+    localStorage.setItem('chulCheckActived',"20132307");
+}

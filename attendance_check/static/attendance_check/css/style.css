@@ -254,3 +254,8 @@ label {
 .local-Storage {
     display: none;
 }
+
+.btn-danger {
+    position: absolute;
+    right: 10px;
+}
