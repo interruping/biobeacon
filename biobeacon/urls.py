@@ -21,5 +21,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'', include('attendance_check.urls')),
     url(r'^attendance_check/', include('attendance_check.urls', namespace='attendance_check')),
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -39,6 +39,9 @@ import datetime
 from django.core.files import File
 # Create your views here.
 
+def mainView(request):
+
+    return render(request, 'attendance_check/main.html')
 
 def mainView(request):
 
