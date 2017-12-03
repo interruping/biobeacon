@@ -8,15 +8,10 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
-    const chulCheckInfo = localStorage.getItem('chulCheckActived');
 
     if (loggedInfo != null) {
         token = loggedInfo;
         $scope.completeLogin();
-    }
-
-    if (chulCheckInfo == "20132307") {
-
     }
 });
 
@@ -320,13 +315,11 @@ var lateText = "지각";
 var reasonableAbsentText = "공결";
 var checkCompleteText = "출석";
 
-
-app.controller('LectureAttendanceCheckController', function($scope, $http){
+app.controller('LectureAttendanceCheckController', function($scope, $http, $interval){
     $scope.select_entire_control = "0";
     $scope.seletedLecture = "0";
 
     currentSpecificControl = 0;
-
     myDataView.attachEvent("onMouseMove", function (id, ev, html){
 
         if ( currentSpecificControl != id ){
@@ -457,9 +450,42 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
 
         }
     };
+    $scope.startLecture = function () {
+        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "minute" : $scope.selectedTimeMin},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        },function(response){
+        });
+    };
 
 
 
+    var timeInterval;
+    $scope.realTimeReset = function () {
+        if ($scope.realTime=!null)
+            $interval.cancel(timeInterval);
+        $scope.realTime = $scope.selectedTimeMin * 60;
+        $scope.strColon = " : ";
+            timeInterval = $interval(function () {
+                $scope.realTime = $scope.realTime -1;
+                $scope.realTimeMin = parseInt($scope.realTime/60);
+                $scope.realTimeSec = $scope.realTime%60;
+
+        }, 1000,[$scope.selectedTimeMin*60]);
+    };
+
+
+    $scope.selectedTime = {
+    1 : {str : "1분", int : 1},
+    3 : {str : "3분", int : 3},
+    5 : {str : "5분", int : 5},
+    10 :{str : "10분", int : 10}
+    }
 
 });
 
@@ -513,12 +539,28 @@ function doLate() {
     });
 };
 
-
 function onEnterSubmit(){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
 }
 
+function activeMyInfo() {
+    localStorage.setItem('chulCheckActived',"20132308");
+}
 function activeChulCheck() {
     localStorage.setItem('chulCheckActived',"20132307");
+}
+function chulcheckJS() {
+    const chulCheckInfo = localStorage.getItem('chulCheckActived');
+
+    if (chulCheckInfo == "20132307") {
+        $(document).ready(function(){
+            $('#chul2').tab('show');
+        });
+    }
+    else if (myInfoInfo == "20132308") {
+        $(document).ready(function(){
+            $('#chul1').tab('show');
+        });
+    }
 }

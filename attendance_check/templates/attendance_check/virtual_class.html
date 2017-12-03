@@ -41,9 +41,8 @@ function loadDataView(){
       <a class="navbar-brand" href="JavaScript:window.location.reload()">BioBeacon 출석인증 시스템</a>
     </div>
     <ul class="nav navbar-nav">
-      <li class="active"><a data-toggle="tab" href="#myinfo">내 정보</a></li>
-      <li><a data-toggle="tab" href="#attendance_check" onclick="activeChulCheck()">출석체크</a></li>
-      <li><a data-toggle="tab" href="#"></a></li>
+      <li onclick="activeMyInfo()" class="active"><a data-toggle="tab" href="#myinfo" id="chul1">내 정보</a></li>
+      <li onclick="activeChulCheck()"><a data-toggle="tab" href="#attendance_check" id="chul2">출석체크</a></li>
     </ul>
       <ul class="navbar-form navbar-right" ng-controller="LogoutController">
           <!--    <input name="logout" class="form-control btn btn-login" tabindex="4" value="로그아웃" ng-click="doLogout()" onclick="void()"> -->
@@ -127,10 +126,17 @@ function loadDataView(){
                     <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()">
                         <option ng-selected="selected" value="0">강좌를 선택하여 주세요</option>
                         {% verbatim %}
-                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">{{ lecture.title }}</option>
+                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
 
-                        <input type="button" class="btn btn-success" style="width:100%;margin-top:10px" value="출석 시작" ng-click="startLecture()">
+                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset()">
+                            인증시간
+                            <select ng-model="selectedTimeMin" style="margin-top:10px">
+                                {% verbatim %}
+                                <option ng-repeat="x in selectedTime" value="{{x.int}}"> {{x.str}} </option>
+                                {% endverbatim %}
+                            </select>
+                            남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
                         <hr>
                         <div class="panel panel-default">
                             <div class="panel-heading">일괄 출석</div>
@@ -212,3 +218,5 @@ function loadDataView(){
         </div>
     </div>
 </div>
+
+<script>chulcheckJS();</script>
