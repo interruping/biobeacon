@@ -403,10 +403,14 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
           return $(title).children(".popover-heading").html();
         }});
         $('#specificControl_'+ id).popover('show');
-        // your code here
         return true;
     });
 
+    myDataView.attachEvent("onMouseOut", function (ev){
+        var id = currentSpecificControl;
+        $('#specificControl_'+ id).popover('hide');
+        return true;
+    });
 
 
      $scope.loadLectureList = function () {
