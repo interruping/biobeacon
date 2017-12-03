@@ -28,12 +28,52 @@ app.controller('LogoutController', function($scope, $http){
 
 app.controller('LoginController', function($scope, $http){
 
+        if(localStorage.getItem('id') != 'null' && localStorage.getItem('pw') != 'null' &&localStorage.getItem('check') == 'true'){
+            $scope.login_checkbox = true;
+            $scope.login_username = localStorage.getItem('id');
+            $scope.login_password = localStorage.getItem('pw');
+        }
+
+        else{
+          $('#checkbox1').checked = false;
+         }
+
     $scope.doLogin = function(){
 
         var userAuthData = {
             "username": $scope.login_username,
             "password": $scope.login_password
         };
+
+        if(localStorage.getItem('check') == 'true'){
+            $('#checkbox1').checked = true;
+
+                if(localStorage.getItem('id') == null || localStorage.getItem('pw') == null){
+                      localStorage.setItem('id',$scope.login_username);
+                      localStorage.setItem('pw',$scope.login_password);
+                }
+                 else{
+                      if($scope.login_username != localStorage.getItem('id')|| $scope.login_password != localStorage.getItem('pw') ){
+                            if($scope.login_username != localStorage.getItem('id')){
+                                       localStorage.setItem('id',$scope.login_username);
+                            }
+                            if($scope.login_password != localStorage.getItem('pw')){
+                                       localStorage.setItem('pw',$scope.login_password);
+                            }
+
+                      }
+
+                 }
+
+
+        }
+
+       else{
+              localStorage.setItem('check','false');
+              localStorage.setItem('id','');
+              localStorage.setItem('pw','');
+       }
+
 
         $http.post("/attendance_check/api/user_auth/", userAuthData)
         .then(function(response){
@@ -49,6 +89,16 @@ app.controller('LoginController', function($scope, $http){
         });
 
     };
+
+    $scope.checked_storage = function(state){
+         if(state == true){
+             localStorage.setItem('check','true');
+         }
+         else{
+             localStorage.setItem('check','false');
+         }
+    };
+
 
 });
 
