@@ -6,6 +6,26 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 //localStorage.setItem('storedUserAuthData',"no_token");
 
+app.controller('checkIdController', function($scope, $http){
+
+    $scope.doCheckId = function (){
+
+        var userAuthData = {
+            "reg_username": $scope.reg_username
+              };
+
+    $http.post("/attendance_check/api/user_register/id/check", userAuthData).then(function(response){
+
+                    alert("아이디 같음");
+
+        }, function (response){
+
+            });
+
+        }
+    });
+
+
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
     const chulCheckInfo = localStorage.getItem('chulCheckActived');

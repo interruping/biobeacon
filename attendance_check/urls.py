@@ -20,6 +20,7 @@ from .views import (
                     loginView,
                     virtualClassView,
                     RegistrationView,
+                    IdCheckView,
                     LectureCreateView,
                     LectureStartView,
                     LectureListView,
@@ -40,6 +41,7 @@ urlpatterns = [
     url(r'^virtual_class/$', virtualClassView, name='virtual_class'),
 
     url(r'^api/user_register/$', RegistrationView.as_view()),
+    url(r'^api/user_register/id/check/$', IdCheckView.as_view()),
     url(r'^api/user_auth/$', obtain_jwt_token),
     url(r'^api/user_auth/refresh/$', refresh_jwt_token),
     url(r'^api/user_auth/verify/$', verify_jwt_token),

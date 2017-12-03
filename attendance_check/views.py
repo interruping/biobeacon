@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 from django.shortcuts import render
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework import status
@@ -13,6 +14,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureStartSerializer,
                                            LectureRequestAttendanceCheckSerializer,
                                            LectureReceiveApplySerializer,
+                                           IdCheckSerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
@@ -188,6 +190,27 @@ class LectureListView(APIView):
 
             return Response(lectures)
 
+
+class IdCheckView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+
+        serializer = IdCheckSerializer(data=request.data)
+
+        if serializer.is_valid():
+            reg_username = serializer.validated_data['reg_username']
+            user = User.objects.filter(username=[reg_username])
+
+            if user.exists():
+
+                result = {
+                    "result": 1
+                }
+                return Response(result)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LectureStartView(APIView):
