@@ -19,9 +19,12 @@ function loadDataView(){
 					    "</div>" +
 					    "<div class='panel-footer' style='text-align: center'>"+
 					    "#Name# <br>" +
+					    "<div id='specificControl_#id#' data-toggle='popover' data-popover-content='#specificControl'></div>" +
 					    "#IdNum#" +
 					    "</div>" +
 					"</div>"
+
+
 					,
 					height:280,
 					width:150
@@ -148,26 +151,13 @@ function loadDataView(){
                             </div>
                         </div>
                         <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;" ></div>
-                        <div id="specificControl" class="modal fade" role="dialog">
-                            <div class="modal-dialog">
-
-                                <!-- Modal content-->
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                        <h4 id="specificControlTitle" class="modal-title" ></h4>
-                                    </div>
-                                    <div class="modal-body">
-                                        <button type="button" class="btn btn-primary" ng-click="doCheck()" data-dismiss="modal">출석</button>
-                                        <button type="button" class="btn btn-success" ng-click="doReasonableAbsent()" data-dismiss="modal">공결</button>
-                                        <button type="button" class="btn btn-warning" ng-click="doLate()" data-dismiss="modal">지각</button>
-                                        <button type="button" class="btn btn-danger" ng-click="doAbsent()" data-dismiss="modal">결석</button>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-
+                        <div id="specificControl" class="hidden" ng-controller="specificControlController">
+                            <div class="popover-heading">수동 출석</div>
+                            <div class="popover-body">
+                                <button type="button" class="btn btn-primary" onclick="doCheck()" data-dismiss="modal">출석</button>
+                                <button type="button" class="btn btn-success" onclick="doReasonableAbsent()" data-dismiss="modal">공결</button>
+                                <button type="button" class="btn btn-warning" onclick="doLate()" data-dismiss="modal">지각</button>
+                                <button type="button" class="btn btn-danger" onclick="doAbsent()" data-dismiss="modal">결석</button>
                             </div>
                         </div>
                         <script>
