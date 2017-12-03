@@ -18,7 +18,7 @@ app.controller('checkIdController', function($scope, $http){
 
         $http.post("/attendance_check/api/user_register/id/check/", userAuthData)
         .then(function(response){
-        
+
             if(response.data.result == '1'){
                 if(flag == true){
                         flag = false;
