@@ -299,6 +299,18 @@ app.controller('LectureController', function($scope, $http){
         });
     };
 
+    $scope.createUuidTable = function () {
+        $http.post('/attendance_check/api/lecture/createUuid/', {"lecture_num": $scope.newLectureNum},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+    };
 
 
 });
