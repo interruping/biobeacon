@@ -304,6 +304,18 @@ app.controller('LectureController', function($scope, $http){
         });
     };
 
+    $scope.createUuidTable = function () {
+        $http.post('/attendance_check/api/lecture/createUuid/', {"lecture_num": $scope.newLectureNum},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+    };
 
 
 });
@@ -462,6 +474,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     5 : {str : "5분", int : 5},
     10 :{str : "10분", int : 10}
     }
+
 });
 
 function onEnterSubmit(){
