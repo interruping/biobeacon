@@ -8,6 +8,8 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 app.controller('checkIdController', function($scope, $http){
 
+    var flag = false;
+
     $scope.doCheckId = function (){
 
         var userAuthData = {
@@ -16,11 +18,19 @@ app.controller('checkIdController', function($scope, $http){
 
         $http.post("/attendance_check/api/user_register/id/check/", userAuthData)
         .then(function(response){
-
-        if(response.data.result == '1')
-            alert("아이디 같음");
-        else
-            alert("아이디 없음");
+        
+            if(response.data.result == '1'){
+                if(flag == true){
+                        flag = false;
+                        $('[data-toggle="popover"]').popover({placement: 'top', content: "중복된 아이디 입니다."}).popover("show");
+                }
+            }
+            else{
+                if(flag == false){
+                    $('[data-toggle="popover"]').popover('hide');
+                    flag = true;
+                 }
+            }
         }, function (response){
 
         });
