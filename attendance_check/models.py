@@ -46,9 +46,9 @@ class Lecture(models.Model):
 class AttendanceRecord(models.Model):
     activate = models.BooleanField(default=False)
     activate_absence = models.BooleanField(default=False)
-    start_time = models.DateTimeField(editable=True)
-    end_time = models.DateTimeField(editable=True)
-    absence_time = models.DateTimeField(editable=True)
+    start_time = models.DateTimeField(editable=True, null=True)
+    end_time = models.DateTimeField(editable=True, null=True)
+    absence_time = models.DateTimeField(editable=True, null=True)
     lecture = models.ForeignKey(Lecture)
 
 class StudentProfile(models.Model):
