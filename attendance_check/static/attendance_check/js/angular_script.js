@@ -308,33 +308,52 @@ app.controller('LectureController', function($scope, $http){
 
 });
 
+
+var waitStatus = "default";
+var absentStatus = "danger";
+var lateStatus = "warning";
+var reasonableAbsentStatus = "success";
+var checkCompleteStatus = "primary"
+var waitText = "출석대기 중";
+var absentText = "결석";
+var lateText = "지각";
+var reasonableAbsentText = "공결";
+var checkCompleteText = "출석";
+
+
 app.controller('LectureAttendanceCheckController', function($scope, $http){
+    $scope.select_entire_control = "0";
+    $scope.seletedLecture = "0";
 
-	myDataView.attachEvent("onItemClick", function (id, ev, html){
-	    $('#specificControlTitle').html(
-	    myDataView.get(id).Name  + '(' + myDataView.get(id).IdNum + ')' +
-	    "의 출석");
+    currentSpecificControl = 0;
 
+    myDataView.attachEvent("onMouseMove", function (id, ev, html){
 
-        $('#specificControl').appendTo('body').modal();
+        if ( currentSpecificControl != id ){
+            $('#specificControl_'+ currentSpecificControl).popover('hide');
+            currentSpecificControl = id;
 
+        }
+
+        myDataView.unselectAll();
+
+        $('#specificControl_'+ id).popover({
+        html : true,
+        content: function() {
+          var content = $(this).attr("data-popover-content");
+          return $(content).children(".popover-body").html();
+        },
+        title: function() {
+          var title = $(this).attr("data-popover-content");
+          return $(title).children(".popover-heading").html();
+        }});
+        $('#specificControl_'+ id).popover('show');
+        // your code here
         return true;
     });
 
-    var waitStatus = "default";
-    var absentStatus = "danger";
-    var lateStatus = "warning";
-    var reasonableAbsentStatus = "success";
-    var checkCompleteStatus = "primary"
 
-    var waitText = "출석대기 중";
-    var absentText = "결석";
-    var lateText = "지각";
-    var reasonableAbsentText = "공결";
-    var checkCompleteText = "출석";
 
-    $scope.select_entire_control = "0";
-    $scope.seletedLecture = "0";
      $scope.loadLectureList = function () {
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {
@@ -441,58 +460,59 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
 
 
 
-    $scope.doCheck = function() {
-        var id = myDataView.getSelected();
-        myDataView.set(id, {
-            id: id,
-            ImgSRC: myDataView.get(id).ImgSRC,
-            Name:  myDataView.get(id).Name,
-            IdNum:  myDataView.get(id).IdNum,
-            PanelStatus : checkCompleteStatus,
-            AttendanceCheckStatus : checkCompleteText
-        });
 
-
-   };
-
-    $scope.doAbsent = function() {
-        var id = myDataView.getSelected();
-        myDataView.set(id, {
-            id: id,
-            ImgSRC: myDataView.get(id).ImgSRC,
-            Name:  myDataView.get(id).Name,
-            IdNum:  myDataView.get(id).IdNum,
-            PanelStatus : absentStatus,
-            AttendanceCheckStatus : absentText
-        });
-
-    };
-
-    $scope.doReasonableAbsent = function() {
-        var id = myDataView.getSelected();
-        myDataView.set(id, {
-            id: id,
-            ImgSRC: myDataView.get(id).ImgSRC,
-            Name:  myDataView.get(id).Name,
-            IdNum:  myDataView.get(id).IdNum,
-            PanelStatus : reasonableAbsentStatus,
-            AttendanceCheckStatus : reasonableAbsentText
-        });
-    };
-
-    $scope.doLate = function  () {
-        var id = myDataView.getSelected();
-
-        myDataView.set(id, {
-            id: id,
-            ImgSRC: myDataView.get(id).ImgSRC,
-            Name:  myDataView.get(id).Name,
-            IdNum:  myDataView.get(id).IdNum,
-            PanelStatus : lateStatus,
-            AttendanceCheckStatus : lateText
-        });
-    };
 });
+
+
+
+function doCheck() {
+    var id = currentSpecificControl;
+    myDataView.set(id, {
+        id: id,
+        ImgSRC: myDataView.get(id).ImgSRC,
+        Name:  myDataView.get(id).Name,
+        IdNum:  myDataView.get(id).IdNum,
+        PanelStatus : checkCompleteStatus,
+        AttendanceCheckStatus : checkCompleteText
+    });
+};
+
+function doAbsent() {
+    var id = currentSpecificControl;
+    myDataView.set(id, {
+        id: id,
+        ImgSRC: myDataView.get(id).ImgSRC,
+        Name:  myDataView.get(id).Name,
+        IdNum:  myDataView.get(id).IdNum,
+        PanelStatus : absentStatus,
+        AttendanceCheckStatus : absentText
+    });
+};
+
+function doReasonableAbsent() {
+    var id = currentSpecificControl;
+    myDataView.set(id, {
+        id: id,
+        ImgSRC: myDataView.get(id).ImgSRC,
+        Name:  myDataView.get(id).Name,
+        IdNum:  myDataView.get(id).IdNum,
+        PanelStatus : reasonableAbsentStatus,
+        AttendanceCheckStatus : reasonableAbsentText
+    });
+};
+
+function doLate() {
+    var id = currentSpecificControl;
+    myDataView.set(id, {
+        id: id,
+        ImgSRC: myDataView.get(id).ImgSRC,
+        Name:  myDataView.get(id).Name,
+        IdNum:  myDataView.get(id).IdNum,
+        PanelStatus : lateStatus,
+        AttendanceCheckStatus : lateText
+    });
+};
+
 
 function onEnterSubmit(){
      var keyCode = window.event.keyCode;
