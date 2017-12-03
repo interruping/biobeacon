@@ -34,6 +34,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 
 urlpatterns = [
+    url(r'^$', mainView, name='main'),
     url(r'^main/$', mainView, name='main'),
     url(r'^login/$', loginView, name='login'),
     # url(r'^main/$', login_view, name='main'),
