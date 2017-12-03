@@ -8,7 +8,6 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.views import Response
 
-
 from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateSerializer,
                                            LectureStartSerializer,
@@ -201,14 +200,14 @@ class IdCheckView(APIView):
 
         if serializer.is_valid():
             reg_username = serializer.validated_data['reg_username']
-            user = User.objects.filter(username=[reg_username])
+            user = User.objects.filter(username=reg_username)
 
             if user.exists():
-
                 result = {
                     "result": 1
                 }
                 return Response(result)
+            return Response(user)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

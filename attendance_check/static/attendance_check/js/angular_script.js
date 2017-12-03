@@ -12,18 +12,21 @@ app.controller('checkIdController', function($scope, $http){
 
         var userAuthData = {
             "reg_username": $scope.reg_username
-              };
+        };
 
-    $http.post("/attendance_check/api/user_register/id/check", userAuthData).then(function(response){
+        $http.post("/attendance_check/api/user_register/id/check/", userAuthData)
+        .then(function(response){
 
-                    alert("아이디 같음");
-
+        if(response.data.result == '1')
+            alert("아이디 같음");
+        else
+            alert("아이디 없음");
         }, function (response){
 
-            });
+        });
 
-        }
-    });
+     };
+});
 
 
 app.controller('localStorage', function($scope, $http){
