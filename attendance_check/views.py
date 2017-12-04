@@ -17,6 +17,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
                                            LectureCreateUuidSerializer,
+                                           LectureUuidSerializer,
                                            )
 
 from django.utils import timezone
@@ -34,7 +35,7 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-from . import uuidcalc #uuid계산기
+import uuidcalc #uuid계산기
 import random
 from django.utils import timezone
 import datetime
@@ -510,7 +511,7 @@ class LectureCheckUUID(APIView):
     def post(self, request):
         if not request.user.is_staff:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = LectureCreateUuidSerializer(data=request.data)
+        serializer = LectureUuidSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 #강의실 번호에따른 강의실 UUID데이터베이스 가져옴
