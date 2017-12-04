@@ -352,7 +352,7 @@ app.controller('ProfileController', function($scope, $http){
 
 app.controller('LectureController', function($scope, $http){
 
-    $scope.loadOwnedLectureList = function () {
+    $scope.loadLectureList = function () {
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {
                 'Authorization' : token
@@ -376,12 +376,11 @@ app.controller('LectureController', function($scope, $http){
             }
 
         }).then(function(response){
-            $scope.loadOwnedLectureList();
+            $scope.loadLectureList();
 
         }, function (response){
         });
     };
-
 
     $scope.createUuidTable = function () {
         $http.post('/attendance_check/api/lecture/createUuid/', {"lecture_num": $scope.newLectureNum},
@@ -395,7 +394,6 @@ app.controller('LectureController', function($scope, $http){
         }, function (response){
         });
     };
-
 
 
 });
@@ -415,14 +413,6 @@ var checkCompleteText = "출석";
 app.controller('LectureAttendanceCheckController', function($scope, $http, $interval){
     $scope.select_entire_control = "0";
     $scope.seletedLecture = "0";
-
-
-    $scope.$on('reloadLectureList', function(){
-        $scope.loadLectureList();
-
-    });
-
-    $scope.loadLectureList = function () {
 
     currentSpecificControl = 0;
     myDataView.attachEvent("onMouseMove", function (id, ev, html){
@@ -457,7 +447,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
      $scope.loadLectureList = function () {
-
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {
                 'Authorization' : token
@@ -682,7 +671,7 @@ function chulcheckJS() {
             $('#chul2').tab('show');
         });
     }
-    else if (chulCheckInfo == "20132308") {
+    else if (myInfoInfo == "20132308") {
         $(document).ready(function(){
             $('#chul1').tab('show');
         });
