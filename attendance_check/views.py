@@ -403,6 +403,13 @@ class LectureReceiveApplyListView(APIView):
             if serializer.is_valid():
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
+                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate = True)
+                wait_time = 1
+                if activate_lec_card:
+                    lec_card = activate_lec_card.first()
+                    wait_time = (lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().minute*60+timezone.now().second)
+                    if wait_time<0:
+                        wait_time = 1
 
                 student_infos = []
                 for card in cards:
@@ -415,6 +422,7 @@ class LectureReceiveApplyListView(APIView):
                     student_infos.append(student_info)
 
                 result = {
+                    "wait_time" : wait_time,
                     "students" : student_infos
                 }
                 return Response(result)
@@ -456,6 +464,8 @@ def Create_rand_N():
         N = random.randint(1, 99999)
     return N
 
+
+#강의생성 시 해당 강의실의 uuid데이터베이스 테이블이 없으면 생성함
 class LectureCreateuuidView(APIView):
 
     permission_classes = (IsAuthenticated,)
