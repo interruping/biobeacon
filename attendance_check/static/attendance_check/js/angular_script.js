@@ -6,6 +6,39 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 //localStorage.setItem('storedUserAuthData',"no_token");
 
+app.controller('checkIdController', function($scope, $http){
+
+    var flag = false;
+
+    $scope.doCheckId = function (){
+
+        var userAuthData = {
+            "reg_username": $scope.reg_username
+        };
+
+        $http.post("/attendance_check/api/user_register/id/check/", userAuthData)
+        .then(function(response){
+
+            if(response.data.result == '1'){
+                if(flag == true){
+                        flag = false;
+                        $('[data-toggle="popover"]').popover({placement: 'top', content: "중복된 아이디 입니다."}).popover("show");
+                }
+            }
+            else{
+                if(flag == false){
+                    $('[data-toggle="popover"]').popover('hide');
+                    flag = true;
+                 }
+            }
+        }, function (response){
+
+        });
+
+     };
+});
+
+
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
 

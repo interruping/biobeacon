@@ -52,8 +52,13 @@ class LectureCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=128)
     lecture_num = serializers.CharField(max_length=5)
 
+
+class IdCheckSerializer(serializers.Serializer):
+    reg_username = serializers.CharField(max_length=128)
+
 class LectureCreateUuidSerializer(serializers.Serializer):
     lecture_num = serializers.CharField(max_length=5)
+
 
 class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()
