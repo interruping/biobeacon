@@ -57,7 +57,7 @@ class LectureCreateUuidSerializer(serializers.Serializer):
 
 class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    minute = serializers.IntegerField()
+    second = serializers.IntegerField()
 
 class LectureUuidSerializer(serializers.Serializer):
     id = serializers.IntegerField()

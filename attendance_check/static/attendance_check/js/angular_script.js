@@ -315,7 +315,6 @@ app.controller('LectureController', function($scope, $http){
 
 });
 
-
 var waitStatus = "default";
 var absentStatus = "danger";
 var lateStatus = "warning";
@@ -394,8 +393,8 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
                 ImgSRC: student.profile_image,
                 Name: student.name,
                 IdNum: student.student_id,
-                PanelStatus: waitStatus,
-                AttendanceCheckStatus: waitText });
+                PanelStatus: student.std_status,
+                AttendanceCheckStatus: student.std_text});
             }
 
         }, function(response){
@@ -465,7 +464,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         }
     };
     $scope.startLecture = function () {
-        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "minute" : $scope.selectedTimeMin},
+        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "second" : $scope.selectedTimeMin},
         {
             headers: {
                 'Authorization' : token

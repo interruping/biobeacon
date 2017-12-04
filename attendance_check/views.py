@@ -224,7 +224,7 @@ class LectureStartView(APIView):
             # 활성화된 강좌가 있으면
             if record:
                 record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
-                record.end_time=timezone.now() + datetime.timedelta(minutes=serializer.validated_data['minute'])
+                record.end_time=timezone.now() + datetime.timedelta(seconds = serializer.validated_data['second'])
 
             #활성화된 강좌가 없으면
             else:
@@ -232,10 +232,11 @@ class LectureStartView(APIView):
                 record = AttendanceRecord.objects.create(
                     activate = True,
                     start_time = timezone.now(),
-                    end_time = timezone.now()  + datetime.timedelta(minutes = serializer.validated_data['minute']),
+                    end_time = timezone.now()  + datetime.timedelta(seconds = serializer.validated_data['second']),
                     lecture = lecture,
                     absence_time=timezone.now() + datetime.timedelta(minutes=(int)(lecturer.absence_time_set))
                 )
+
             record.save()
 
             return Response(serializer.data)
@@ -405,8 +406,6 @@ class LectureReceiveApplyListView(APIView):
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
 
-
-
                 # 해당 강의의 활성화 여부 찾기
                 record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
                 # 해당 강의의 활성화유무 판단 활성화되면
@@ -426,12 +425,39 @@ class LectureReceiveApplyListView(APIView):
                         wait_time = 1
 
                 student_infos = []
+
                 for card in cards:
+                    std_text = ''
+                    try :
+                        std_card = AttendanceCard.objects.get(checker = card.card_owner)
+                    except:
+                        std_text = "출석대기 중"
+                        std_status = 'default'
+
+                    if std_text == '':
+                        if std_card.is_reasonableabsent_checker == True:
+                            std_text = '공결'
+                            std_status = 'success'
+
+                        elif std_card.is_late_checker == True:
+                            std_text = '지각'
+                            std_status = 'warning'
+
+                        elif std_card.is_absent_checker == True:
+                            std_text = '결석'
+                            std_status = 'danger'
+
+                        else:
+                            std_text = '출석'
+                            std_status = 'primary'
+
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
+                        "std_text": (std_text.decode('utf-8')),
+                        "std_status":(std_status)
                     }
                     student_infos.append(student_info)
 
