@@ -560,8 +560,8 @@ function doLate() {
         ImgSRC: myDataView.get(id).ImgSRC,
         Name:  myDataView.get(id).Name,
         IdNum:  myDataView.get(id).IdNum,
-        PanelStatus : lateStatus,
-        AttendanceCheckStatus : lateText
+        PanelStatus : waitStatus,
+        AttendanceCheckStatus : waitText
     });
 };
 
