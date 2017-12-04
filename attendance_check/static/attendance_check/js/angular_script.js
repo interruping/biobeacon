@@ -507,10 +507,10 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
     $scope.selectedTime = {
-    1 : {str : "1분", int : 1},
-    3 : {str : "3분", int : 3},
-    5 : {str : "5분", int : 5},
-    10 :{str : "10분", int : 10}
+    1 : {str : "1분", int : 60},
+    3 : {str : "3분", int : 180},
+    5 : {str : "5분", int : 300},
+    10 :{str : "10분", int : 600}
     }
 
 });
