@@ -76,6 +76,7 @@ class LectureUuidRecord(models.Model):
     lecture_num = models.CharField(max_length=6, default='', primary_key=True)
     prime_num = models.CharField(max_length=10, default=99991)
     secret_key = models.CharField(max_length=10, default=54321)
+    init_time = models.DateTimeField(editable=True, default=timezone.now, null=True)
     uuid_now = models.CharField(max_length=32, default='')
     uuid_pre = models.CharField(max_length=32, default='')
     uuid_next = models.CharField(max_length=32, default='')
