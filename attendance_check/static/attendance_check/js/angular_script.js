@@ -475,6 +475,18 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         });
     };
 
+    $scope.checkUUID = function () {
+        $http.post('/attendance_check/api/lecture/apply/checkUUID/', {"id": $scope.seletedLecture},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+    };
 
 
     var timeInterval;
