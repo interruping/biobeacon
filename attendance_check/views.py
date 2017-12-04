@@ -1,21 +1,23 @@
 #-*- coding: utf-8 -*-
 from django.shortcuts import render
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.views import Response
 
-
 from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateSerializer,
                                            LectureStartSerializer,
                                            LectureRequestAttendanceCheckSerializer,
                                            LectureReceiveApplySerializer,
+                                           IdCheckSerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
+                                           LectureCreateUuidSerializer,
                                            )
 
 from django.utils import timezone
@@ -27,11 +29,13 @@ from .models import ( ProfessorProfile,
                       AttendanceCard,
                       LectureReceiveCard,
                       ProfileImage,
+                      LectureUuidRecord,
                       )
 
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
+import uuidcalc #uuid계산기
 import random
 from django.utils import timezone
 import datetime
@@ -180,7 +184,8 @@ class LectureListView(APIView):
             for lecture in lecture_set:
                 lectures.append({
                     "id": lecture.pk,
-                    "title": lecture.title
+                    "title": lecture.title,
+                    "lecture_num": lecture.lecture_num
                 })
             result = {"lectures": lectures}
             return Response(result)
@@ -190,6 +195,27 @@ class LectureListView(APIView):
 
             return Response(lectures)
 
+
+class IdCheckView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+
+        serializer = IdCheckSerializer(data=request.data)
+
+        if serializer.is_valid():
+            reg_username = serializer.validated_data['reg_username']
+            user = User.objects.filter(username=reg_username)
+
+            if user.exists():
+                result = {
+                    "result": 1
+                }
+                return Response(result)
+            return Response(user)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LectureStartView(APIView):
@@ -203,13 +229,34 @@ class LectureStartView(APIView):
         serializer = LectureStartSerializer(data=request.data)
         if serializer.is_valid():
             lecture = Lecture.objects.get(pk=serializer.validated_data['id'])
-            record = AttendanceRecord.objects.create(
-                activate = True,
-                start_time = timezone.now(),
-                end_time = timezone.now()  + datetime.timedelta(minutes = serializer.validated_data['minute']),
-                lecture = lecture
-            )
 
+            # 해당 강의의 활성화 여부 찾기
+            record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+            #해당 강의의 활성화유무 판단 활성화되면
+            if record:
+                record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                if (record.end_time<timezone.now()):
+                    record.activate = False
+                    record.save()
+
+            #해당 강의의 활성화 여부 재검색
+            record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+            # 활성화된 강좌가 있으면
+            if record:
+                record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                record.end_time=timezone.now() + datetime.timedelta(minutes=serializer.validated_data['minute'])
+
+            #활성화된 강좌가 없으면
+            else:
+                lecturer = ProfessorProfile.objects.get(user = request.user)
+                record = AttendanceRecord.objects.create(
+                    activate = True,
+                    start_time = timezone.now(),
+                    end_time = timezone.now()  + datetime.timedelta(minutes = serializer.validated_data['minute']),
+                    lecture = lecture,
+                    absence_time=timezone.now() + datetime.timedelta(minutes=(int)(lecturer.absence_time_set))
+                )
             record.save()
 
             return Response(serializer.data)
@@ -430,3 +477,69 @@ def Create_rand_N():
     while (N % 99991 == 0):
         N = random.randint(1, 99999)
     return N
+
+class LectureCreateuuidView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if not request.user.is_staff:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = LectureCreateUuidSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                lectureuuidtest = LectureUuidRecord.objects.filter(serializer.validated_data['lecture_num'])
+            except:
+                record = LectureUuidRecord.objects.create(
+                    lecture_num=serializer.validated_data['lecture_num']
+                )
+                record.save()
+
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#UUID갱신 확인
+class LectureCheckUUID(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if not request.user.is_staff:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = LectureCreateUuidSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                #강의실 번호에따른 강의실 UUID데이터베이스 가져옴
+                lecture = Lecture.objects.get(id = serializer.validated_data['id'])
+                lectureuuid = LectureUuidRecord.objects.get(lecture_num=lecture.lecture_num)
+
+                #지정한 강의실 UUID 갱신기간이 넘어가면 수행
+                if lectureuuid.init_time <= timezone.now():
+                    secret_key = (int)(lectureuuid.secret_key)
+                    prime_num = (int)(lectureuuid.prime_num)
+
+                    # UUID값을 계산하여 저장 now현재 pre이전 next다음
+                    # UUID_calc(prime_num, secret_key, default_uuid, 강의실번호)
+                    lectureuuid.uuid_now =  (uuidcalc.UUID_calc_now(prime_num, secret_key, lectureuuid.default_uuid,
+                                                  lecture.lecture_num))
+                    lectureuuid.uuid_pre =  (uuidcalc.UUID_calc_pre(prime_num, secret_key, lectureuuid.default_uuid,
+                                                  lecture.lecture_num))
+                    lectureuuid.uuid_next =  (uuidcalc.UUID_calc_next(prime_num, secret_key, lectureuuid.default_uuid,
+                                                  lecture.lecture_num))
+                    #다음 uuid값이 변경해야할 값을 저장
+                    lectureuuid.init_time = timezone.now() + datetime.timedelta(minutes=uuidcalc.addTime(timezone.now().minute)) - datetime.timedelta(seconds=timezone.now().second)
+                    lectureuuid.save()
+
+            except:
+                return Response()
+
+
+
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
