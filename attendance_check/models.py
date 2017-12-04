@@ -29,7 +29,7 @@ class ProfessorProfile(models.Model):
     user = models.OneToOneField(User)
     employee_id = models.IntegerField(unique=True)
     department =  models.ForeignKey(Department)
-
+    absence_time_set = models.CharField(max_length=2, default=30)
     def __str__(self):
         return str(self.employee_id)
 
@@ -39,16 +39,16 @@ class Lecture(models.Model):
     title = models.CharField(max_length=256, default='')
     lecturer = models.ForeignKey(ProfessorProfile)
     lecture_num = models.CharField(max_length=5, default='')
-    absence_time_set = models.CharField(max_length=2, default=30)
+
     def __str__(self):
         return self.title
 
 class AttendanceRecord(models.Model):
     activate = models.BooleanField(default=False)
     activate_absence = models.BooleanField(default=False)
-    start_time = models.DateTimeField(editable=True)
-    end_time = models.DateTimeField(editable=True)
-    absence_time = models.DateTimeField(editable=True)
+    start_time = models.DateTimeField(editable=True, null=True)
+    end_time = models.DateTimeField(editable=True, null=True)
+    absence_time = models.DateTimeField(editable=True, null=True)
     lecture = models.ForeignKey(Lecture)
 
 class StudentProfile(models.Model):
@@ -56,6 +56,7 @@ class StudentProfile(models.Model):
     student_id = models.IntegerField(unique=True)
     department = models.ForeignKey(Department)
     Crypt_rand_N = models.CharField(max_length=6, default='')
+
 
     def __str__(self):
         return str(self.student_id)
@@ -70,6 +71,13 @@ class AttendanceCard(models.Model):
     record_to = models.ForeignKey(AttendanceRecord)
     is_late_checker = models.BooleanField(default=False)
 
-
+class LectureUuidRecord(models.Model):
+    default_uuid = models.CharField(max_length=15, default='4a4ece607eb011e')
+    lecture_num = models.CharField(max_length=6, default='', primary_key=True)
+    prime_num = models.CharField(max_length=10, default=99991)
+    secret_key = models.CharField(max_length=10, default=54321)
+    uuid_now = models.CharField(max_length=32, default='')
+    uuid_pre = models.CharField(max_length=32, default='')
+    uuid_next = models.CharField(max_length=32, default='')
 
 

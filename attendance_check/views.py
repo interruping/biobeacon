@@ -17,6 +17,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
+                                           LectureCreateUuidSerializer,
                                            )
 
 from django.utils import timezone
@@ -28,6 +29,7 @@ from .models import ( ProfessorProfile,
                       AttendanceCard,
                       LectureReceiveCard,
                       ProfileImage,
+                      LectureUuidRecord,
                       )
 
 from django.contrib.auth.models import User
@@ -40,6 +42,9 @@ import datetime
 from django.core.files import File
 # Create your views here.
 
+def mainView(request):
+
+    return render(request, 'attendance_check/main.html')
 
 def mainView(request):
 
@@ -472,3 +477,26 @@ def Create_rand_N():
     while (N % 99991 == 0):
         N = random.randint(1, 99999)
     return N
+
+class LectureCreateuuidView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if not request.user.is_staff:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = LectureCreateUuidSerializer(data=request.data)
+
+        if serializer.is_valid():
+            try:
+                lectureuuidtest = LectureUuidRecord.objects.filter(serializer.validated_data['lecture_num'])
+            except:
+                record = LectureUuidRecord.objects.create(
+                    lecture_num=serializer.validated_data['lecture_num']
+                )
+                record.save()
+
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
