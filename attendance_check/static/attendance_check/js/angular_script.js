@@ -481,6 +481,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
             }
 
         }).then(function(response){
+            $scope.realTimeReset(response.data.wait_time);
             myDataView.clearAll();
             var students = response.data.students;
 
@@ -499,6 +500,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
         });
+
 
 
     };
@@ -588,17 +590,17 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
     var timeInterval;
-    $scope.realTimeReset = function () {
+    $scope.realTimeReset = function (timeset) {
         if ($scope.realTime=!null)
             $interval.cancel(timeInterval);
-        $scope.realTime = $scope.selectedTimeMin * 60;
+        $scope.realTime = timeset;
         $scope.strColon = " : ";
             timeInterval = $interval(function () {
                 $scope.realTime = $scope.realTime -1;
                 $scope.realTimeMin = parseInt($scope.realTime/60);
                 $scope.realTimeSec = $scope.realTime%60;
 
-        }, 1000,[$scope.selectedTimeMin*60]);
+        }, 1000,[timeset]);
     };
 
 
