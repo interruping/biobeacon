@@ -379,6 +379,7 @@ app.controller('LectureController', function($scope, $http){
             $scope.loadLectureList();
 
         }, function (response){
+            $("#lecture-failed-modal").appendTo("body").modal();
         });
     };
 
@@ -489,8 +490,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
         });
-
-
 
     };
 
@@ -603,7 +602,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 });
 
 
-
 function doCheck() {
     var id = currentSpecificControl;
     myDataView.set(id, {
@@ -671,7 +669,7 @@ function chulcheckJS() {
             $('#chul2').tab('show');
         });
     }
-    else if (myInfoInfo == "20132308") {
+    else if (chulCheckInfo == "20132308") {
         $(document).ready(function(){
             $('#chul1').tab('show');
         });

@@ -35,7 +35,7 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-import uuidcalc #uuid계산기
+from . import uuidcalc #uuid계산기
 import random
 from django.utils import timezone
 import datetime
@@ -153,7 +153,6 @@ class LectureCreateView(APIView):
 
         if serializer.is_valid():
             professorProfile = ProfessorProfile.objects.get(user=request.user)
-
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
                 lecture_num=serializer.validated_data['lecture_num'],
