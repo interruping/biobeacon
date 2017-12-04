@@ -269,7 +269,7 @@ app.controller('ProfileController', function($scope, $http){
 
 app.controller('LectureController', function($scope, $http){
 
-    $scope.loadLectureList = function () {
+    $scope.loadOwnedLectureList = function () {
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {
                 'Authorization' : token
@@ -293,13 +293,11 @@ app.controller('LectureController', function($scope, $http){
             }
 
         }).then(function(response){
-            $scope.loadLectureList();
+            $scope.loadOwnedLectureList();
 
         }, function (response){
         });
     };
-
-
 
 });
 
@@ -319,7 +317,13 @@ app.controller('LectureAttendanceCheckController', function($scope, $http){
 
     $scope.select_entire_control = "0";
     $scope.seletedLecture = "0";
-     $scope.loadLectureList = function () {
+
+    $scope.$on('reloadLectureList', function(){
+        $scope.loadLectureList();
+
+    });
+
+    $scope.loadLectureList = function () {
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {
                 'Authorization' : token
@@ -439,7 +443,7 @@ function chulcheckJS() {
             $('#chul2').tab('show');
         });
     }
-    else if (myInfoInfo == "20132308") {
+    else if (chulCheckInfo == "20132308") {
         $(document).ready(function(){
             $('#chul1').tab('show');
         });
