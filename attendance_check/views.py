@@ -476,9 +476,8 @@ class LectureCreateuuidView(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         serializer = LectureCreateUuidSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                lectureuuidtest = LectureUuidRecord.objects.filter(serializer.validated_data['lecture_num'])
-            except:
+            lectureuuidtest = LectureUuidRecord.objects.filter(lecture_num = serializer.validated_data['lecture_num'])
+            if not lectureuuidtest:
                 record = LectureUuidRecord.objects.create(
                     lecture_num=serializer.validated_data['lecture_num']
                 )
