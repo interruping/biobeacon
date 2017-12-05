@@ -71,7 +71,7 @@ app.controller('checkIdNumberController', function($scope, $http){
 });
 
 
-app.controller('localS  torage', function($scope, $http){
+app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
 
     if (loggedInfo != null) {
