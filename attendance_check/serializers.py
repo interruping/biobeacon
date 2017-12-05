@@ -64,6 +64,9 @@ class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     minute = serializers.IntegerField()
 
+class LectureUuidSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
 class LectureRequestAttendanceCheckSerializer(serializers.Serializer):
     user = serializers.IntegerField(required=False)
     lecture = serializers.IntegerField()

@@ -70,6 +70,7 @@ class AttendanceCard(models.Model):
     checker = models.ForeignKey(StudentProfile)
     record_to = models.ForeignKey(AttendanceRecord)
     is_late_checker = models.BooleanField(default=False)
+    is_reasonableabsent_checker = models.BooleanField(default=False)
 
 class LectureUuidRecord(models.Model):
     default_uuid = models.CharField(max_length=15, default='4a4ece607eb011e')
