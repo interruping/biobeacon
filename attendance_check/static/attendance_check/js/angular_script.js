@@ -38,8 +38,40 @@ app.controller('checkIdController', function($scope, $http){
      };
 });
 
+app.controller('checkIdNumberController', function($scope, $http){
 
-app.controller('localStorage', function($scope, $http){
+    var flag = false;
+
+    $scope.doCheckIdNumber = function (){
+
+        var userAuthNumData = {
+            "organization_id": $scope.organization_id
+        };
+
+        $http.post("/attendance_check/api/user_register/id/NumberCheck/", userAuthNumData)
+        .then(function(response){
+
+            if(response.data.result == '1'){
+                if(flag == true){
+                        flag = false;
+                        $('[data-toggle="popover1"]').popover({placement: 'top', content: "중복된 학번/사번 입니다."}).popover("show");
+                }
+            }
+            else{
+                if(flag == false){
+                    $('[data-toggle="popover1"]').popover('hide');
+                    flag = true;
+                 }
+            }
+        }, function (response){
+
+        });
+
+     };
+});
+
+
+app.controller('localS  torage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
 
     if (loggedInfo != null) {
