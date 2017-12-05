@@ -512,6 +512,14 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     10 :{str : "10분", int : 600}
     }
 
+
+
+
+
+
+
+
+
 });
 
 
@@ -526,6 +534,12 @@ function doCheck() {
         PanelStatus : checkCompleteStatus,
         AttendanceCheckStatus : checkCompleteText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"check");
+    };
+
+
 };
 
 function doAbsent() {
@@ -538,6 +552,10 @@ function doAbsent() {
         PanelStatus : absentStatus,
         AttendanceCheckStatus : absentText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"absent");
+    };
 };
 
 function doReasonableAbsent() {
@@ -550,6 +568,10 @@ function doReasonableAbsent() {
         PanelStatus : reasonableAbsentStatus,
         AttendanceCheckStatus : reasonableAbsentText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"reasonableAbsent");
+    };
 };
 
 function doLate() {
@@ -559,10 +581,15 @@ function doLate() {
         ImgSRC: myDataView.get(id).ImgSRC,
         Name:  myDataView.get(id).Name,
         IdNum:  myDataView.get(id).IdNum,
-        PanelStatus : waitStatus,
-        AttendanceCheckStatus : waitText
+        PanelStatus : lateStatus,
+        AttendanceCheckStatus : lateText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"late");
+    };
 };
+
 
 function onEnterSubmit(){
      var keyCode = window.event.keyCode;
@@ -589,3 +616,37 @@ function chulcheckJS() {
         });
     }
 }
+
+
+app.controller('specificControlController', function($scope, $http){
+
+    $scope.ng_doCheck = function (std_id, status_flag) {
+        $http.post('/attendance_check/api/lecture/apply/check/ng_doCheck/', {"std_id": std_id,"lec_id": $scope.seletedLecture,"status_flag": status_flag},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+
+    };
+
+
+    $scope.checkUUIDs = function () {
+        $http.post('/attendance_check/api/lecture/apply/checkUUID/', {},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+    };
+
+
+});

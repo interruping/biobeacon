@@ -68,3 +68,8 @@ class LectureRequestAttendanceCheckSerializer(serializers.Serializer):
 
 class LectureReceiveApplySerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
+
+class LectureCheckSerializer(serializers.Serializer):
+    status_flag = serializers.CharField(max_length=18)
+    std_id = serializers.IntegerField()
+    lec_id = serializers.IntegerField()

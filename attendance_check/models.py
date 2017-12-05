@@ -67,6 +67,7 @@ class LectureReceiveCard(models.Model):
 
 class AttendanceCard(models.Model):
     check_time = models.DateTimeField(editable=False, null=True)
+    check_start_time = models.DateTimeField(editable=True, null=True)
     checker = models.ForeignKey(StudentProfile)
     record_to = models.ForeignKey(AttendanceRecord)
     is_late_checker = models.BooleanField(default=False)

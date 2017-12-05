@@ -129,7 +129,7 @@ function loadDataView(){
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
 
-                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();">
+                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();updateSelectedLecture();">
                             인증시간
                             <select ng-model="selectedTimeMin" style="margin-top:10px">
                                 {% verbatim %}
@@ -138,7 +138,7 @@ function loadDataView(){
                             </select>
                             남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
                             <ul class="navbar-form navbar-right">
-                                <button type="button" class="btn btn-success" tyle="width:100px;margin-top:10px" value="save" ng-click="lectureListSave();">저장</button>
+                                <button type="button" class="btn btn-success" tyle="width:100px;margin-top:10px" value="save" ng-click="save();">저장</button>
                             </ul>
                             <hr>
                         <div class="panel panel-default">
@@ -153,14 +153,14 @@ function loadDataView(){
                                 </select>
                             </div>
                         </div>
-                        <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;" ></div>
-                        <div id="specificControl" class="hidden" ng-controller="specificControlController">
+                        <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;"></div>
+                        <div id="specificControl" class="hidden" ng-app="BioBeaconApp" ng-controller="specificControlController">
                             <div class="popover-heading">수동 출석</div>
                             <div class="popover-body">
-                                <button type="button" class="btn btn-primary" onclick="doCheck()" data-dismiss="modal">출석</button>
-                                <button type="button" class="btn btn-success" onclick="doReasonableAbsent()" data-dismiss="modal">공결</button>
-                                <button type="button" class="btn btn-warning" onclick="doLate()" data-dismiss="modal">지각</button>
-                                <button type="button" class="btn btn-danger" onclick="doAbsent()" data-dismiss="modal">결석</button>
+                                <button type="button" class="btn btn-primary" onclick="doCheck();" data-dismiss="modal">출석</button>
+                                <button type="button" class="btn btn-success" onclick="doReasonableAbsent()" value="reasonableAbsentText" data-dismiss="modal">공결</button>
+                                <button type="button" class="btn btn-warning" onclick="doLate()"  value="lateText" data-dismiss="modal">지각</button>
+                                <button type="button" class="btn btn-danger" onclick="doAbsent()"  value="absentText" data-dismiss="modal">결석</button>
                             </div>
                         </div>
                         <script>
