@@ -154,7 +154,6 @@ class LectureCreateView(APIView):
 
         if serializer.is_valid():
             professorProfile = ProfessorProfile.objects.get(user=request.user)
-
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
                 lecture_num=serializer.validated_data['lecture_num'],
