@@ -652,9 +652,14 @@ function doLate() {
     });
 };
 
-function onEnterSubmit(){
-     var keyCode = window.event.keyCode;
-     document.getElementById("login-submit").click();
+function onEnterSubmit(sw){
+    if(sw == true){
+        var keyCode = window.event.keyCode;
+        document.getElementById("login-submit").click();
+    }
+
+    else{
+    }
 }
 
 function activeMyInfo() {
