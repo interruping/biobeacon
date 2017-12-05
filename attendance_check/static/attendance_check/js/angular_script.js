@@ -496,16 +496,24 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
             $interval.cancel(timeInterval);
         $scope.realTime = timeset;
         $scope.strColon = " : ";
+        if (timeset<=1){
+            $scope.realTimeMin = 0;
+            $scope.realTimeSec = 0;
+        }
+
+        else{
             timeInterval = $interval(function () {
                 $scope.realTime = $scope.realTime -1;
                 $scope.realTimeMin = parseInt($scope.realTime/60);
                 $scope.realTimeSec = $scope.realTime%60;
 
         }, 1000,[timeset]);
+        }
     };
 
 
     $scope.selectedTime = {
+    0 : {str : "없음", int : 1},
     1 : {str : "1분", int : 60},
     3 : {str : "3분", int : 180},
     5 : {str : "5분", int : 300},
@@ -621,7 +629,7 @@ function chulcheckJS() {
 app.controller('specificControlController', function($scope, $http){
 
     $scope.ng_doCheck = function (std_id, status_flag) {
-        $http.post('/attendance_check/api/lecture/apply/check/ng_doCheck/', {"std_id": std_id,"lec_id": $scope.seletedLecture,"status_flag": status_flag},
+        $http.post('/attendance_check/api/lecture/apply/check/status/', {"std_id": std_id,"lec_id": $scope.seletedLecture,"status_flag": status_flag},
         {
             headers: {
                 'Authorization' : token

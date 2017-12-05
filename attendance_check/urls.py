@@ -64,7 +64,7 @@ urlpatterns = [
     url(r'^api/lecture/apply/list/$', LectureReceiveApplyListView.as_view()),
     url(r'^api/lecture/apply/start/$', LectureStartView.as_view()),
     url(r'^api/lecture/apply/checkUUID/$', LectureCheckUUID.as_view()),
-    url(r'^api/lecture/apply/check/ng_doCheck/$', LectureStuCheck.as_view()),
+    url(r'^api/lecture/apply/check/status/$', LectureStuCheck.as_view()),
     # url(r'^api/lecture/stop/$', LectureStopView.as_view()),
     # url(r'^api/lecture/check/$', LectureStopView.as_view()),
 ]
