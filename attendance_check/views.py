@@ -13,6 +13,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureStartSerializer,
                                            LectureRequestAttendanceCheckSerializer,
                                            LectureReceiveApplySerializer,
+                                           IdNumberCheckSerializer,
                                            IdCheckSerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
@@ -36,7 +37,9 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-from . import uuidcalc #uuid계산기
+
+from . import uuidcalc#uuid계산기
+
 import random
 from django.utils import timezone
 import datetime
@@ -214,6 +217,35 @@ class IdCheckView(APIView):
                 }
                 return Response(result)
             return Response(user)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IdNumberCheckView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+
+        serializer = IdNumberCheckSerializer(data=request.data)
+
+        if serializer.is_valid():
+            organization_id = serializer.validated_data['organization_id']
+            employee_user = ProfessorProfile.objects.filter(employee_id=organization_id)
+            student_user = StudentProfile.objects.filter(student_id=organization_id)
+
+            if employee_user.exists():
+                result = {
+                    "result": 1
+                }
+                return Response(result)
+            if student_user.exists():
+                result = {
+                    "result": 1
+                }
+                return Response(result)
+            return Response(employee_user)
+
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
