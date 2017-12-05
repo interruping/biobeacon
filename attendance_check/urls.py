@@ -15,6 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.urls import reverse_lazy
+from django.views.generic import RedirectView
+
 from .views import (
                     mainView,
                     loginView,
@@ -38,11 +41,12 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 
 urlpatterns = [
-    url(r'^$', mainView, name='main'),
     url(r'^main/$', mainView, name='main'),
     url(r'^login/$', loginView, name='login'),
     # url(r'^main/$', login_view, name='main'),
     url(r'^virtual_class/$', virtualClassView, name='virtual_class'),
+    url(r'^$', RedirectView.as_view(url='attendance_check/main/')),
+
 
     url(r'^api/user_register/$', RegistrationView.as_view()),
     url(r'^api/user_register/id/check/$', IdCheckView.as_view()),

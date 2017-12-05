@@ -37,8 +37,7 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-
-from . import uuidcalc#uuid계산기
+from . import uuidcalc
 
 import random
 from django.utils import timezone
