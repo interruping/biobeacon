@@ -411,6 +411,7 @@ app.controller('LectureController', function($scope, $http){
             $scope.loadLectureList();
 
         }, function (response){
+            $("#lecture-failed-modal").appendTo("body").modal();
         });
     };
 
@@ -522,8 +523,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
         });
 
-
-
     };
 
     $scope.updateEntireControl = function() {
@@ -626,14 +625,13 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
     $scope.selectedTime = {
-    1 : {str : "1분", int : 1},
-    3 : {str : "3분", int : 3},
-    5 : {str : "5분", int : 5},
-    10 :{str : "10분", int : 10}
+    1 : {str : "1분", int : 60},
+    3 : {str : "3분", int : 180},
+    5 : {str : "5분", int : 300},
+    10 :{str : "10분", int : 600}
     }
 
 });
-
 
 
 function doCheck() {
@@ -679,8 +677,8 @@ function doLate() {
         ImgSRC: myDataView.get(id).ImgSRC,
         Name:  myDataView.get(id).Name,
         IdNum:  myDataView.get(id).IdNum,
-        PanelStatus : lateStatus,
-        AttendanceCheckStatus : lateText
+        PanelStatus : waitStatus,
+        AttendanceCheckStatus : waitText
     });
 };
 
@@ -703,7 +701,7 @@ function chulcheckJS() {
             $('#chul2').tab('show');
         });
     }
-    else if (myInfoInfo == "20132308") {
+    else if (chulCheckInfo == "20132308") {
         $(document).ready(function(){
             $('#chul1').tab('show');
         });

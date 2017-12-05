@@ -19,6 +19,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
                                            LectureCreateUuidSerializer,
+                                           LectureUuidSerializer,
                                            )
 
 from django.utils import timezone
@@ -36,7 +37,9 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
+
 from . import uuidcalc#uuid계산기
+
 import random
 from django.utils import timezone
 import datetime
@@ -154,7 +157,6 @@ class LectureCreateView(APIView):
 
         if serializer.is_valid():
             professorProfile = ProfessorProfile.objects.get(user=request.user)
-
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
                 lecture_num=serializer.validated_data['lecture_num'],
@@ -455,7 +457,20 @@ class LectureReceiveApplyListView(APIView):
             if serializer.is_valid():
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
-                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate = True)
+
+
+
+                # 해당 강의의 활성화 여부 찾기
+                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                # 해당 강의의 활성화유무 판단 활성화되면
+                if record:
+                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                    if (record.end_time < timezone.now()):
+                        record.activate = False
+                        record.save()
+
+                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
                 wait_time = 1
                 if activate_lec_card:
                     lec_card = activate_lec_card.first()
@@ -549,7 +564,7 @@ class LectureCheckUUID(APIView):
     def post(self, request):
         if not request.user.is_staff:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = LectureCreateUuidSerializer(data=request.data)
+        serializer = LectureUuidSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 #강의실 번호에따른 강의실 UUID데이터베이스 가져옴
