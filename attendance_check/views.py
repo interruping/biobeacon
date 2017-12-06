@@ -35,7 +35,7 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-import uuidcalc #uuid계산기
+from . import uuidcalc #uuid계산기
 import random
 from django.utils import timezone
 import datetime
@@ -102,7 +102,7 @@ class RegistrationView(APIView):
                 profile_img.user = newUser
                 profile_img.save()
 
-            return Response(serializer.validated_data['department'])
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

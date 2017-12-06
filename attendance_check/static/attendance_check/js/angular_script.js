@@ -301,7 +301,7 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
         $('#upload_progress_container').css({'display':'block'});
         Upload.upload({
             url: '/attendance_check/api/profile/image/upload/',
-            data: {file: file, 'username': $scope.username}
+            data: {'file': file}
         }).then(function (resp) {
             $('#uploaded_image').attr('src', resp.data.uploaded_url);
             $('#image_confirm').collapse();
