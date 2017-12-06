@@ -152,6 +152,21 @@ class LectureCreateView(APIView):
         serializer = LectureCreateSerializer(data=request.data)
 
         if serializer.is_valid():
+            lecture = Lecture.objects.filter(title=serializer.validated_data['title'],
+                                             lecture_num=serializer.validated_data['lecture_num'])
+
+            if lecture:
+                lectureL = lecture.reverse()[0]
+                lecturer = ProfessorProfile.objects.get(user=request.user)
+
+                # 강의명, 강의실 번호, 등록자(lecturer) 확인
+                record = Lecture.objects.filter(title=lectureL, lecturer=lecturer)
+                if record:
+                    result = {
+                        'failedModal': True,
+                    }
+                    return Response(result)
+
             professorProfile = ProfessorProfile.objects.get(user=request.user)
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
@@ -162,8 +177,8 @@ class LectureCreateView(APIView):
 
             return Response(serializer.data)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -550,4 +565,3 @@ class LectureCheckUUID(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

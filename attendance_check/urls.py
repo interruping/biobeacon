@@ -32,7 +32,8 @@ from .views import (
                     DepartmentListView,
                     ProfileImageUploadView,
                     LectureCreateuuidView,
-                    LectureCheckUUID)
+                    LectureCheckUUID,
+                    )
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 
