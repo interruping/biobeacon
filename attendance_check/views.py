@@ -589,10 +589,9 @@ class LectureStuCheck(APIView):
     def post(self, request):
         if not request.user.is_staff:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        print (request.data)
+
         serializer = LectureCheckSerializer(data=request.data)
         if serializer.is_valid():
-
             stu_num = StudentProfile.objects.get(pk = serializer.validated_data['std_id'])#체크한 학번
             lecture = Lecture.objects.get(pk = serializer.validated_data['lec_id'])#선택강의
 
