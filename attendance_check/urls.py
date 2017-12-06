@@ -25,6 +25,7 @@ from .views import (
                     RegistrationView,
                     IdCheckView,
                     IdNumberCheckView,
+                    LectureDeleteView,
                     LectureCreateView,
                     LectureStartView,
                     LectureListView,
@@ -64,6 +65,7 @@ urlpatterns = [
 
     url(r'^api/lecture/list/$', LectureListView.as_view()),
     url(r'^api/lecture/create/$', LectureCreateView.as_view()),
+    url(r'^api/lecture/delete/$', LectureDeleteView.as_view()),
     url(r'^api/lecture/createUuid/$', LectureCreateuuidView.as_view()),
     url(r'^api/lecture/start/$', LectureStartView.as_view()),
     url(r'^api/lecture/check/$', LectureRequestAttendaneCheck.as_view()),

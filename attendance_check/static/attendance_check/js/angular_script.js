@@ -382,6 +382,20 @@ app.controller('ProfileController', function($scope, $http){
 
 app.controller('LectureController', function($scope, $http){
 
+    $scope.deleteLecture = function(num){
+        $http.post('/attendance_check/api/lecture/delete/',{"id": num}, {
+            headers: {
+                'Authorization' : token
+            }
+        }).then(function(response){
+                $scope.loadLectureList();
+
+        },function(response){
+             $("#lecture-failed-modal").appendTo("body").modal();
+        });
+
+    };
+
     $scope.loadLectureList = function () {
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {

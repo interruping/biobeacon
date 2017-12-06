@@ -75,3 +75,6 @@ class LectureRequestAttendanceCheckSerializer(serializers.Serializer):
 
 class LectureReceiveApplySerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
+
+class DeleteLectureSerializer(serializers.Serializer):
+    id = serializers.CharField()

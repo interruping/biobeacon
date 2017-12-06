@@ -15,6 +15,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureReceiveApplySerializer,
                                            IdNumberCheckSerializer,
                                            IdCheckSerializer,
+                                           DeleteLectureSerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
@@ -439,6 +440,29 @@ class LectureRecordStatusView(APIView):
             return Response(cards)
         else:
             return Response("Lecture Record Status can read by staff user.", status=status.HTTP_403_FORBIDDEN)
+
+class LectureDeleteView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+
+        serializer = DeleteLectureSerializer(data=request.data)
+
+        if serializer.is_valid():
+            id = serializer.validated_data['id']
+
+            if request.user.is_staff:
+                prof = Lecture.objects.get(pk=id)
+                prof.delete()
+                result = {
+                    "result": 1
+                }
+            return Response(result)
+
+        else:
+            return Response("Lecture Error.", status=status.HTTP_403_FORBIDDEN)
+
 
 
 class LectureReceiveApplyView(APIView):
