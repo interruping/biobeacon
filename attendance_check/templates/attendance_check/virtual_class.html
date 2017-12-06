@@ -112,8 +112,7 @@ function loadDataView(){
                 </div>
 			{% verbatim %}
                 <div class="well" ng-repeat="lecture in lectures">
-                    강좌명 : {{lecture.title}}  <button type="button" class="btn btn-default" onclick="clickdelete()">삭제</button>
-
+                    강좌명 : {{lecture.title}}<button type="button" class="btn btn-default" style="float: right;height:40px;margin-top:-9px;" onclick="clickdelete()">삭제</button>
                     <div class="modal fade" id="deleteCheck" role="dialog">
               <div class="modal-dialog" >
 
