@@ -106,7 +106,7 @@ function loadDataView(){
                         <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
                     </div>
                     <div class="col-md-2">
-                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable()">
+                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable();">
                     </div>
 
                 </div>
@@ -129,7 +129,7 @@ function loadDataView(){
                 <h4 class="modal-title">생성 실패</h4>
               </div>
               <div class="modal-body">
-                <p>잘못된 입력입니다.</p>
+                <p>이미 개설된 강좌입니다.</p>
               </div>
               <div class="modal-footer">
                   <script>

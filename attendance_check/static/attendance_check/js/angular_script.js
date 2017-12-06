@@ -408,8 +408,11 @@ app.controller('LectureController', function($scope, $http){
         }).then(function(response){
             $scope.loadLectureList();
 
+            var checkCompare = response.data.failedModal
+            if (checkCompare) {
+                $("#lecture-failed-modal").appendTo("body").modal();
+            }
         }, function (response){
-            $("#lecture-failed-modal").appendTo("body").modal();
         });
     };
 
@@ -425,8 +428,6 @@ app.controller('LectureController', function($scope, $http){
         }, function (response){
         });
     };
-
-
 });
 
 
