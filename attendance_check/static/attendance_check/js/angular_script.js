@@ -8,38 +8,6 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 
 
-app.controller('checkIdNumberController', function($scope, $http){
-
-    var flag = false;
-
-    $scope.doCheckIdNumber = function (){
-
-        var userAuthNumData = {
-            "organization_id": $scope.organization_id
-        };
-
-        $http.post("/attendance_check/api/user_register/id/NumberCheck/", userAuthNumData)
-        .then(function(response){
-
-            if(response.data.result == '1'){
-                if(flag == true){
-                        flag = false;
-                        $('[data-toggle="popover1"]').popover({placement: 'top', content: "중복된 학번/사번 입니다."}).popover("show");
-                }
-            }
-            else{
-                if(flag == false){
-                    $('[data-toggle="popover1"]').popover('hide');
-                    flag = true;
-                 }
-            }
-        }, function (response){
-
-        });
-
-     };
-});
-
 
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
@@ -152,7 +120,8 @@ app.controller('LoginController', function($scope, $http){
 
 app.controller('RegisterController',['$scope', '$http', 'Upload', function ($scope, $http, Upload){
 
- var flag = false;
+ var username_flag = false;
+  var id_flag= false;
 
     $scope.doCheckId = function (){
 
@@ -161,18 +130,48 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
         };
 
         $http.post("/attendance_check/api/user_register/id/check/", userAuthData)
+            .then(function(response){
+
+               if(response.data.result == '1'){
+                     if(username_flag == true){
+                            username_flag = false;
+                            $('[data-toggle="popover"]').popover({placement: 'top', content: "중복된 아이디 입니다."}).popover("show");
+                     }
+               }
+                else{
+                     if(username_flag == false){
+                           $('[data-toggle="popover"]').popover('hide');
+                           username_flag = true;
+                     }
+                }
+
+        }, function (response){
+
+        });
+
+     };
+
+
+
+    $scope.doCheckIdNumber = function (){
+
+        var userAuthNumData = {
+            "organization_id": $scope.organization_id
+        };
+
+        $http.post("/attendance_check/api/user_register/id/NumberCheck/", userAuthNumData)
         .then(function(response){
 
             if(response.data.result == '1'){
-                if(flag == true){
-                        flag = false;
-                        $('[data-toggle="popover"]').popover({placement: 'top', content: "중복된 아이디 입니다."}).popover("show");
+                if(id_flag == true){
+                        id_flag = false;
+                        $('[data-toggle="popover1"]').popover({placement: 'top', content: "중복된 학번/사번 입니다."}).popover("show");
                 }
             }
             else{
-                if(flag == false){
-                    $('[data-toggle="popover"]').popover('hide');
-                    flag = true;
+                if(id_flag == false){
+                    $('[data-toggle="popover1"]').popover('hide');
+                    id_flag = true;
                  }
             }
         }, function (response){
