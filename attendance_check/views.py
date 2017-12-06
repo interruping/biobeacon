@@ -438,14 +438,15 @@ class LectureDeleteView(APIView):
             id = serializer.validated_data['id']
 
             if request.user.is_staff:
-                prof = Lecture.objects.get(lecture_num=id)
+                prof = Lecture.objects.get(pk=id)
                 prof.delete()
                 result = {
-                    "id": 1
+                    "result": 1
                 }
             return Response(result)
+
         else:
-            return Response("Lecture Record Status can read by staff user.", status=status.HTTP_403_FORBIDDEN)
+            return Response("Lecture Error.", status=status.HTTP_403_FORBIDDEN)
 
 
 

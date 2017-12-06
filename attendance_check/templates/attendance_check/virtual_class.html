@@ -112,7 +112,7 @@ function loadDataView(){
                 </div>
 			{% verbatim %}
                 <div class="well" ng-repeat="lecture in lectures">
-                    강좌명 : {{lecture.title}}  <button type="button" class="btn btn-default" ng-click="deleteLecture(lecture.lecture_num)">삭제</button>
+                    강좌명 : {{lecture.title}}  <button type="button" class="btn btn-default" ng-click="deleteLecture(lecture.id)">삭제</button>
                 </div>
                 <hr>
                 <p style="float:right">총 {{lectures.length}}개의 강좌 담당 중</p>
