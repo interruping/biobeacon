@@ -38,6 +38,38 @@ app.controller('checkIdController', function($scope, $http){
      };
 });
 
+app.controller('checkIdNumberController', function($scope, $http){
+
+    var flag = false;
+
+    $scope.doCheckIdNumber = function (){
+
+        var userAuthNumData = {
+            "organization_id": $scope.organization_id
+        };
+
+        $http.post("/attendance_check/api/user_register/id/NumberCheck/", userAuthNumData)
+        .then(function(response){
+
+            if(response.data.result == '1'){
+                if(flag == true){
+                        flag = false;
+                        $('[data-toggle="popover1"]').popover({placement: 'top', content: "중복된 학번/사번 입니다."}).popover("show");
+                }
+            }
+            else{
+                if(flag == false){
+                    $('[data-toggle="popover1"]').popover('hide');
+                    flag = true;
+                 }
+            }
+        }, function (response){
+
+        });
+
+     };
+});
+
 
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
@@ -379,6 +411,7 @@ app.controller('LectureController', function($scope, $http){
             $scope.loadLectureList();
 
         }, function (response){
+            $("#lecture-failed-modal").appendTo("body").modal();
         });
     };
 
@@ -490,8 +523,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
         });
 
-
-
     };
 
     $scope.updateEntireControl = function() {
@@ -594,14 +625,13 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
     $scope.selectedTime = {
-    1 : {str : "1분", int : 1},
-    3 : {str : "3분", int : 3},
-    5 : {str : "5분", int : 5},
-    10 :{str : "10분", int : 10}
+    1 : {str : "1분", int : 60},
+    3 : {str : "3분", int : 180},
+    5 : {str : "5분", int : 300},
+    10 :{str : "10분", int : 600}
     }
 
 });
-
 
 
 function doCheck() {
@@ -647,14 +677,19 @@ function doLate() {
         ImgSRC: myDataView.get(id).ImgSRC,
         Name:  myDataView.get(id).Name,
         IdNum:  myDataView.get(id).IdNum,
-        PanelStatus : lateStatus,
-        AttendanceCheckStatus : lateText
+        PanelStatus : waitStatus,
+        AttendanceCheckStatus : waitText
     });
 };
 
-function onEnterSubmit(){
-     var keyCode = window.event.keyCode;
-     document.getElementById("login-submit").click();
+function onEnterSubmit(sw){
+    if(sw == true){
+        var keyCode = window.event.keyCode;
+        document.getElementById("login-submit").click();
+    }
+
+    else{
+    }
 }
 
 function activeMyInfo() {
@@ -671,7 +706,7 @@ function chulcheckJS() {
             $('#chul2').tab('show');
         });
     }
-    else if (myInfoInfo == "20132308") {
+    else if (chulCheckInfo == "20132308") {
         $(document).ready(function(){
             $('#chul1').tab('show');
         });

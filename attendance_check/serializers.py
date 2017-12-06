@@ -56,6 +56,9 @@ class LectureCreateSerializer(serializers.Serializer):
 class IdCheckSerializer(serializers.Serializer):
     reg_username = serializers.CharField(max_length=128)
 
+class IdNumberCheckSerializer(serializers.Serializer):
+    organization_id = serializers.IntegerField()
+
 class LectureCreateUuidSerializer(serializers.Serializer):
     lecture_num = serializers.CharField(max_length=5)
 
@@ -63,6 +66,9 @@ class LectureCreateUuidSerializer(serializers.Serializer):
 class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     minute = serializers.IntegerField()
+
+class LectureUuidSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
 
 class LectureRequestAttendanceCheckSerializer(serializers.Serializer):
     user = serializers.IntegerField(required=False)
