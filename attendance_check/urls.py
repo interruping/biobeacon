@@ -38,7 +38,9 @@ from .views import (
                     ProfileImageUploadView,
                     LectureCreateuuidView,
                     LectureCheckUUID,
+                    LectureStuCheck,
                     )
+
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 
@@ -74,6 +76,7 @@ urlpatterns = [
     url(r'^api/lecture/apply/list/$', LectureReceiveApplyListView.as_view()),
     url(r'^api/lecture/apply/start/$', LectureStartView.as_view()),
     url(r'^api/lecture/apply/checkUUID/$', LectureCheckUUID.as_view()),
+    url(r'^api/lecture/apply/check/status/$', LectureStuCheck.as_view()),
     # url(r'^api/lecture/stop/$', LectureStopView.as_view()),
     # url(r'^api/lecture/check/$', LectureStopView.as_view()),
 ]

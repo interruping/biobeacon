@@ -66,11 +66,13 @@ class LectureReceiveCard(models.Model):
     card_owner = models.ForeignKey(StudentProfile)
 
 class AttendanceCard(models.Model):
-    check_time = models.DateTimeField(editable=False)
+    check_time = models.DateTimeField(editable=False, null=True)
+    check_start_time = models.DateTimeField(editable=True, null=True)
     checker = models.ForeignKey(StudentProfile)
     record_to = models.ForeignKey(AttendanceRecord)
     is_late_checker = models.BooleanField(default=False)
     is_reasonableabsent_checker = models.BooleanField(default=False)
+    is_absent_checker = models.BooleanField(default=False)
 
 class LectureUuidRecord(models.Model):
     default_uuid = models.CharField(max_length=15, default='4a4ece607eb011e')
