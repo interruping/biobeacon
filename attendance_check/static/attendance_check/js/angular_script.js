@@ -6,6 +6,9 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 //localStorage.setItem('storedUserAuthData',"no_token");
 
+
+
+
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
 
@@ -40,12 +43,52 @@ app.controller('LogoutController', function($scope, $http){
 
 app.controller('LoginController', function($scope, $http){
 
+        if(localStorage.getItem('id') != 'null' && localStorage.getItem('pw') != 'null' &&localStorage.getItem('check') == 'true'){
+            $scope.login_checkbox = true;
+            $scope.login_username = localStorage.getItem('id');
+            $scope.login_password = localStorage.getItem('pw');
+        }
+
+        else{
+          $('#checkbox1').checked = false;
+         }
+
     $scope.doLogin = function(){
 
         var userAuthData = {
             "username": $scope.login_username,
             "password": $scope.login_password
         };
+
+        if(localStorage.getItem('check') == 'true'){
+            $('#checkbox1').checked = true;
+
+                if(localStorage.getItem('id') == null || localStorage.getItem('pw') == null){
+                      localStorage.setItem('id',$scope.login_username);
+                      localStorage.setItem('pw',$scope.login_password);
+                }
+                 else{
+                      if($scope.login_username != localStorage.getItem('id')|| $scope.login_password != localStorage.getItem('pw') ){
+                            if($scope.login_username != localStorage.getItem('id')){
+                                       localStorage.setItem('id',$scope.login_username);
+                            }
+                            if($scope.login_password != localStorage.getItem('pw')){
+                                       localStorage.setItem('pw',$scope.login_password);
+                            }
+
+                      }
+
+                 }
+
+
+        }
+
+       else{
+              localStorage.setItem('check','false');
+              localStorage.setItem('id','');
+              localStorage.setItem('pw','');
+       }
+
 
         $http.post("/attendance_check/api/user_auth/", userAuthData)
         .then(function(response){
@@ -63,9 +106,79 @@ app.controller('LoginController', function($scope, $http){
 
     };
 
+    $scope.checked_storage = function(state){
+         if(state == true){
+             localStorage.setItem('check','true');
+         }
+         else{
+             localStorage.setItem('check','false');
+         }
+    };
+
+
 });
 
 app.controller('RegisterController',['$scope', '$http', 'Upload', function ($scope, $http, Upload){
+
+ var username_flag = false;
+  var id_flag= false;
+
+    $scope.doCheckId = function (){
+
+        var userAuthData = {
+            "reg_username": $scope.reg_username
+        };
+
+        $http.post("/attendance_check/api/user_register/id/check/", userAuthData)
+            .then(function(response){
+
+               if(response.data.result == '1'){
+                     if(username_flag == true){
+                            username_flag = false;
+                            $('[data-toggle="popover"]').popover({placement: 'top', content: "중복된 아이디 입니다."}).popover("show");
+                     }
+               }
+                else{
+                     if(username_flag == false){
+                           $('[data-toggle="popover"]').popover('hide');
+                           username_flag = true;
+                     }
+                }
+
+        }, function (response){
+
+        });
+
+     };
+
+
+
+    $scope.doCheckIdNumber = function (){
+
+        var userAuthNumData = {
+            "organization_id": $scope.organization_id
+        };
+
+        $http.post("/attendance_check/api/user_register/id/NumberCheck/", userAuthNumData)
+        .then(function(response){
+
+            if(response.data.result == '1'){
+                if(id_flag == true){
+                        id_flag = false;
+                        $('[data-toggle="popover1"]').popover({placement: 'top', content: "중복된 학번/사번 입니다."}).popover("show");
+                }
+            }
+            else{
+                if(id_flag == false){
+                    $('[data-toggle="popover1"]').popover('hide');
+                    id_flag = true;
+                 }
+            }
+        }, function (response){
+
+        });
+
+     };
 
     $http.get("/attendance_check/api/department/list/")
     .then(function (response) {
@@ -218,7 +331,7 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
         $('#upload_progress_container').css({'display':'block'});
         Upload.upload({
             url: '/attendance_check/api/profile/image/upload/',
-            data: {file: file, 'username': $scope.username}
+            data: {'file': file}
         }).then(function (resp) {
             $('#uploaded_image').attr('src', resp.data.uploaded_url);
             $('#image_confirm').collapse();
@@ -269,6 +382,20 @@ app.controller('ProfileController', function($scope, $http){
 
 app.controller('LectureController', function($scope, $http){
 
+    $scope.deleteLecture = function(num){
+        $http.post('/attendance_check/api/lecture/delete/',{"id": num}, {
+            headers: {
+                'Authorization' : token
+            }
+        }).then(function(response){
+                $scope.loadLectureList();
+
+        },function(response){
+             $("#lecture-failed-modal").appendTo("body").modal();
+        });
+
+    };
+
     $scope.loadLectureList = function () {
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {
@@ -295,6 +422,10 @@ app.controller('LectureController', function($scope, $http){
         }).then(function(response){
             $scope.loadLectureList();
 
+            var checkCompare = response.data.failedModal
+            if (checkCompare) {
+                $("#lecture-failed-modal").appendTo("body").modal();
+            }
         }, function (response){
         });
     };
@@ -311,8 +442,6 @@ app.controller('LectureController', function($scope, $http){
         }, function (response){
         });
     };
-
-
 });
 
 var waitStatus = "default";
@@ -352,10 +481,14 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
           return $(title).children(".popover-heading").html();
         }});
         $('#specificControl_'+ id).popover('show');
-        // your code here
         return true;
     });
 
+    myDataView.attachEvent("onMouseOut", function (ev){
+        var id = currentSpecificControl;
+        $('#specificControl_'+ id).popover('hide');
+        return true;
+    });
 
 
      $scope.loadLectureList = function () {
@@ -401,8 +534,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
         });
-
-
 
     };
 
@@ -531,7 +662,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 });
 
 
-
 function doCheck() {
     var id = currentSpecificControl;
     myDataView.set(id, {
@@ -599,9 +729,11 @@ function doLate() {
 };
 
 
+
 function onEnterSubmit(){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
+
 }
 
 function activeMyInfo() {
@@ -618,7 +750,7 @@ function chulcheckJS() {
             $('#chul2').tab('show');
         });
     }
-    else if (myInfoInfo == "20132308") {
+    else if (chulCheckInfo == "20132308") {
         $(document).ready(function(){
             $('#chul1').tab('show');
         });
