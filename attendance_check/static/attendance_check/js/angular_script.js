@@ -25,6 +25,7 @@ app.controller('SaveLectureTime', function($scope, $http){
 
                 if(response.data.result == 1)
                     alert('변경되었습니다.');
+                    window.location.reload();
 
             },function(){
 
@@ -396,6 +397,7 @@ app.controller('ProfileController', function($scope, $http){
             $scope.email = response.data.email;
             $scope.user_type = response.data.user_type;
             $scope.profile_image = response.data.profile_image;
+            $scope.time_set = response.data.time_set;
 
         }, function (response){
 

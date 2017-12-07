@@ -129,6 +129,7 @@ class ProfileView(APIView):
                 'id' : prof.employee_id,
                 'department' : prof.department.name,
                 'profile_image' : prof_img.image.url,
+                'time_set' : prof.absence_time_set,
             }
 
 
