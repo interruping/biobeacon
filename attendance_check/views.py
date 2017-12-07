@@ -17,6 +17,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            IdCheckSerializer,
                                            DeleteLectureSerializer,
                                            LectureListSerializer,
+                                           ProfileTimeSetSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
                                            LectureCreateUuidSerializer,
@@ -455,6 +456,32 @@ class LectureDeleteView(APIView):
             if request.user.is_staff:
                 prof = Lecture.objects.get(pk=id)
                 prof.delete()
+                result = {
+                    "result": 1
+                }
+            return Response(result)
+
+        else:
+            return Response("Lecture Error.", status=status.HTTP_403_FORBIDDEN)
+
+
+
+class ProfileTimeSetView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+
+        serializer = ProfileTimeSetSerializer(data=request.data)
+
+        if serializer.is_valid():
+            time_set = serializer.validated_data['time_set']
+
+            if request.user.is_staff:
+                prof = ProfessorProfile.objects.get(user=request.user)
+                prof.absence_time_set = time_set
+                prof.save()
+
                 result = {
                     "result": 1
                 }

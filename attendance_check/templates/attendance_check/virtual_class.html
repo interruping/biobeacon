@@ -90,7 +90,39 @@ function loadDataView(){
 			</div>
 		</div>
         <div class="panel panel-default" ng-controller="LectureController" ng-init="loadLectureList()">
-  			<div class="panel-heading">담당 강좌
+  			<div class="panel-heading">담당 강좌 <button type="button" class="btn btn-default" onclick="optionclick()" style="float: right;height:30px;margin-top:-6px;">톱니 </button>
+                <script>
+                    function optionclick(){
+             $("#optionButton").css("z-index", "9999");
+            $("#optionButton").appendTo("body").modal();
+             }
+                </script>
+                <div class="modal fade" id="optionButton" role="dialog" ng-controller="SaveLectureTime">
+              <div class="modal-dialog" >
+
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">설정</h4>
+                      </div>
+                      <div class="modal-body">
+                          <p> 강의 만료 시간 설정 <BR>
+                              <input type="radio" name="e" value="20" ng-model="formData.e">20분<br>
+                              <input type="radio" name="e" value="30" ng-model="formData.e">30분<br>
+                              <input type="radio" name="e" value="40" ng-model="formData.e">40분<br>
+                              <input type="radio" name="e" value="50" ng-model="formData.e">50분<br>
+                              <input type="radio" name="e" value="60" ng-model="formData.e">60분<br>
+                          </p>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="formData()">Save Change</button>
+                      </div>
+                  </div>
+
+              </div>
+          </div>
 
             </div>
   			<div class="panel-body">

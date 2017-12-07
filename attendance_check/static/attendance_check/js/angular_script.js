@@ -8,6 +8,31 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 
 
+app.controller('SaveLectureTime', function($scope, $http){
+
+    $scope.formData = function (){
+        var timeData = {
+            "time_set": $scope.formData.e
+        };
+
+        $http.post("/attendance_check/api/profile/time_set/update/", timeData,
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+                if(response.data.result == 1)
+                    alert('변경되었습니다.');
+
+            },function(){
+
+            })
+
+    }
+});
+
 
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
