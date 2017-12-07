@@ -53,7 +53,33 @@ app.controller('LoginController', function($scope, $http){
           $('#checkbox1').checked = false;
          }
 
+$scope.doInfoCheck = function(){
+var login_error;
+ var userIdData ={
+            "login_username" : $scope.login_username
+            };
+
+            $http.post("/attendance_check/api/user_register/info/check/", userIdData)
+        .then(function(response){
+        //success
+             if(response.data.result ==1){
+                    $scope.doLogin();
+
+             } else{
+                   login_error = "학생은 로그인이 불가합니다. 어플리케이션을 이용해주세요";
+                   $("#no_login").html(login_error);
+                   $("#login_error").appendTo('body').modal();
+                }
+        }, function(response){
+            login_error = "회원이 아닙니다. 회원신청 바랍니다.";
+            $("#no_login").html(login_error);
+            $("#login_error").appendTo('body').modal();
+            });
+  };
+
     $scope.doLogin = function(){
+
+
 
         var userAuthData = {
             "username": $scope.login_username,
@@ -90,22 +116,21 @@ app.controller('LoginController', function($scope, $http){
        }
 
 
-        $http.post("/attendance_check/api/user_auth/", userAuthData)
-        .then(function(response){
-        //success
-            token = "JWT " + response.data.token;
-            $scope.completeLogin();
-            $scope.login_username = "";
-            $scope.login_password = "";
-            localStorage.setItem('storedUserAuthData',token);
+                  $http.post("/attendance_check/api/user_auth/", userAuthData)
+                  .then(function(response){
+                   //success
+                   token = "JWT " + response.data.token;
+                   $scope.completeLogin();
+                   $scope.login_username = "";
+                   $scope.login_password = "";
+                   localStorage.setItem('storedUserAuthData',token);
 
-        }, function (response){
-        //error
-            $("#registration-failed-modal").appendTo("body").modal();
-        });
+                    }, function (response){
+                   //error
+                 $("#registration-failed-modal").appendTo("body").modal();
+                  });
 
     };
-
     $scope.checked_storage = function(state){
          if(state == true){
              localStorage.setItem('check','true');
@@ -734,6 +759,10 @@ function onEnterSubmit(){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
 
+}
+function onEnter(){
+        if(window.event.keyCode == 13)
+        document.getElementById("login-submit").click();
 }
 
 function activeMyInfo() {
