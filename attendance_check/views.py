@@ -734,7 +734,7 @@ class LectureListSearch(APIView):
                             })
 
                         num+=1
-                    print (lecturesTime)
+
 
 
                 # 결과값
@@ -757,6 +757,93 @@ class LectureCheckedSearchView(APIView):
 
     def post(self, request):
         if request.user.is_staff:
+            serializer = LectureCheckedListViewSerializer(data = request.data)
+            if serializer.is_valid():
+                lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
+                cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
+
+                ######
+                # 해당 강의의 활성화 여부 찾기
+                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                # 해당 강의의 활성화유무 판단 활성화되면
+                if record:
+                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                    if (record.end_time < timezone.now()):
+                        record.activate = False
+                        record.save()
+                ######
+
+                #활성 강의 남은시간 계산
+                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                wait_time = 1
+                if activate_lec_card:
+                    lec_card = activate_lec_card.last()
+                    wait_time = (lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().minute*60+timezone.now().second)
+                    if wait_time<0:
+                        wait_time = 1
+
+
+                #db에서 학생 출결상태 출력
+                student_infos = []
+                selectLecture = AttendanceRecord.objects.get(pk=serializer.validated_data['time'])
+                for card in cards:
+                    std_text = ''
+                    try :
+                        std_card = AttendanceCard.objects.get(checker = card.card_owner, record_to=selectLecture)
+                    except:
+                        std_text = "결석"
+                        std_status = 'danger'
+
+                    if std_text == '':
+                        if std_card.is_reasonableabsent_checker == True:
+                            std_text = '공결'
+                            std_status = 'success'
+
+                        elif std_card.is_late_checker == True:
+                            std_text = '지각'
+                            std_status = 'warning'
+
+                        elif std_card.is_absent_checker == True:
+                            std_text = '결석'
+                            std_status = 'danger'
+
+                        else:
+                            std_text = '출석'
+                            std_status = 'primary'
+
+                    student_info = {
+                        "student_id" : card.card_owner.student_id,
+                        "id" : card.card_owner.pk,
+                        "name" : card.card_owner.user.username,
+                        "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
+                        "std_text": (std_text.decode('utf-8')),
+                        "std_status":(std_status)
+                    }
+                    student_infos.append(student_info)
+
+
+
+                # 결과값
+                result = {
+                    "wait_time" : wait_time,
+                    "students" : student_infos
+                }
+                return Response(result)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
+
+
+
+
+class LectureBeaconCheck(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if request.user:
             serializer = LectureCheckedListViewSerializer(data = request.data)
             if serializer.is_valid():
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])

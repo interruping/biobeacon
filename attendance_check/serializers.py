@@ -77,3 +77,7 @@ class LectureCheckSerializer(serializers.Serializer):
 class LectureCheckedListViewSerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
     time = serializers.CharField(max_length=17)
+
+class LectureBeaconCheckSerializer(serializers.Serializer):
+    lecture = serializers.IntegerField()
+    time = serializers.CharField(max_length=17)
