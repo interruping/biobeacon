@@ -851,7 +851,7 @@ class LectureListSearch(APIView):
                     num = 1
                     for lecture in selectLecture:
                         lecturesTime.append({
-                                "date": (str)(lecture.start_time)[0:16],
+                                "date": (str)(lecture.start_time+datetime.timedelta(hours=9))[0:16],
                                 "id": lecture.pk,
                                 "num": num
                             })
