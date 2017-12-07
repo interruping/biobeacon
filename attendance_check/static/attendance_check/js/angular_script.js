@@ -714,6 +714,10 @@ function onEnterSubmit(sw){
     else{
     }
 }
+function onEnter(){
+        if(window.event.keyCode == 13)
+        document.getElementById("login-submit").click();
+}
 
 function activeMyInfo() {
     localStorage.setItem('chulCheckActived',"20132308");
