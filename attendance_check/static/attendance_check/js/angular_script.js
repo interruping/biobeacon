@@ -356,7 +356,7 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
         $('#upload_progress_container').css({'display':'block'});
         Upload.upload({
             url: '/attendance_check/api/profile/image/upload/',
-            data: {file: file, 'username': $scope.username}
+            data: {'file': file}
         }).then(function (resp) {
             $('#uploaded_image').attr('src', resp.data.uploaded_url);
             $('#image_confirm').collapse();
@@ -407,6 +407,20 @@ app.controller('ProfileController', function($scope, $http){
 
 app.controller('LectureController', function($scope, $http){
 
+    $scope.deleteLecture = function(num){
+        $http.post('/attendance_check/api/lecture/delete/',{"id": num}, {
+            headers: {
+                'Authorization' : token
+            }
+        }).then(function(response){
+                $scope.loadLectureList();
+
+        },function(response){
+             $("#lecture-failed-modal").appendTo("body").modal();
+        });
+
+    };
+
     $scope.loadLectureList = function () {
         $http.get('/attendance_check/api/lecture/list/', {
             headers: {
@@ -433,8 +447,11 @@ app.controller('LectureController', function($scope, $http){
         }).then(function(response){
             $scope.loadLectureList();
 
+            var checkCompare = response.data.failedModal
+            if (checkCompare) {
+                $("#lecture-failed-modal").appendTo("body").modal();
+            }
         }, function (response){
-            $("#lecture-failed-modal").appendTo("body").modal();
         });
     };
 
@@ -450,10 +467,7 @@ app.controller('LectureController', function($scope, $http){
         }, function (response){
         });
     };
-
-
 });
-
 
 var waitStatus = "default";
 var absentStatus = "danger";
@@ -537,8 +551,8 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
                 ImgSRC: student.profile_image,
                 Name: student.name,
                 IdNum: student.student_id,
-                PanelStatus: waitStatus,
-                AttendanceCheckStatus: waitText });
+                PanelStatus: student.std_status,
+                AttendanceCheckStatus: student.std_text});
             }
 
         }, function(response){
@@ -606,7 +620,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         }
     };
     $scope.startLecture = function () {
-        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "minute" : $scope.selectedTimeMin},
+        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "second" : $scope.selectedTimeMin},
         {
             headers: {
                 'Authorization' : token
@@ -638,21 +652,37 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
             $interval.cancel(timeInterval);
         $scope.realTime = timeset;
         $scope.strColon = " : ";
+        if (timeset<=1){
+            $scope.realTimeMin = 0;
+            $scope.realTimeSec = 0;
+        }
+
+        else{
             timeInterval = $interval(function () {
                 $scope.realTime = $scope.realTime -1;
                 $scope.realTimeMin = parseInt($scope.realTime/60);
                 $scope.realTimeSec = $scope.realTime%60;
 
         }, 1000,[timeset]);
+        }
     };
 
 
     $scope.selectedTime = {
+    0 : {str : "없음", int : 1},
     1 : {str : "1분", int : 60},
     3 : {str : "3분", int : 180},
     5 : {str : "5분", int : 300},
     10 :{str : "10분", int : 600}
     }
+
+
+
+
+
+
+
+
 
 });
 
@@ -667,6 +697,12 @@ function doCheck() {
         PanelStatus : checkCompleteStatus,
         AttendanceCheckStatus : checkCompleteText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"check");
+    };
+
+
 };
 
 function doAbsent() {
@@ -679,6 +715,10 @@ function doAbsent() {
         PanelStatus : absentStatus,
         AttendanceCheckStatus : absentText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"absent");
+    };
 };
 
 function doReasonableAbsent() {
@@ -691,6 +731,10 @@ function doReasonableAbsent() {
         PanelStatus : reasonableAbsentStatus,
         AttendanceCheckStatus : reasonableAbsentText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"reasonableAbsent");
+    };
 };
 
 function doLate() {
@@ -700,19 +744,21 @@ function doLate() {
         ImgSRC: myDataView.get(id).ImgSRC,
         Name:  myDataView.get(id).Name,
         IdNum:  myDataView.get(id).IdNum,
-        PanelStatus : waitStatus,
-        AttendanceCheckStatus : waitText
+        PanelStatus : lateStatus,
+        AttendanceCheckStatus : lateText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"late");
+    };
 };
 
-function onEnterSubmit(sw){
-    if(sw == true){
-        var keyCode = window.event.keyCode;
-        document.getElementById("login-submit").click();
-    }
 
-    else{
-    }
+
+function onEnterSubmit(){
+     var keyCode = window.event.keyCode;
+     document.getElementById("login-submit").click();
+
 }
 function onEnter(){
         if(window.event.keyCode == 13)
@@ -739,3 +785,37 @@ function chulcheckJS() {
         });
     }
 }
+
+
+app.controller('specificControlController', function($scope, $http){
+
+    $scope.ng_doCheck = function (std_id, status_flag) {
+        $http.post('/attendance_check/api/lecture/apply/check/status/', {"std_id": std_id,"lec_id": $scope.seletedLecture,"status_flag": status_flag},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+
+    };
+
+
+    $scope.checkUUIDs = function () {
+        $http.post('/attendance_check/api/lecture/apply/checkUUID/', {},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+    };
+
+
+});

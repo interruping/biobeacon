@@ -106,12 +106,43 @@ function loadDataView(){
                         <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
                     </div>
                     <div class="col-md-2">
-                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable()">
+                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable();">
                     </div>
 
                 </div>
 			{% verbatim %}
-                <div class="well" ng-repeat="lecture in lectures">강좌명 : {{lecture.title}}</div>
+                <div class="well" ng-repeat="lecture in lectures">
+                    강좌명 : {{lecture.title}}  <button type="button" class="btn btn-default" onclick="clickdelete()">삭제</button>
+
+                    <div class="modal fade" id="deleteCheck" role="dialog">
+              <div class="modal-dialog" >
+
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">경고</h4>
+                      </div>
+                      <div class="modal-body">
+                          <p>정말 삭제 하시겠습니까?</p>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="deleteLecture(lecture.id)">네</button>
+                          <button type="submit" class="btn btn-default" data-dismiss="modal">아니요</button>
+                      </div>
+                  </div>
+
+              </div>
+          </div>
+                    <script>
+             function clickdelete(){
+             $("#deleteCheck").css("z-index", "9999");
+            $("#deleteCheck").appendTo("body").modal();
+             }
+
+          </script>
+                </div>
+
                 <hr>
                 <p style="float:right">총 {{lectures.length}}개의 강좌 담당 중</p>
 			{% endverbatim %}
@@ -129,7 +160,7 @@ function loadDataView(){
                 <h4 class="modal-title">생성 실패</h4>
               </div>
               <div class="modal-body">
-                <p>잘못된 입력입니다.</p>
+                <p>이미 개설된 강좌입니다.</p>
               </div>
               <div class="modal-footer">
                   <script>
@@ -162,7 +193,7 @@ function loadDataView(){
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
 
-                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();">
+                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();updateSelectedLecture();">
                             인증시간
                             <select ng-model="selectedTimeMin" style="margin-top:10px">
                                 {% verbatim %}
@@ -171,7 +202,7 @@ function loadDataView(){
                             </select>
                             남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
                             <ul class="navbar-form navbar-right">
-                                <button type="button" class="btn btn-success" tyle="width:100px;margin-top:10px" value="save" ng-click="lectureListSave();">저장</button>
+                                <button type="button" class="btn btn-success" tyle="width:100px;margin-top:10px" value="save" ng-click="save();">저장</button>
                             </ul>
                             <hr>
                         <div class="panel panel-default">
@@ -186,14 +217,14 @@ function loadDataView(){
                                 </select>
                             </div>
                         </div>
-                        <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;" ></div>
-                        <div id="specificControl" class="hidden" ng-controller="specificControlController">
+                        <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;"></div>
+                        <div id="specificControl" class="hidden" ng-app="BioBeaconApp" ng-controller="specificControlController">
                             <div class="popover-heading">수동 출석</div>
                             <div class="popover-body">
-                                <button type="button" class="btn btn-primary" onclick="doCheck()" data-dismiss="modal">출석</button>
-                                <button type="button" class="btn btn-success" onclick="doReasonableAbsent()" data-dismiss="modal">공결</button>
-                                <button type="button" class="btn btn-warning" onclick="doLate()" data-dismiss="modal">지각</button>
-                                <button type="button" class="btn btn-danger" onclick="doAbsent()" data-dismiss="modal">결석</button>
+                                <button type="button" class="btn btn-primary" onclick="doCheck();" data-dismiss="modal">출석</button>
+                                <button type="button" class="btn btn-success" onclick="doReasonableAbsent()" value="reasonableAbsentText" data-dismiss="modal">공결</button>
+                                <button type="button" class="btn btn-warning" onclick="doLate()"  value="lateText" data-dismiss="modal">지각</button>
+                                <button type="button" class="btn btn-danger" onclick="doAbsent()"  value="absentText" data-dismiss="modal">결석</button>
                             </div>
                         </div>
                         <script>
@@ -203,6 +234,7 @@ function loadDataView(){
             $("#logoutCheck").appendTo("body").modal();
         });
     });
+
                         loadDataView();
 
      function onlyNumber(event){
