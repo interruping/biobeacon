@@ -59,6 +59,9 @@ class IdCheckSerializer(serializers.Serializer):
 class IdNumberCheckSerializer(serializers.Serializer):
     organization_id = serializers.IntegerField()
 
+class InfoCheckSerializer(serializers.Serializer):
+    login_username = serializers.CharField(max_length=128)
+
 class LectureCreateUuidSerializer(serializers.Serializer):
     lecture_num = serializers.CharField(max_length=5)
 

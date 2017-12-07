@@ -23,6 +23,7 @@ from .views import (
                     loginView,
                     virtualClassView,
                     RegistrationView,
+                    InfoCheckView,
                     IdCheckView,
                     IdNumberCheckView,
                     LectureCreateView,
@@ -49,6 +50,7 @@ urlpatterns = [
 
 
     url(r'^api/user_register/$', RegistrationView.as_view()),
+    url(r'^api/user_register/info/check/$', InfoCheckView.as_view()),
     url(r'^api/user_register/id/check/$', IdCheckView.as_view()),
     url(r'^api/user_register/id/NumberCheck/$', IdNumberCheckView.as_view()),
     url(r'^api/user_auth/$', obtain_jwt_token),

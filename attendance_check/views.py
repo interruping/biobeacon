@@ -15,6 +15,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureReceiveApplySerializer,
                                            IdNumberCheckSerializer,
                                            IdCheckSerializer,
+                                           InfoCheckSerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
@@ -247,6 +248,37 @@ class IdNumberCheckView(APIView):
 
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class InfoCheckView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+
+        serializer = InfoCheckSerializer(data=request.data)
+
+        if serializer.is_valid():
+            login_username = serializer.validated_data['login_username']
+            user = User.objects.filter(username=login_username).last()
+
+            if user:
+                if user.is_staff:
+                    result = {
+                        "result": 1
+                    }
+                    return Response(result)
+                else:
+                    result = {
+                        "result": 2
+                    }
+                    return Response(result)
+
+            else:
+                return Response({'error': 'user not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 class LectureStartView(APIView):
