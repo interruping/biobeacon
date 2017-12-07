@@ -15,11 +15,18 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.urls import reverse_lazy
+from django.views.generic import RedirectView
+
 from .views import (
                     mainView,
                     loginView,
                     virtualClassView,
                     RegistrationView,
+                    InfoCheckView,
+                    IdCheckView,
+                    IdNumberCheckView,
+                    LectureDeleteView,
                     LectureCreateView,
                     LectureStartView,
                     LectureListView,
@@ -35,17 +42,22 @@ from .views import (
                     LectureStuCheck,
                     LectureListSearch,
                     LectureCheckedSearchView)
+
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 
 urlpatterns = [
-    url(r'^$', mainView, name='main'),
     url(r'^main/$', mainView, name='main'),
     url(r'^login/$', loginView, name='login'),
     # url(r'^main/$', login_view, name='main'),
     url(r'^virtual_class/$', virtualClassView, name='virtual_class'),
+    url(r'^$', RedirectView.as_view(url='attendance_check/main/')),
+
 
     url(r'^api/user_register/$', RegistrationView.as_view()),
+    url(r'^api/user_register/info/check/$', InfoCheckView.as_view()),
+    url(r'^api/user_register/id/check/$', IdCheckView.as_view()),
+    url(r'^api/user_register/id/NumberCheck/$', IdNumberCheckView.as_view()),
     url(r'^api/user_auth/$', obtain_jwt_token),
     url(r'^api/user_auth/refresh/$', refresh_jwt_token),
     url(r'^api/user_auth/verify/$', verify_jwt_token),
@@ -58,6 +70,7 @@ urlpatterns = [
 
     url(r'^api/lecture/list/$', LectureListView.as_view()),
     url(r'^api/lecture/create/$', LectureCreateView.as_view()),
+    url(r'^api/lecture/delete/$', LectureDeleteView.as_view()),
     url(r'^api/lecture/createUuid/$', LectureCreateuuidView.as_view()),
     url(r'^api/lecture/start/$', LectureStartView.as_view()),
     url(r'^api/lecture/check/$', LectureRequestAttendaneCheck.as_view()),

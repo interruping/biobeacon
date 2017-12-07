@@ -1,18 +1,22 @@
 #-*- coding: utf-8 -*-
 from django.shortcuts import render
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.views import Response
 
-
 from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateSerializer,
                                            LectureStartSerializer,
                                            LectureRequestAttendanceCheckSerializer,
                                            LectureReceiveApplySerializer,
+                                           IdNumberCheckSerializer,
+                                           IdCheckSerializer,
+                                           InfoCheckSerializer,
+                                           DeleteLectureSerializer,
                                            LectureListSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
@@ -37,7 +41,10 @@ from .models import ( ProfessorProfile,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-from . import uuidcalc #uuid계산기
+
+from . import uuidcalc
+
+
 import random
 from django.utils import timezone
 import datetime
@@ -104,7 +111,7 @@ class RegistrationView(APIView):
                 profile_img.user = newUser
                 profile_img.save()
 
-            return Response(serializer.validated_data['department'])
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -154,8 +161,22 @@ class LectureCreateView(APIView):
         serializer = LectureCreateSerializer(data=request.data)
 
         if serializer.is_valid():
-            professorProfile = ProfessorProfile.objects.get(user=request.user)
+            lecture = Lecture.objects.filter(title=serializer.validated_data['title'],
+                                             lecture_num=serializer.validated_data['lecture_num'])
 
+            if lecture:
+                lectureL = lecture.reverse()[0]
+                lecturer = ProfessorProfile.objects.get(user=request.user)
+
+                # 강의명, 강의실 번호, 등록자(lecturer) 확인
+                record = Lecture.objects.filter(title=lectureL, lecturer=lecturer)
+                if record:
+                    result = {
+                        'failedModal': True,
+                    }
+                    return Response(result)
+
+            professorProfile = ProfessorProfile.objects.get(user=request.user)
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
                 lecture_num=serializer.validated_data['lecture_num'],
@@ -165,8 +186,8 @@ class LectureCreateView(APIView):
 
             return Response(serializer.data)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -196,6 +217,87 @@ class LectureListView(APIView):
             lectures = { "lectures" : Lecture.objects.values()}
 
             return Response(lectures)
+
+
+class IdCheckView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+
+        serializer = IdCheckSerializer(data=request.data)
+
+        if serializer.is_valid():
+            reg_username = serializer.validated_data['reg_username']
+            user = User.objects.filter(username=reg_username)
+
+            if user.exists():
+                result = {
+                    "result": 1
+                }
+                return Response(result)
+            return Response(user)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IdNumberCheckView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+
+        serializer = IdNumberCheckSerializer(data=request.data)
+
+        if serializer.is_valid():
+            organization_id = serializer.validated_data['organization_id']
+            employee_user = ProfessorProfile.objects.filter(employee_id=organization_id)
+            student_user = StudentProfile.objects.filter(student_id=organization_id)
+
+            if employee_user.exists():
+                result = {
+                    "result": 1
+                }
+                return Response(result)
+            if student_user.exists():
+                result = {
+                    "result": 1
+                }
+                return Response(result)
+            return Response(employee_user)
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class InfoCheckView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+
+        serializer = InfoCheckSerializer(data=request.data)
+
+        if serializer.is_valid():
+            login_username = serializer.validated_data['login_username']
+            user = User.objects.filter(username=login_username).last()
+
+            if user:
+                if user.is_staff:
+                    result = {
+                        "result": 1
+                    }
+                    return Response(result)
+                else:
+                    result = {
+                        "result": 2
+                    }
+                    return Response(result)
+
+            else:
+                return Response({'error': 'user not exist'}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 
@@ -373,6 +475,29 @@ class LectureRecordStatusView(APIView):
             return Response(cards)
         else:
             return Response("Lecture Record Status can read by staff user.", status=status.HTTP_403_FORBIDDEN)
+
+class LectureDeleteView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+
+        serializer = DeleteLectureSerializer(data=request.data)
+
+        if serializer.is_valid():
+            id = serializer.validated_data['id']
+
+            if request.user.is_staff:
+                prof = Lecture.objects.get(pk=id)
+                prof.delete()
+                result = {
+                    "result": 1
+                }
+            return Response(result)
+
+        else:
+            return Response("Lecture Error.", status=status.HTTP_403_FORBIDDEN)
+
 
 
 class LectureReceiveApplyView(APIView):
@@ -580,7 +705,6 @@ class LectureCheckUUID(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 # 출석체크값 저장
 class LectureStuCheck(APIView):
 
@@ -646,7 +770,6 @@ class LectureStuCheck(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class LectureListSearch(APIView):
@@ -921,3 +1044,4 @@ class LectureBeaconCheck(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
+

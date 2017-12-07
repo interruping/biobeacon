@@ -136,17 +136,81 @@ function loadDataViewList(){
                         <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
                     </div>
                     <div class="col-md-2">
-                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable()">
+                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable();">
                     </div>
 
                 </div>
 			{% verbatim %}
-                <div class="well" ng-repeat="lecture in lectures">강좌명 : {{lecture.title}}</div>
+                <div class="well" ng-repeat="lecture in lectures">
+                    강좌명 : {{lecture.title}}  <button type="button" class="btn btn-default" onclick="clickdelete()">삭제</button>
+
+                    <div class="modal fade" id="deleteCheck" role="dialog">
+              <div class="modal-dialog" >
+
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">경고</h4>
+                      </div>
+                      <div class="modal-body">
+                          <p>정말 삭제 하시겠습니까?</p>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="deleteLecture(lecture.id)">네</button>
+                          <button type="submit" class="btn btn-default" data-dismiss="modal">아니요</button>
+                      </div>
+                  </div>
+
+              </div>
+          </div>
+                    <script>
+             function clickdelete(){
+             $("#deleteCheck").css("z-index", "9999");
+            $("#deleteCheck").appendTo("body").modal();
+             }
+
+          </script>
+                </div>
+
                 <hr>
                 <p style="float:right">총 {{lectures.length}}개의 강좌 담당 중</p>
 			{% endverbatim %}
 			</div>
 		</div>
+
+        <!-- Modal -->
+        <div id="lecture-failed-modal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">생성 실패</h4>
+              </div>
+              <div class="modal-body">
+                <p>이미 개설된 강좌입니다.</p>
+              </div>
+              <div class="modal-footer">
+                  <script>
+                      function transToLogin() {
+
+                        $("#login-form").delay(100).fadeIn(100);
+ 		                $("#register-form").fadeOut(100);
+		                $('#register-form-link').removeClass('active');
+		                $(this).addClass('active');
+
+                      }
+
+                  </script>
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="transToLogin()">확인</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
 	</div>
 	<div id="attendance_check" class="tab-pane fade" ng-controller="LectureAttendanceCheckController" ng-init="loadLectureList()">
         <div class="panel panel-default">
@@ -200,6 +264,7 @@ function loadDataViewList(){
             $("#logoutCheck").appendTo("body").modal();
         });
     });
+
                         loadDataView();
                         loadDataViewList();
 
@@ -314,3 +379,16 @@ function loadDataViewList(){
 </div>
 
 <script>chulcheckJS();</script>
+
+
+ <script>
+
+    $(document).ready(function() {
+
+        window.document.onkeydown = function () {
+             if(event.keyCode==13)
+                onEnterSubmit(false);
+        }
+
+    });
+</script>
