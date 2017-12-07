@@ -3,6 +3,7 @@
 
 
 var myDataView;
+var myDataViewList;
 
 function loadDataView(){
 
@@ -29,9 +30,37 @@ function loadDataView(){
 					height:280,
 					width:150
 				}
+
 			});
+}
+
+function loadDataViewList(){
+
+    myDataViewList = new dhtmlXDataView({
+				container:"data_container_list",
+				type:{
+					template
+					:
+
+					"<div class='panel panel-#PanelStatus#' style='width:130px'>" +
+					    "<div class='panel-heading' style='text-align: center'>#AttendanceCheckStatus#</div>" +
+					    "<div class='panel-body'>" +
+					        "<img src='#ImgSRC#' style='width:100px;height:100px'>" +
+					    "</div>" +
+					    "<div class='panel-footer' style='text-align: center'>"+
+					    "#Name# <br>" +
+					    "<div id='specificControl_list_#id#' data-toggle='popover' data-popover-content='#specificControl_list'></div>" +
+					    "#IdNum#" +
+					    "</div>" +
+					"</div>"
 
 
+					,
+					height:280,
+					width:150
+				}
+
+			});
 }
 
 </script>
@@ -43,6 +72,7 @@ function loadDataView(){
     <ul class="nav navbar-nav">
       <li onclick="activeMyInfo()" class="active"><a data-toggle="tab" href="#myinfo" id="chul1">내 정보</a></li>
       <li onclick="activeChulCheck()"><a data-toggle="tab" href="#attendance_check" id="chul2">출석체크</a></li>
+      <li onclick="activeChulCheckList()"><a data-toggle="tab" href="#attendance_check_list" id="chul3">강의기록</a></li>
     </ul>
       <ul class="navbar-form navbar-right" ng-controller="LogoutController">
           <!--    <input name="logout" class="form-control btn btn-login" tabindex="4" value="로그아웃" ng-click="doLogout()" onclick="void()"> -->
@@ -193,7 +223,7 @@ function loadDataView(){
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
 
-                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();updateSelectedLecture();">
+                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();">
                             인증시간
                             <select ng-model="selectedTimeMin" style="margin-top:10px">
                                 {% verbatim %}
@@ -222,9 +252,9 @@ function loadDataView(){
                             <div class="popover-heading">수동 출석</div>
                             <div class="popover-body">
                                 <button type="button" class="btn btn-primary" onclick="doCheck();" data-dismiss="modal">출석</button>
-                                <button type="button" class="btn btn-success" onclick="doReasonableAbsent()" value="reasonableAbsentText" data-dismiss="modal">공결</button>
-                                <button type="button" class="btn btn-warning" onclick="doLate()"  value="lateText" data-dismiss="modal">지각</button>
-                                <button type="button" class="btn btn-danger" onclick="doAbsent()"  value="absentText" data-dismiss="modal">결석</button>
+                                <button type="button" class="btn btn-success" onclick="doReasonableAbsent()" data-dismiss="modal">공결</button>
+                                <button type="button" class="btn btn-warning" onclick="doLate()" data-dismiss="modal">지각</button>
+                                <button type="button" class="btn btn-danger" onclick="doAbsent()" data-dismiss="modal">결석</button>
                             </div>
                         </div>
                         <script>
@@ -236,6 +266,7 @@ function loadDataView(){
     });
 
                         loadDataView();
+                        loadDataViewList();
 
      function onlyNumber(event){
 			event = event || window.event;
@@ -280,6 +311,66 @@ function loadDataView(){
 
 
                         </script>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <-- 강좌 기록 -->
+    <div id="attendance_check_list" class="tab-pane fade" ng-controller="LectureAttendanceCheckController_list" ng-init="loadLectureList()">
+        <div class="panel panel-default">
+            <div class="panel-heading">강좌선택</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLectureTitle()">
+                        <option ng-selected="selected" value="0">강좌를 선택하여 주세요</option>
+                        {% verbatim %}
+                        <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
+                        {% endverbatim %}
+                        <input type="button" class="btn btn-success" style="margin-top:10px" value="저장" ng-click="save();">
+                            <!--인증시간
+                            <select ng-model="selectedTimeMin" style="margin-top:10px">
+                                {% verbatim %}
+                                <option ng-repeat="x in selectedTime" value="{{x.int}}"> {{x.str}} </option>
+                                {% endverbatim %}
+                            </select>-->
+                        <ul class="navbar-form navbar-right">
+                        <select ng-model="seletedLectureTime" style="margin-top:10px" ng-change="checkedListView()">
+                            {% verbatim %}
+                            <option ng-repeat="timeLecture in timeLectures" value="{{timeLecture.id}}">[{{timeLecture.date}}] ({{timeLecture.num}}회)</option>
+                            {% endverbatim %}
+                        </select>
+                        </ul>
+                            <!--남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
+                            <ul class="navbar-form navbar-right">
+                                <button type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="save" ng-click="save();">저장</button>
+                            </ul>-->
+                            <hr>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">일괄 출석</div>
+                            <div id="entire_controll_panel_list" class="panel-body">
+                                <select ng-model="select_entire_control" ng-disabled="seletedLecture == '0'" style="height:25px; width:100%;" ng-change="updateEntireControl()">
+                                    <option value="0" ng-selected="selected" >선택하세요</option>
+                                    <option value="1" >전체 결석</option>
+                                    <option value="2" >전체 지각</option>
+                                    <option value="3" >전체 공결</option>
+                                    <option value="4" >전체 출석</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="data_container_list" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;"></div>
+                        <div id="specificControl_list" class="hidden" ng-app="BioBeaconApp" ng-controller="specificControlController_list">
+                            <div class="popover-heading">수동 출석</div>
+                            <div class="popover-body">
+                                <button type="button" class="btn btn-primary" onclick="doCheckList();" data-dismiss="modal">출석</button>
+                                <button type="button" class="btn btn-success" onclick="doReasonableAbsentList()" data-dismiss="modal">공결</button>
+                                <button type="button" class="btn btn-warning" onclick="doLateList()" data-dismiss="modal">지각</button>
+                                <button type="button" class="btn btn-danger" onclick="doAbsentList()" data-dismiss="modal">결석</button>
+                            </div>
+                        </div>
+
                     </select>
                 </div>
             </div>

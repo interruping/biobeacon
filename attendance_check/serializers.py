@@ -85,5 +85,15 @@ class LectureCheckSerializer(serializers.Serializer):
     std_id = serializers.IntegerField()
     lec_id = serializers.IntegerField()
 
+
+class LectureCheckedListViewSerializer(serializers.Serializer):
+    lecture = serializers.IntegerField()
+    time = serializers.CharField(max_length=17)
+
+class LectureBeaconCheckSerializer(serializers.Serializer):
+    lecture = serializers.IntegerField()
+    time = serializers.CharField(max_length=17)
+
 class DeleteLectureSerializer(serializers.Serializer):
     id = serializers.CharField()
+

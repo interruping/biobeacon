@@ -23,6 +23,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateUuidSerializer,
                                            LectureUuidSerializer,
                                            LectureCheckSerializer,
+                                           LectureCheckedListViewSerializer,
                                            )
 
 from django.utils import timezone
@@ -563,7 +564,7 @@ class LectureReceiveApplyListView(APIView):
                 for card in cards:
                     std_text = ''
                     try :
-                        std_card = AttendanceCard.objects.get(checker = card.card_owner, check_start_time=check_start_time)
+                        std_card = AttendanceCard.objects.get(checker = card.card_owner, record_to=selectLecture.last())
                     except:
                         std_text = "출석대기 중"
                         std_status = 'default'
@@ -713,10 +714,9 @@ class LectureStuCheck(APIView):
     def post(self, request):
         if not request.user.is_staff:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        print (request.data)
+
         serializer = LectureCheckSerializer(data=request.data)
         if serializer.is_valid():
-
             stu_num = StudentProfile.objects.get(pk = serializer.validated_data['std_id'])#체크한 학번
             lecture = Lecture.objects.get(pk = serializer.validated_data['lec_id'])#선택강의
 
@@ -728,7 +728,7 @@ class LectureStuCheck(APIView):
             if attendanceRecord:
                 #학생의 출석카드가 만들어진 경우 ex)출석 대기상태가 아닌 결석,지각,공결 등의 상태일경우 해당
                 if AttendanceCard.objects.filter(checker = stu_num, check_start_time = attendanceRecord.start_time):
-                    attendanceCard = AttendanceCard.objects.filter(checker = stu_num, check_start_time = attendanceRecord.start_time).last()
+                    attendanceCard = AttendanceCard.objects.get(checker = stu_num, record_to = attendanceRecord)
 
                 #학생의 출석체크가 이루어지지 않은 출석 대기상태
                 else:
@@ -739,7 +739,7 @@ class LectureStuCheck(APIView):
                         check_start_time = attendanceRecord.start_time,
                     )
                     createCard.save()
-                    attendanceCard = AttendanceCard.objects.filter(checker=stu_num,check_start_time=attendanceRecord.start_time).last()
+                    attendanceCard = AttendanceCard.objects.get(checker=stu_num, record_to = attendanceRecord)
 
                 #출석
                 if serializer.validated_data['status_flag']=='check':
@@ -771,4 +771,277 @@ class LectureStuCheck(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class LectureListSearch(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if request.user.is_staff:
+            serializer = LectureReceiveApplySerializer(data = request.data)
+            if serializer.is_valid():
+                lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
+                cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
+
+                ######
+                # 해당 강의의 활성화 여부 찾기
+                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                # 해당 강의의 활성화유무 판단 활성화되면
+                if record:
+                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                    if (record.end_time < timezone.now()):
+                        record.activate = False
+                        record.save()
+                ######
+
+                #활성 강의 남은시간 계산
+                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                wait_time = 1
+                if activate_lec_card:
+                    lec_card = activate_lec_card.last()
+                    wait_time = (lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().minute*60+timezone.now().second)
+                    if wait_time<0:
+                        wait_time = 1
+
+
+                #db에서 학생 출결상태 출력
+                student_infos = []
+                selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
+                check_start_time = ''
+                if selectLecture:
+                    check_start_time = selectLecture.last().start_time
+                for card in cards:
+                    std_text = ''
+                    try :
+                        std_card = AttendanceCard.objects.get(checker = card.card_owner, check_start_time=check_start_time)
+                    except:
+                        std_text = "출석대기 중"
+                        std_status = 'default'
+
+                    if std_text == '':
+                        if std_card.is_reasonableabsent_checker == True:
+                            std_text = '공결'
+                            std_status = 'success'
+
+                        elif std_card.is_late_checker == True:
+                            std_text = '지각'
+                            std_status = 'warning'
+
+                        elif std_card.is_absent_checker == True:
+                            std_text = '결석'
+                            std_status = 'danger'
+
+                        else:
+                            std_text = '출석'
+                            std_status = 'primary'
+
+                    student_info = {
+                        "student_id" : card.card_owner.student_id,
+                        "id" : card.card_owner.pk,
+                        "name" : card.card_owner.user.username,
+                        "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
+                        "std_text": (std_text.decode('utf-8')),
+                        "std_status":(std_status)
+                    }
+                    student_infos.append(student_info)
+                #강의 날짜별로 정리
+                if selectLecture:
+                    lecturesTime = []
+                    num = 1
+                    for lecture in selectLecture:
+                        lecturesTime.append({
+                                "date": (str)(lecture.start_time)[0:16],
+                                "id": lecture.pk,
+                                "num": num
+                            })
+
+                        num+=1
+
+
+
+                # 결과값
+                result = {
+                    "wait_time" : wait_time,
+                    "students" : student_infos,
+                    "lecturesTime": lecturesTime
+                }
+                return Response(result)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
+
+
+
+class LectureCheckedSearchView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if request.user.is_staff:
+            serializer = LectureCheckedListViewSerializer(data = request.data)
+            if serializer.is_valid():
+                lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
+                cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
+
+                ######
+                # 해당 강의의 활성화 여부 찾기
+                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                # 해당 강의의 활성화유무 판단 활성화되면
+                if record:
+                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                    if (record.end_time < timezone.now()):
+                        record.activate = False
+                        record.save()
+                ######
+
+                #활성 강의 남은시간 계산
+                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                wait_time = 1
+                if activate_lec_card:
+                    lec_card = activate_lec_card.last()
+                    wait_time = (lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().minute*60+timezone.now().second)
+                    if wait_time<0:
+                        wait_time = 1
+
+
+                #db에서 학생 출결상태 출력
+                student_infos = []
+                selectLecture = AttendanceRecord.objects.get(pk=serializer.validated_data['time'])
+                for card in cards:
+                    std_text = ''
+                    try :
+                        std_card = AttendanceCard.objects.get(checker = card.card_owner, record_to=selectLecture)
+                    except:
+                        std_text = "결석"
+                        std_status = 'danger'
+
+                    if std_text == '':
+                        if std_card.is_reasonableabsent_checker == True:
+                            std_text = '공결'
+                            std_status = 'success'
+
+                        elif std_card.is_late_checker == True:
+                            std_text = '지각'
+                            std_status = 'warning'
+
+                        elif std_card.is_absent_checker == True:
+                            std_text = '결석'
+                            std_status = 'danger'
+
+                        else:
+                            std_text = '출석'
+                            std_status = 'primary'
+
+                    student_info = {
+                        "student_id" : card.card_owner.student_id,
+                        "id" : card.card_owner.pk,
+                        "name" : card.card_owner.user.username,
+                        "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
+                        "std_text": (std_text.decode('utf-8')),
+                        "std_status":(std_status)
+                    }
+                    student_infos.append(student_info)
+
+
+
+                # 결과값
+                result = {
+                    "wait_time" : wait_time,
+                    "students" : student_infos
+                }
+                return Response(result)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
+
+
+
+
+class LectureBeaconCheck(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if request.user:
+            serializer = LectureCheckedListViewSerializer(data = request.data)
+            if serializer.is_valid():
+                lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
+                cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
+
+                ######
+                # 해당 강의의 활성화 여부 찾기
+                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                # 해당 강의의 활성화유무 판단 활성화되면
+                if record:
+                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                    if (record.end_time < timezone.now()):
+                        record.activate = False
+                        record.save()
+                ######
+
+                #활성 강의 남은시간 계산
+                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+                wait_time = 1
+                if activate_lec_card:
+                    lec_card = activate_lec_card.last()
+                    wait_time = (lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().minute*60+timezone.now().second)
+                    if wait_time<0:
+                        wait_time = 1
+
+
+                #db에서 학생 출결상태 출력
+                student_infos = []
+                selectLecture = AttendanceRecord.objects.get(pk=serializer.validated_data['time'])
+                for card in cards:
+                    std_text = ''
+                    try :
+                        std_card = AttendanceCard.objects.get(checker = card.card_owner, record_to=selectLecture)
+                    except:
+                        std_text = "결석"
+                        std_status = 'danger'
+
+                    if std_text == '':
+                        if std_card.is_reasonableabsent_checker == True:
+                            std_text = '공결'
+                            std_status = 'success'
+
+                        elif std_card.is_late_checker == True:
+                            std_text = '지각'
+                            std_status = 'warning'
+
+                        elif std_card.is_absent_checker == True:
+                            std_text = '결석'
+                            std_status = 'danger'
+
+                        else:
+                            std_text = '출석'
+                            std_status = 'primary'
+
+                    student_info = {
+                        "student_id" : card.card_owner.student_id,
+                        "id" : card.card_owner.pk,
+                        "name" : card.card_owner.user.username,
+                        "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
+                        "std_text": (std_text.decode('utf-8')),
+                        "std_status":(std_status)
+                    }
+                    student_infos.append(student_info)
+
+
+
+                # 결과값
+                result = {
+                    "wait_time" : wait_time,
+                    "students" : student_infos
+                }
+                return Response(result)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
 
