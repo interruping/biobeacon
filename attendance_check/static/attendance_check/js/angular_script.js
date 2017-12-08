@@ -79,7 +79,33 @@ app.controller('LoginController', function($scope, $http){
           $('#checkbox1').checked = false;
          }
 
+$scope.doInfoCheck = function(){
+var login_error;
+ var userIdData ={
+            "login_username" : $scope.login_username
+            };
+
+            $http.post("/attendance_check/api/user_register/info/check/", userIdData)
+        .then(function(response){
+        //success
+             if(response.data.result ==1){
+                    $scope.doLogin();
+
+             } else{
+                   login_error = "학생은 로그인이 불가합니다. 어플리케이션을 이용해주세요";
+                   $("#no_login").html(login_error);
+                   $("#login_error").appendTo('body').modal();
+                }
+        }, function(response){
+            login_error = "회원이 아닙니다. 회원신청 바랍니다.";
+            $("#no_login").html(login_error);
+            $("#login_error").appendTo('body').modal();
+            });
+  };
+
     $scope.doLogin = function(){
+
+
 
         var userAuthData = {
             "username": $scope.login_username,
@@ -116,22 +142,21 @@ app.controller('LoginController', function($scope, $http){
        }
 
 
-        $http.post("/attendance_check/api/user_auth/", userAuthData)
-        .then(function(response){
-        //success
-            token = "JWT " + response.data.token;
-            $scope.completeLogin();
-            $scope.login_username = "";
-            $scope.login_password = "";
-            localStorage.setItem('storedUserAuthData',token);
+                  $http.post("/attendance_check/api/user_auth/", userAuthData)
+                  .then(function(response){
+                   //success
+                   token = "JWT " + response.data.token;
+                   $scope.completeLogin();
+                   $scope.login_username = "";
+                   $scope.login_password = "";
+                   localStorage.setItem('storedUserAuthData',token);
 
-        }, function (response){
-        //error
-            $("#registration-failed-modal").appendTo("body").modal();
-        });
+                    }, function (response){
+                   //error
+                 $("#registration-failed-modal").appendTo("body").modal();
+                  });
 
     };
-
     $scope.checked_storage = function(state){
          if(state == true){
              localStorage.setItem('check','true');
@@ -471,7 +496,6 @@ app.controller('LectureController', function($scope, $http){
     };
 });
 
-
 var waitStatus = "default";
 var absentStatus = "danger";
 var lateStatus = "warning";
@@ -554,8 +578,8 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
                 ImgSRC: student.profile_image,
                 Name: student.name,
                 IdNum: student.student_id,
-                PanelStatus: waitStatus,
-                AttendanceCheckStatus: waitText });
+                PanelStatus: student.std_status,
+                AttendanceCheckStatus: student.std_text});
             }
 
         }, function(response){
@@ -623,14 +647,14 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         }
     };
     $scope.startLecture = function () {
-        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "minute" : $scope.selectedTimeMin},
+        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "second" : $scope.selectedTimeMin},
         {
             headers: {
                 'Authorization' : token
             }
 
         }).then(function(response){
-
+            $scope.updateSelectedLecture()
         },function(response){
         });
     };
@@ -645,6 +669,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         }).then(function(response){
 
         }, function (response){
+
         });
     };
 
@@ -655,21 +680,37 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
             $interval.cancel(timeInterval);
         $scope.realTime = timeset;
         $scope.strColon = " : ";
+        if (timeset<=1){
+            $scope.realTimeMin = 0;
+            $scope.realTimeSec = 0;
+        }
+
+        else{
             timeInterval = $interval(function () {
                 $scope.realTime = $scope.realTime -1;
                 $scope.realTimeMin = parseInt($scope.realTime/60);
                 $scope.realTimeSec = $scope.realTime%60;
 
         }, 1000,[timeset]);
+        }
     };
 
 
     $scope.selectedTime = {
+    0 : {str : "없음", int : 1},
     1 : {str : "1분", int : 60},
-    3 : {str : "3분", int : 180},
-    5 : {str : "5분", int : 300},
-    10 :{str : "10분", int : 600}
+    2 : {str : "3분", int : 180},
+    3 : {str : "5분", int : 300},
+    4 :{str : "10분", int : 600}
     }
+
+
+
+
+
+
+
+
 
 });
 
@@ -684,6 +725,12 @@ function doCheck() {
         PanelStatus : checkCompleteStatus,
         AttendanceCheckStatus : checkCompleteText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"check");
+    };
+
+
 };
 
 function doAbsent() {
@@ -696,6 +743,10 @@ function doAbsent() {
         PanelStatus : absentStatus,
         AttendanceCheckStatus : absentText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"absent");
+    };
 };
 
 function doReasonableAbsent() {
@@ -708,6 +759,10 @@ function doReasonableAbsent() {
         PanelStatus : reasonableAbsentStatus,
         AttendanceCheckStatus : reasonableAbsentText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"reasonableAbsent");
+    };
 };
 
 function doLate() {
@@ -717,19 +772,25 @@ function doLate() {
         ImgSRC: myDataView.get(id).ImgSRC,
         Name:  myDataView.get(id).Name,
         IdNum:  myDataView.get(id).IdNum,
-        PanelStatus : waitStatus,
-        AttendanceCheckStatus : waitText
+        PanelStatus : lateStatus,
+        AttendanceCheckStatus : lateText
     });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"late");
+    };
 };
 
-function onEnterSubmit(sw){
-    if(sw == true){
-        var keyCode = window.event.keyCode;
-        document.getElementById("login-submit").click();
-    }
 
-    else{
-    }
+
+function onEnterSubmit(){
+     var keyCode = window.event.keyCode;
+     document.getElementById("login-submit").click();
+
+}
+function onEnter(){
+        if(window.event.keyCode == 13)
+        document.getElementById("login-submit").click();
 }
 
 function activeMyInfo() {
@@ -738,6 +799,10 @@ function activeMyInfo() {
 function activeChulCheck() {
     localStorage.setItem('chulCheckActived',"20132307");
 }
+function activeChulCheckList() {
+    localStorage.setItem('chulCheckActived',"20132309");
+}
+
 function chulcheckJS() {
     const chulCheckInfo = localStorage.getItem('chulCheckActived');
 
@@ -751,4 +816,368 @@ function chulcheckJS() {
             $('#chul1').tab('show');
         });
     }
+        else if (myInfoInfo == "20132309") {
+        $(document).ready(function(){
+            $('#chul3').tab('show');
+        });
+    }
 }
+
+
+app.controller('specificControlController', function($scope, $http){
+
+    $scope.ng_doCheck = function (std_id, status_flag) {
+        $http.post('/attendance_check/api/lecture/apply/check/status/', {"std_id": std_id,"lec_id": $scope.seletedLecture,"status_flag": status_flag},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+
+    };
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*****************************************************************************************/
+/******************************강의기록 페이지 ***********************************************/
+
+
+app.controller('LectureAttendanceCheckController_list', function($scope, $http, $interval){
+    $scope.select_entire_control = "0";
+    $scope.seletedLecture = "0";
+
+    currentSpecificControl = 0;
+    myDataViewList.attachEvent("onMouseMove", function (id, ev, html){
+
+        if ( currentSpecificControl != id ){
+            $('#specificControl_list_'+ currentSpecificControl).popover('hide');
+            currentSpecificControl = id;
+
+        }
+
+        myDataViewList.unselectAll();
+
+        $('#specificControl_list_'+ id).popover({
+        html : true,
+        content: function() {
+          var content = $(this).attr("data-popover-content");
+          return $(content).children(".popover-body").html();
+        },
+        title: function() {
+          var title = $(this).attr("data-popover-content");
+          return $(title).children(".popover-heading").html();
+        }});
+        $('#specificControl_list_'+ id).popover('show');
+        // your code here
+        return true;
+    });
+
+
+
+     $scope.loadLectureList = function () {
+        $http.get('/attendance_check/api/lecture/list/', {
+            headers: {
+                'Authorization' : token
+            }
+        }).then(function(response){
+            lecture_list = response.data.lectures;
+            $scope.lectures = [];
+            for ( index in lecture_list ) {
+                $scope.lectures.push(lecture_list[index]);
+            }
+
+        }, function (response){
+        });
+    };
+
+
+    $scope.updateSelectedLectureTitle = function () {
+        $http.post('/attendance_check/api/lecture/list/search/', {"lecture": $scope.seletedLecture},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+            $scope.realTimeReset(response.data.wait_time);
+            myDataViewList.clearAll();
+            var students = response.data.students;
+
+            for ( index in students ) {
+                student = students[index];
+                myDataViewList
+                .add({id: student.id,
+                ImgSRC: student.profile_image,
+                Name: student.name,
+                IdNum: student.student_id,
+                PanelStatus: student.std_status,
+                AttendanceCheckStatus: student.std_text});
+            }
+
+            lecturesTime = response.data.lecturesTime;
+            $scope.timeLectures = [];
+            for ( index in lecturesTime){
+                {
+                    $scope.timeLectures.push(lecturesTime[index]);
+                }
+
+            }
+         });
+
+
+
+    };
+
+
+    $scope.checkedListView = function () {
+        $http.post('/attendance_check/api/lecture/list/checked/view/', {"lecture": $scope.seletedLecture, "time": $scope.seletedLectureTime},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+            $scope.realTimeReset(response.data.wait_time);
+            myDataViewList.clearAll();
+            var students = response.data.students;
+
+            for ( index in students ) {
+                student = students[index];
+                myDataViewList
+                .add({id: student.id,
+                ImgSRC: student.profile_image,
+                Name: student.name,
+                IdNum: student.student_id,
+                PanelStatus: student.std_status,
+                AttendanceCheckStatus: student.std_text});
+            }
+        }, function(response){
+       });
+    };
+
+
+
+    $scope.updateEntireControl = function() {
+        var count = myDataViewList.dataCount();
+
+        for ( var index = 0; index < count; index++ ) {
+            var id = myDataViewList.idByIndex(index);
+
+            var value = Number($scope.select_entire_control);
+
+            switch ( value ) {
+            case 0:
+                break;
+            case 1:
+                myDataViewList.set(id, {
+                    id: id,
+                    ImgSRC: myDataViewList.get(id).ImgSRC,
+                    Name:  myDataViewList.get(id).Name,
+                    IdNum:  myDataViewList.get(id).IdNum,
+                    PanelStatus : absentStatus,
+                    AttendanceCheckStatus : absentText
+                });
+                break;
+            case 2:
+                myDataViewList.set(id, {
+                    id: id,
+                    ImgSRC: myDataViewList.get(id).ImgSRC,
+                    Name:  myDataViewList.get(id).Name,
+                    IdNum:  myDataViewList.get(id).IdNum,
+                    PanelStatus : lateStatus,
+                    AttendanceCheckStatus : lateText
+                });
+                break;
+            case 3:
+                myDataViewList.set(id, {
+                    id: id,
+                    ImgSRC: myDataViewList.get(id).ImgSRC,
+                    Name:  myDataViewList.get(id).Name,
+                    IdNum:  myDataViewList.get(id).IdNum,
+                    PanelStatus : reasonableAbsentStatus,
+                    AttendanceCheckStatus : reasonableAbsentText
+                });
+                break;
+            case 4:
+                myDataViewList.set(id, {
+                    id: id,
+                    ImgSRC: myDataViewList.get(id).ImgSRC,
+                    Name:  myDataViewList.get(id).Name,
+                    IdNum:  myDataViewList.get(id).IdNum,
+                    PanelStatus : checkCompleteStatus,
+                    AttendanceCheckStatus : checkCompleteText
+                    });
+                break;
+
+            }
+
+
+        }
+    };
+    $scope.startLecture = function () {
+        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "second" : $scope.selectedTimeMin},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+            $scope.updateSelectedLectureTitle()
+        },function(response){
+        });
+    };
+
+    $scope.checkUUID = function () {
+        $http.post('/attendance_check/api/lecture/apply/checkUUID/', {"id": $scope.seletedLecture},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+
+        });
+    };
+
+
+    var timeInterval;
+    $scope.realTimeReset = function (timeset) {
+        if ($scope.realTime=!null)
+            $interval.cancel(timeInterval);
+        $scope.realTime = timeset;
+        $scope.strColon = " : ";
+        if (timeset<=1){
+            $scope.realTimeMin = 0;
+            $scope.realTimeSec = 0;
+        }
+
+        else{
+            timeInterval = $interval(function () {
+                $scope.realTime = $scope.realTime -1;
+                $scope.realTimeMin = parseInt($scope.realTime/60);
+                $scope.realTimeSec = $scope.realTime%60;
+
+        }, 1000,[timeset]);
+        }
+    };
+
+
+    $scope.selectedTime = {
+    0 : {str : "없음", int : 1},
+    1 : {str : "1분", int : 60},
+    3 : {str : "3분", int : 180},
+    5 : {str : "5분", int : 300},
+    10 :{str : "10분", int : 600}
+    }
+
+});
+
+
+app.controller('specificControlController_list', function($scope, $http){
+
+    $scope.ng_doCheck = function (std_id, status_flag) {
+        $http.post('/attendance_check/api/lecture/apply/check/status/', {"std_id": std_id,"lec_id": $scope.seletedLecture,"status_flag": status_flag},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+
+        }, function (response){
+        });
+
+    };
+
+
+});
+
+
+
+function doCheckList() {
+    var id = currentSpecificControl;
+    myDataViewList.set(id, {
+        id: id,
+        ImgSRC: myDataViewList.get(id).ImgSRC,
+        Name:  myDataViewList.get(id).Name,
+        IdNum:  myDataViewList.get(id).IdNum,
+        PanelStatus : checkCompleteStatus,
+        AttendanceCheckStatus : checkCompleteText
+    });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"check");
+    };
+
+
+};
+
+function doAbsentList() {
+    var id = currentSpecificControl;
+    myDataViewList.set(id, {
+        id: id,
+        ImgSRC: myDataViewList.get(id).ImgSRC,
+        Name:  myDataViewList.get(id).Name,
+        IdNum:  myDataViewList.get(id).IdNum,
+        PanelStatus : absentStatus,
+        AttendanceCheckStatus : absentText
+    });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"absent");
+    };
+};
+
+function doReasonableAbsentList() {
+    var id = currentSpecificControl;
+    myDataViewList.set(id, {
+        id: id,
+        ImgSRC: myDataViewList.get(id).ImgSRC,
+        Name:  myDataViewList.get(id).Name,
+        IdNum:  myDataViewList.get(id).IdNum,
+        PanelStatus : reasonableAbsentStatus,
+        AttendanceCheckStatus : reasonableAbsentText
+    });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"reasonableAbsent");
+    };
+};
+
+function doLateList() {
+    var id = currentSpecificControl;
+    myDataViewList.set(id, {
+        id: id,
+        ImgSRC: myDataViewList.get(id).ImgSRC,
+        Name:  myDataViewList.get(id).Name,
+        IdNum:  myDataViewList.get(id).IdNum,
+        PanelStatus : lateStatus,
+        AttendanceCheckStatus : lateText
+    });
+
+    {
+    angular.element(document.getElementById('specificControl')).scope().ng_doCheck(currentSpecificControl,"late");
+    };
+};

@@ -58,13 +58,16 @@ class IdCheckSerializer(serializers.Serializer):
 class IdNumberCheckSerializer(serializers.Serializer):
     organization_id = serializers.IntegerField()
 
+class InfoCheckSerializer(serializers.Serializer):
+    login_username = serializers.CharField(max_length=128)
+
 class LectureCreateUuidSerializer(serializers.Serializer):
     lecture_num = serializers.CharField(max_length=5)
 
 
 class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    minute = serializers.IntegerField()
+    second = serializers.IntegerField()
 
 class LectureUuidSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -76,8 +79,25 @@ class LectureRequestAttendanceCheckSerializer(serializers.Serializer):
 class LectureReceiveApplySerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
 
+
+class LectureCheckSerializer(serializers.Serializer):
+    status_flag = serializers.CharField(max_length=18)
+    std_id = serializers.IntegerField()
+    lec_id = serializers.IntegerField()
+
+
+class LectureCheckedListViewSerializer(serializers.Serializer):
+    lecture = serializers.IntegerField()
+    time = serializers.CharField(max_length=17)
+
+class LectureBeaconCheckSerializer(serializers.Serializer):
+    lecture = serializers.IntegerField()
+    time = serializers.CharField(max_length=17)
+
 class DeleteLectureSerializer(serializers.Serializer):
     id = serializers.CharField()
 
+
 class ProfileTimeSetSerializer(serializers.Serializer):
     time_set = serializers.CharField()
+
