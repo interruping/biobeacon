@@ -25,13 +25,14 @@ app.controller('SaveLectureTime', function($scope, $http){
 
                 if(response.data.result == 1)
                     alert('변경되었습니다.');
-                    window.location.reload();
+                    $scope.loadProfile();
 
             },function(){
 
             })
 
     }
+
 });
 
 
@@ -406,7 +407,6 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
 }]);
 
 app.controller('ProfileController', function($scope, $http){
-
 
 
     $scope.loadProfile = function () {
@@ -816,7 +816,7 @@ function chulcheckJS() {
             $('#chul1').tab('show');
         });
     }
-        else if (myInfoInfo == "20132309") {
+    else if(chulCheckInfo == "20132309") {
         $(document).ready(function(){
             $('#chul3').tab('show');
         });
