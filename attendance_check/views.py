@@ -187,7 +187,11 @@ class LectureCreateView(APIView):
             lec.save()
 
             return Response(serializer.data)
-
+        else:
+            result = {
+            "result" : 1
+            }
+            return Response(result)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

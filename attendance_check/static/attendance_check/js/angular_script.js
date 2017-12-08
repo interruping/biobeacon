@@ -471,6 +471,9 @@ app.controller('LectureController', function($scope, $http){
             }
 
         }).then(function(response){
+            if(response.data.result == 1){
+            alert("잘못된 입력입니다.");
+            }
             $scope.loadLectureList();
 
             var checkCompare = response.data.failedModal
