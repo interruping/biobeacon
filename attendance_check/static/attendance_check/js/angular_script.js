@@ -914,6 +914,19 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
             for ( index in students ) {
                 student = students[index];
+
+                if (student.std_status=='default'){
+                myDataViewList
+                .add({id: student.id,
+                ImgSRC: student.profile_image,
+                Name: student.name,
+                IdNum: student.student_id,
+                PanelStatus: absentStatus,
+                AttendanceCheckStatus: absentText});
+                }
+
+
+                else{
                 myDataViewList
                 .add({id: student.id,
                 ImgSRC: student.profile_image,
@@ -921,6 +934,7 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
                 IdNum: student.student_id,
                 PanelStatus: student.std_status,
                 AttendanceCheckStatus: student.std_text});
+                }
             }
 
             lecturesTime = response.data.lecturesTime;
