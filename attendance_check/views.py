@@ -612,3 +612,22 @@ class LectureCheckUUID(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LectureAvailableList(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+
+        std = StudentProfile.objects.get(user=request.user)
+        availableList = LectureReceiveCard.objects.filter(card_owner=std)
+
+        results = []
+        for list in availableList:
+            result = {
+                "lecture":list.target_lecture.title,
+                "pk": list.pk,
+            }
+            results.append(result)
+
+        return Response({"result": results})
