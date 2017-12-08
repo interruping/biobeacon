@@ -23,8 +23,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateUuidSerializer,
                                            LectureUuidSerializer,
                                            LectureCheckSerializer,
-                                           LectureCheckedListViewSerializer,
-                                           )
+                                           LectureCheckedListViewSerializer)
 
 from django.utils import timezone
 from .models import ( ProfessorProfile,
@@ -261,7 +260,7 @@ class IdNumberCheckView(APIView):
                 return Response(result)
             if student_user.exists():
                 result = {
-                    "result": 1
+                    "result": 2
                 }
                 return Response(result)
             return Response(employee_user)
@@ -291,7 +290,7 @@ class InfoCheckView(APIView):
                     return Response(result)
                 else:
                     result = {
-                        "result": 2
+                        "result": 1
                     }
                     return Response(result)
 
@@ -984,12 +983,47 @@ class LectureBeaconCheck(APIView):
                 #그러면 으므으므믐 LectureReceiveCard에 대한 id값을 받고 보내온 id와 user가 일치하는지 확인 그게 향하는 lecture에서 검사가 가능
                 #거기서 뽑아온 강의실 번호로 uuid확인 여기서 어떤 값을 확인할지 정해야한다
                 # 결과값
-                result = {
 
-                }
-                return Response(result)
+
+                return Response()
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
+
+
+class LectureFastestView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+        if request.user:
+            userInfo = User.objects.get(username = request.user)
+            userprofile = StudentProfile.objects.get(user = userInfo)
+            userLectureCard = LectureReceiveCard.objects.filter(card_owner=userprofile)
+            if userLectureCard:
+                listcach = []
+
+                for card in userLectureCard:
+                    record = AttendanceRecord.objects.filter(lecture=card.target_lecture, activate=True)
+                    if record:
+                        if (record.last().end_time < timezone.now()):
+                            record.last().activate = False
+                            record.last().save()
+
+                    record = AttendanceRecord.objects.filter(lecture=card.target_lecture, activate=True)
+                    if record:
+
+                        cardList = {
+                            "lecture_id" : card.target_lecture.pk,
+                            "lecture_title" : card.target_lecture.title
+                       }
+                        listcach.append(cardList)
+                print (listcach)
+                return Response(listcach)
+
+            else:
+                return Response("you don't have lecture", status=status.HTTP_403_FORBIDDEN)
         else:
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 

@@ -682,7 +682,19 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     }
 
 
+    $scope.save = function () {
+            $http.get('/attendance_check/api/lecture/fastest/view/',
+            {
+                headers: {
+                    'Authorization' : token
+                }
 
+            }).then(function(response){
+
+            }, function (response){
+
+            });
+        };
 
 
 
