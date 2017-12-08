@@ -315,6 +315,7 @@ class LectureStartView(APIView):
 
             # 해당 강의의 활성화 여부 찾기
             record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+
             #해당 강의의 활성화유무 판단 활성화되면
             if record:
                 record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
@@ -343,7 +344,15 @@ class LectureStartView(APIView):
 
             record.save()
 
-            return Response(serializer.data)
+            selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
+            check_start_time_record = ((str)(selectLecture.last().start_time + datetime.timedelta(hours=9)))[0:16]
+
+            result = {
+                "serializer.data": serializer.data,
+                "check_start_time_record": check_start_time_record
+            }
+
+            return Response(result)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -558,9 +567,9 @@ class LectureReceiveApplyListView(APIView):
 
                 student_infos = []
                 selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
-                check_start_time = ''
+                check_start_time_record = ''
                 if selectLecture:
-                    check_start_time = selectLecture.last().start_time
+                    check_start_time_record = ((str)(selectLecture.last().start_time+datetime.timedelta(hours=9)))[0:16]
                 for card in cards:
                     std_text = ''
                     try :
@@ -598,7 +607,8 @@ class LectureReceiveApplyListView(APIView):
 
                 result = {
                     "wait_time" : wait_time,
-                    "students" : student_infos
+                    "students" : student_infos,
+                    "lecture_time_record" : check_start_time_record
                 }
                 return Response(result)
             else:
@@ -969,79 +979,17 @@ class LectureBeaconCheck(APIView):
         if request.user:
             serializer = LectureCheckedListViewSerializer(data = request.data)
             if serializer.is_valid():
-                lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
-                cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
-
-                ######
-                # 해당 강의의 활성화 여부 찾기
-                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
-                # 해당 강의의 활성화유무 판단 활성화되면
-                if record:
-                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
-                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
-                    if (record.end_time < timezone.now()):
-                        record.activate = False
-                        record.save()
-                ######
-
-                #활성 강의 남은시간 계산
-                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
-                wait_time = 1
-                if activate_lec_card:
-                    lec_card = activate_lec_card.last()
-                    wait_time = (lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().minute*60+timezone.now().second)
-                    if wait_time<0:
-                        wait_time = 1
-
-
-                #db에서 학생 출결상태 출력
-                student_infos = []
-                selectLecture = AttendanceRecord.objects.get(pk=serializer.validated_data['time'])
-                for card in cards:
-                    std_text = ''
-                    try :
-                        std_card = AttendanceCard.objects.get(checker = card.card_owner, record_to=selectLecture)
-                    except:
-                        std_text = "결석"
-                        std_status = 'danger'
-
-                    if std_text == '':
-                        if std_card.is_reasonableabsent_checker == True:
-                            std_text = '공결'
-                            std_status = 'success'
-
-                        elif std_card.is_late_checker == True:
-                            std_text = '지각'
-                            std_status = 'warning'
-
-                        elif std_card.is_absent_checker == True:
-                            std_text = '결석'
-                            std_status = 'danger'
-
-                        else:
-                            std_text = '출석'
-                            std_status = 'primary'
-
-                    student_info = {
-                        "student_id" : card.card_owner.student_id,
-                        "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
-                        "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
-                        "std_status":(std_status)
-                    }
-                    student_infos.append(student_info)
-
-
-
+                #일단 출석 활성화 검사와 uuid값 검사가 이루어져야함
+                #받아야하는 값이 사용자 정보 UUID값 그리고ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ음 뭐가있을까 음 강의실 정보인데 거기에는 뭐가있을까 일단 수강신천한 강의 정보를 보내겠지
+                #그러면 으므으므믐 LectureReceiveCard에 대한 id값을 받고 보내온 id와 user가 일치하는지 확인 그게 향하는 lecture에서 검사가 가능
+                #거기서 뽑아온 강의실 번호로 uuid확인 여기서 어떤 값을 확인할지 정해야한다
                 # 결과값
                 result = {
-                    "wait_time" : wait_time,
-                    "students" : student_infos
+
                 }
                 return Response(result)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
+            return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 

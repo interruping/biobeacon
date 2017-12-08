@@ -541,6 +541,10 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
         }).then(function(response){
             $scope.realTimeReset(response.data.wait_time);
+            if (response.data.lecture_time_record)
+                $scope.lectureTimeRecord = "기록날짜:"+response.data.lecture_time_record;
+            else
+                $scope.lectureTimeRecord = "출석을 시작하지 않으셨습니다."
             myDataView.clearAll();
             var students = response.data.students;
 

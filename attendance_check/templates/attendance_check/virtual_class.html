@@ -231,7 +231,9 @@ function loadDataViewList(){
                                 {% endverbatim %}
                             </select>
                             남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
-                            <ul class="navbar-form navbar-right">
+
+                        <ul class="navbar-form navbar-right">
+                                {% verbatim %}{{lectureTimeRecord}}{% endverbatim %}
                                 <button type="button" class="btn btn-success" tyle="width:100px;margin-top:10px" value="save" ng-click="save();">저장</button>
                             </ul>
                             <hr>
@@ -318,7 +320,7 @@ function loadDataViewList(){
     </div>
 
 
-    <-- 강좌 기록 -->
+    <!-- 강좌 기록 -->
     <div id="attendance_check_list" class="tab-pane fade" ng-controller="LectureAttendanceCheckController_list" ng-init="loadLectureList()">
         <div class="panel panel-default">
             <div class="panel-heading">강좌선택</div>
