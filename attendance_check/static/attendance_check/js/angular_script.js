@@ -22,9 +22,8 @@ app.controller('SaveLectureTime', function($scope, $http){
             }
 
         }).then(function(response){
-
                 if(response.data.result == 1)
-                    alert('변경되었습니다.');
+                    alert("변경되었습니다.");
                     $scope.loadProfile();
 
             },function(){
