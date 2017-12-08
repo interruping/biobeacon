@@ -35,6 +35,7 @@ from .views import (
                     LectureReceiveApplyView,
                     LectureReceiveApplyListView,
                     ProfileView,
+                    ProfileTimeSetView,
                     DepartmentListView,
                     ProfileImageUploadView,
                     LectureCreateuuidView,
@@ -65,6 +66,7 @@ urlpatterns = [
     url(r'^api/profile/$', ProfileView.as_view()),
 
     url(r'^api/profile/image/upload/$', ProfileImageUploadView.as_view()),
+    url(r'^api/profile/time_set/update/$', ProfileTimeSetView.as_view()),
 
     url(r'^api/department/list/$', DepartmentListView.as_view()),
 
