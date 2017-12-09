@@ -260,7 +260,7 @@ class IdNumberCheckView(APIView):
                 return Response(result)
             if student_user.exists():
                 result = {
-                    "result": 2
+                    "result": 1
                 }
                 return Response(result)
             return Response(employee_user)
