@@ -104,24 +104,10 @@ function loadDataViewList(){
 </nav>
 
 <div class="tab-content biobeacon-content container">
-	<div id="myinfo" class="tab-pane fade in active">
+	<div id="myinfo" class="tab-pane fade in active" >
 		<div class="panel panel-default" ng-controller="ProfileController" ng-init="loadProfile()">
-  			<div class="panel-heading">사용자 프로파일</div>
-  			<div class="panel-body">
-			{% verbatim %}
-                <img ng-src="{{ profile_image }}" width="100px" height="120px"><br/>
-            구분 : {{ user_type }} <br/>
-            아이디 : {{ username }} <br/>
-			학번/사번 : {{ id }} <br/>
-            소속학과 : {{ department }} <br/>
-            이메일 : {{ email }} <br />
-            결석 시간 설정 : {{ time_set }}분 <br />
-			{% endverbatim %}
-			</div>
-		</div>
-        <div class="panel panel-default" ng-controller="LectureController" ng-init="loadLectureList()">
-  			<div class="panel-heading">담당 강좌 <i class="fa fa-cog fa-spin" onclick="optionclick()" style="float: right; font-size:24px"></i>
-                <script>
+            <div class="panel-heading">사용자 프로파일 <i class="fa fa-cog fa-spin" onclick="optionclick()" style="cursor:pointer;float: right; font-size:24px"></i>
+            <script>
                     function optionclick(){
              $("#optionButton").css("z-index", "9999");
             $("#optionButton").appendTo("body").modal();
@@ -138,6 +124,7 @@ function loadDataViewList(){
                       </div>
                       <div class="modal-body">
                           <p> 강의 만료 시간 설정 <BR>
+                              ---------------------------<br>
                               <input type="radio" name="e" value="20" ng-model="formData.e">20분<br>
                               <input type="radio" name="e" value="30" ng-model="formData.e">30분<br>
                               <input type="radio" name="e" value="40" ng-model="formData.e">40분<br>
@@ -154,6 +141,21 @@ function loadDataViewList(){
               </div>
           </div>
 
+            </div>
+  			<div class="panel-body">
+			{% verbatim %}
+                <img ng-src="{{ profile_image }}" width="100px" height="120px"><br/>
+            구분 : {{ user_type }} <br/>
+            아이디 : {{ username }} <br/>
+			학번/사번 : {{ id }} <br/>
+            소속학과 : {{ department }} <br/>
+            이메일 : {{ email }} <br />
+            결석 시간 설정 : {{ time_set }}분 <br />
+			{% endverbatim %}
+			</div>
+		</div>
+        <div class="panel panel-default" ng-controller="LectureController" ng-init="loadLectureList()">
+  			<div class="panel-heading">담당 강좌
             </div>
   			<div class="panel-body">
                 <div class="row" >

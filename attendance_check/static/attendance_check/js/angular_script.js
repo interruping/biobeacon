@@ -22,16 +22,15 @@ app.controller('SaveLectureTime', function($scope, $http){
             }
 
         }).then(function(response){
-
                 if(response.data.result == 1)
-                    alert('변경되었습니다.');
-                    window.location.reload();
+                    $scope.loadProfile();
 
             },function(){
 
             })
 
     }
+
 });
 
 
@@ -408,7 +407,6 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
 app.controller('ProfileController', function($scope, $http){
 
 
-
     $scope.loadProfile = function () {
         $http.get('/attendance_check/api/profile', {
             headers: {
@@ -472,6 +470,9 @@ app.controller('LectureController', function($scope, $http){
             }
 
         }).then(function(response){
+            if(response.data.result == 1){
+            alert("잘못된 입력입니다.");
+            }
             $scope.loadLectureList();
 
             var checkCompare = response.data.failedModal
@@ -816,7 +817,7 @@ function chulcheckJS() {
             $('#chul1').tab('show');
         });
     }
-        else if (myInfoInfo == "20132309") {
+    else if(chulCheckInfo == "20132309") {
         $(document).ready(function(){
             $('#chul3').tab('show');
         });
