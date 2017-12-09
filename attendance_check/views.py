@@ -24,8 +24,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCreateUuidSerializer,
                                            LectureUuidSerializer,
                                            LectureCheckSerializer,
-                                           LectureCheckedListViewSerializer,
-                                           )
+                                           LectureCheckedListViewSerializer)
 
 from django.utils import timezone
 from .models import ( ProfessorProfile,
@@ -319,8 +318,17 @@ class LectureStartView(APIView):
         if serializer.is_valid():
             lecture = Lecture.objects.get(pk=serializer.validated_data['id'])
 
+            # 해당 강좌의 결석플래그 상태 조정
+            recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
+            if recordLate:
+                for list in recordLate:
+                    if list.absence_time < timezone.now():
+                        list.activate_absence = True
+                        list.save()
+
             # 해당 강의의 활성화 여부 찾기
             record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+
             #해당 강의의 활성화유무 판단 활성화되면
             if record:
                 record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
@@ -349,7 +357,15 @@ class LectureStartView(APIView):
 
             record.save()
 
-            return Response(serializer.data)
+            selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
+            check_start_time_record = ((str)(selectLecture.last().start_time + datetime.timedelta(hours=9)))[0:16]
+
+            result = {
+                "serializer.data": serializer.data,
+                "check_start_time_record": check_start_time_record
+            }
+
+            return Response(result)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -565,6 +581,13 @@ class LectureReceiveApplyListView(APIView):
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
 
+                # 해당 강좌의 결석플래그 상태 조정
+                recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
+                if recordLate:
+                    for list in recordLate:
+                        if list.absence_time < timezone.now():
+                            list.activate_absence = True
+                            list.save()
                 ######
                 # 해당 강의의 활성화 여부 찾기
                 record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
@@ -590,9 +613,9 @@ class LectureReceiveApplyListView(APIView):
 
                 student_infos = []
                 selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
-                check_start_time = ''
+                check_start_time_record = ''
                 if selectLecture:
-                    check_start_time = selectLecture.last().start_time
+                    check_start_time_record = ((str)(selectLecture.last().start_time+datetime.timedelta(hours=9)))[0:16]
                 for card in cards:
                     std_text = ''
                     try :
@@ -630,7 +653,8 @@ class LectureReceiveApplyListView(APIView):
 
                 result = {
                     "wait_time" : wait_time,
-                    "students" : student_infos
+                    "students" : student_infos,
+                    "lecture_time_record" : check_start_time_record
                 }
                 return Response(result)
             else:
@@ -859,6 +883,14 @@ class LectureListSearch(APIView):
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
 
+                # 해당 강좌의 결석플래그 상태 조정
+                recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
+                if recordLate:
+                    for list in recordLate:
+                        if list.absence_time < timezone.now():
+                            list.activate_absence = True
+                            list.save()
+
                 ######
                 # 해당 강의의 활성화 여부 찾기
                 record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
@@ -927,7 +959,7 @@ class LectureListSearch(APIView):
                     num = 1
                     for lecture in selectLecture:
                         lecturesTime.append({
-                                "date": (str)(lecture.start_time)[0:16],
+                                "date": (str)(lecture.start_time+datetime.timedelta(hours=9))[0:16],
                                 "id": lecture.pk,
                                 "num": num
                             })
@@ -1035,5 +1067,63 @@ class LectureCheckedSearchView(APIView):
             return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
 
 
+
+
+class LectureBeaconCheck(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if request.user:
+            serializer = LectureCheckedListViewSerializer(data = request.data)
+            if serializer.is_valid():
+                #일단 출석 활성화 검사와 uuid값 검사가 이루어져야함
+                #받아야하는 값이 사용자 정보 UUID값 그리고ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ음 뭐가있을까 음 강의실 정보인데 거기에는 뭐가있을까 일단 수강신천한 강의 정보를 보내겠지
+                #그러면 으므으므믐 LectureReceiveCard에 대한 id값을 받고 보내온 id와 user가 일치하는지 확인 그게 향하는 lecture에서 검사가 가능
+                #거기서 뽑아온 강의실 번호로 uuid확인 여기서 어떤 값을 확인할지 정해야한다
+                # 결과값
+
+
+                return Response()
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
+
+
+class LectureFastestView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+        if request.user:
+            userInfo = User.objects.get(username = request.user)
+            userprofile = StudentProfile.objects.get(user = userInfo)
+            userLectureCard = LectureReceiveCard.objects.filter(card_owner=userprofile)
+            if userLectureCard:
+                listcach = []
+
+                for card in userLectureCard:
+                    record = AttendanceRecord.objects.filter(lecture=card.target_lecture, activate=True)
+                    if record:
+                        if (record.last().end_time < timezone.now()):
+                            record.last().activate = False
+                            record.last().save()
+
+                    record = AttendanceRecord.objects.filter(lecture=card.target_lecture, activate=True)
+                    if record:
+
+                        cardList = {
+                            "lecture_id" : card.target_lecture.pk,
+                            "lecture_title" : card.target_lecture.title
+                       }
+                        listcach.append(cardList)
+                print (listcach)
+                return Response(listcach)
+
+            else:
+                return Response("You don't have lecture", status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 
 

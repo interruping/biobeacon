@@ -569,6 +569,10 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
         }).then(function(response){
             $scope.realTimeReset(response.data.wait_time);
+            if (response.data.lecture_time_record)
+                $scope.lectureTimeRecord = "기록날짜:"+response.data.lecture_time_record;
+            else
+                $scope.lectureTimeRecord = "출석을 시작하지 않으셨습니다."
             myDataView.clearAll();
             var students = response.data.students;
 
@@ -706,7 +710,19 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     }
 
 
+    $scope.save = function () {
+            $http.get('/attendance_check/api/lecture/fastest/view/',
+            {
+                headers: {
+                    'Authorization' : token
+                }
 
+            }).then(function(response){
+
+            }, function (response){
+
+            });
+        };
 
 
 
@@ -927,6 +943,19 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
             for ( index in students ) {
                 student = students[index];
+
+                if (student.std_status=='default'){
+                myDataViewList
+                .add({id: student.id,
+                ImgSRC: student.profile_image,
+                Name: student.name,
+                IdNum: student.student_id,
+                PanelStatus: absentStatus,
+                AttendanceCheckStatus: absentText});
+                }
+
+
+                else{
                 myDataViewList
                 .add({id: student.id,
                 ImgSRC: student.profile_image,
@@ -934,6 +963,7 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
                 IdNum: student.student_id,
                 PanelStatus: student.std_status,
                 AttendanceCheckStatus: student.std_text});
+                }
             }
 
             lecturesTime = response.data.lecturesTime;
