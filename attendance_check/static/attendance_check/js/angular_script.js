@@ -702,7 +702,29 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         $interval.cancel(ainterval);
 
         ainterval = $interval(function () {
-                $scope.updateSelectedLecture();
+                $http.post('/attendance_check/api/lecture/apply/list/', {"lecture": $scope.seletedLecture},
+                {
+                    headers: { 'Authorization' : token }
+
+                }).then(function(response){
+
+                        var students = response.data.students;
+
+                        for ( index in students ) {
+                            student = students[index];
+                            myDataView
+                            .update(student.id, {id: student.id,
+                            ImgSRC: student.profile_image,
+                            Name: student.name,
+                            IdNum: student.student_id,
+                            PanelStatus: student.std_status,
+                            AttendanceCheckStatus: student.std_text});
+                        }
+
+                    }, function(response){
+
+
+                    });
         }, 1000,[timeset]);
 
     };
