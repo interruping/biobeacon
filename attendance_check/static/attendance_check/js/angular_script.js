@@ -697,12 +697,13 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     };
 
     var ainterval;
-    $scope.realTimeCheck = function () {
+    $scope.realTimeCheck = function (timeset) {
+
         $interval.cancel(ainterval);
 
         ainterval = $interval(function () {
                 $scope.updateSelectedLecture();
-        }, 1000);
+        }, 1000,[timeset]);
 
     };
 
