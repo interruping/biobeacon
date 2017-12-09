@@ -18,6 +18,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            InfoCheckSerializer,
                                            DeleteLectureSerializer,
                                            LectureListSerializer,
+                                           ProfileTimeSetSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
                                            LectureCreateUuidSerializer,
@@ -130,6 +131,7 @@ class ProfileView(APIView):
                 'id' : prof.employee_id,
                 'department' : prof.department.name,
                 'profile_image' : prof_img.image.url,
+                'time_set' : prof.absence_time_set,
             }
 
 
@@ -184,7 +186,11 @@ class LectureCreateView(APIView):
             lec.save()
 
             return Response(serializer.data)
-
+        else:
+            result = {
+            "result" : 1
+            }
+            return Response(result)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -516,6 +522,32 @@ class LectureDeleteView(APIView):
 
 
 
+class ProfileTimeSetView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+
+        serializer = ProfileTimeSetSerializer(data=request.data)
+
+        if serializer.is_valid():
+            time_set = serializer.validated_data['time_set']
+
+            if request.user.is_staff:
+                prof = ProfessorProfile.objects.get(user=request.user)
+                prof.absence_time_set = time_set
+                prof.save()
+
+                result = {
+                    "result": 1
+                }
+            return Response(result)
+
+        else:
+            return Response("Lecture Error.", status=status.HTTP_403_FORBIDDEN)
+
+
+
 class LectureReceiveApplyView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -614,7 +646,7 @@ class LectureReceiveApplyListView(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -728,6 +760,50 @@ class LectureCheckUUID(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LectureAvailableList(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+        availableList = Lecture.objects.all()
+
+        results = []
+        for list in availableList:
+            result = {
+                 "lectureList": list.title,
+            }
+            results.append(result)
+        return Response(results)
+
+class LectureRequestList (APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+
+        std = StudentProfile.objects.get(user=request.user)
+        reqLectureList = LectureReceiveCard.objects.filter(card_owner=std)
+
+        results = []
+        for list in reqLectureList:
+            result = {
+                "lecture":list.target_lecture.title,
+                "pk": list.pk,
+            }
+            results.append(result)
+
+        return Response({"result": results})
+
+class StudentView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        std = StudentProfile.objects.get(user=request.user)
+
+        return Response({"StudentPK": std.pk})
 
 # 출석체크값 저장
 class LectureStuCheck(APIView):
@@ -873,7 +949,7 @@ class LectureListSearch(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -972,7 +1048,7 @@ class LectureCheckedSearchView(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -1049,4 +1125,5 @@ class LectureFastestView(APIView):
                 return Response("You don't have lecture", status=status.HTTP_403_FORBIDDEN)
         else:
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
+
 

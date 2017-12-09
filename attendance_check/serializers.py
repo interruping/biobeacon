@@ -50,7 +50,7 @@ class LectureListSerializer(serializers.Serializer):
 
 class LectureCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=128)
-    lecture_num = serializers.CharField(max_length=5)
+    lecture_num = serializers.CharField(min_length=5, max_length=5)
 
 class IdCheckSerializer(serializers.Serializer):
     reg_username = serializers.CharField(max_length=128)
@@ -97,4 +97,8 @@ class LectureBeaconCheckSerializer(serializers.Serializer):
 
 class DeleteLectureSerializer(serializers.Serializer):
     id = serializers.CharField()
+
+
+class ProfileTimeSetSerializer(serializers.Serializer):
+    time_set = serializers.CharField()
 

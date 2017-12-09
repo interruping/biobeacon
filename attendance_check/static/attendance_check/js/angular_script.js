@@ -8,6 +8,31 @@ var app = angular.module('BioBeaconApp', ['ngFileUpload']);
 
 
 
+app.controller('SaveLectureTime', function($scope, $http){
+
+    $scope.formData = function (){
+        var timeData = {
+            "time_set": $scope.formData.e
+        };
+
+        $http.post("/attendance_check/api/profile/time_set/update/", timeData,
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+                if(response.data.result == 1)
+                    $scope.loadProfile();
+
+            },function(){
+
+            })
+
+    }
+
+});
+
 
 app.controller('localStorage', function($scope, $http){
     const loggedInfo = localStorage.getItem('storedUserAuthData');
@@ -382,7 +407,6 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
 app.controller('ProfileController', function($scope, $http){
 
 
-
     $scope.loadProfile = function () {
         $http.get('/attendance_check/api/profile', {
             headers: {
@@ -396,6 +420,7 @@ app.controller('ProfileController', function($scope, $http){
             $scope.email = response.data.email;
             $scope.user_type = response.data.user_type;
             $scope.profile_image = response.data.profile_image;
+            $scope.time_set = response.data.time_set;
 
         }, function (response){
 
@@ -445,6 +470,9 @@ app.controller('LectureController', function($scope, $http){
             }
 
         }).then(function(response){
+            if(response.data.result == 1){
+            alert("잘못된 입력입니다.");
+            }
             $scope.loadLectureList();
 
             var checkCompare = response.data.failedModal
@@ -772,10 +800,11 @@ function doLate() {
 
 
 
-function onEnterSubmit(){
+function onEnterSubmit(sw){
+    if( sw == true){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
-
+  }
 }
 function onEnter(){
         if(window.event.keyCode == 13)
@@ -805,7 +834,7 @@ function chulcheckJS() {
             $('#chul1').tab('show');
         });
     }
-        else if (myInfoInfo == "20132309") {
+    else if(chulCheckInfo == "20132309") {
         $(document).ready(function(){
             $('#chul3').tab('show');
         });
