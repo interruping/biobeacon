@@ -784,10 +784,11 @@ function doLate() {
 
 
 
-function onEnterSubmit(){
+function onEnterSubmit(sw){
+    if( sw == true){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
-
+  }
 }
 function onEnter(){
         if(window.event.keyCode == 13)
