@@ -290,7 +290,7 @@ class InfoCheckView(APIView):
                     return Response(result)
                 else:
                     result = {
-                        "result": 1
+                        "result": 2
                     }
                     return Response(result)
 
@@ -311,6 +311,14 @@ class LectureStartView(APIView):
         serializer = LectureStartSerializer(data=request.data)
         if serializer.is_valid():
             lecture = Lecture.objects.get(pk=serializer.validated_data['id'])
+
+            # 해당 강좌의 결석플래그 상태 조정
+            recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
+            if recordLate:
+                for list in recordLate:
+                    if list.absence_time < timezone.now():
+                        list.activate_absence = True
+                        list.save()
 
             # 해당 강의의 활성화 여부 찾기
             record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
@@ -541,6 +549,13 @@ class LectureReceiveApplyListView(APIView):
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
 
+                # 해당 강좌의 결석플래그 상태 조정
+                recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
+                if recordLate:
+                    for list in recordLate:
+                        if list.absence_time < timezone.now():
+                            list.activate_absence = True
+                            list.save()
                 ######
                 # 해당 강의의 활성화 여부 찾기
                 record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
@@ -792,6 +807,14 @@ class LectureListSearch(APIView):
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
 
+                # 해당 강좌의 결석플래그 상태 조정
+                recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
+                if recordLate:
+                    for list in recordLate:
+                        if list.absence_time < timezone.now():
+                            list.activate_absence = True
+                            list.save()
+
                 ######
                 # 해당 강의의 활성화 여부 찾기
                 record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
@@ -1023,7 +1046,7 @@ class LectureFastestView(APIView):
                 return Response(listcach)
 
             else:
-                return Response("you don't have lecture", status=status.HTTP_403_FORBIDDEN)
+                return Response("You don't have lecture", status=status.HTTP_403_FORBIDDEN)
         else:
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 
