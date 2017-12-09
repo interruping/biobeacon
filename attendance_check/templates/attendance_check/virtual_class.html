@@ -256,7 +256,7 @@ function loadDataViewList(){
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
 
-                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();">
+                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeCheck();realTimeReset(selectedTimeMin);checkUUID();">
                             인증시간
                             <select ng-model="selectedTimeMin" style="margin-top:10px">
                                 {% verbatim %}

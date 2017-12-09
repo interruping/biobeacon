@@ -696,6 +696,17 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         }
     };
 
+    var ainterval;
+    $scope.realTimeCheck = function () {
+        $interval.cancel(ainterval);
+
+        ainterval = $interval(function () {
+                $scope.updateSelectedLecture();
+        }, 1000);
+
+    };
+
+
 
     $scope.selectedTime = {
     0 : {str : "없음", int : 1},
@@ -1083,7 +1094,6 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
         }, 1000,[timeset]);
         }
     };
-
 
     $scope.selectedTime = {
     0 : {str : "없음", int : 1},

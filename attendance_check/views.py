@@ -623,7 +623,7 @@ class LectureReceiveApplyListView(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -873,7 +873,7 @@ class LectureListSearch(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -972,7 +972,7 @@ class LectureCheckedSearchView(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -1059,7 +1059,7 @@ class LectureBeaconCheck(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
