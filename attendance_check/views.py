@@ -663,9 +663,9 @@ class LectureReceiveApplyListView(APIView):
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
+                        "name" : card.card_owner.user.last_name+card.card_owner.user.first_name,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text),
+                        "std_text": (std_text.decode('utf-8')),
                         "std_status":(std_status)
                     }
 
@@ -1006,9 +1006,9 @@ class LectureListSearch(APIView):
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
+                        "name" : card.card_owner.user.last_name+card.card_owner.user.first_name,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text),
+                        "std_text": (std_text.decode('utf-8')),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -1109,13 +1109,12 @@ class LectureCheckedSearchView(APIView):
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
+                        "name" : card.card_owner.user.last_name+card.card_owner.user.first_name,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text),
+                        "std_text": (std_text.decode('utf-8')),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
-
 
 
                 # 결과값
