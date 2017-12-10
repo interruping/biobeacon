@@ -25,6 +25,7 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureUuidSerializer,
                                            LectureCheckSerializer,
                                            LectureCheckedListViewSerializer,
+                                           LectureRequestSerializer,
                                            )
 
 from django.utils import timezone
@@ -745,6 +746,7 @@ class LectureAvailableList(APIView):
         for list in availableList:
             result = {
                  "lectureList": list.title,
+                 "id": list.pk,
             }
             results.append(result)
         return Response(results)
@@ -776,6 +778,36 @@ class StudentView(APIView):
         std = StudentProfile.objects.get(user=request.user)
 
         return Response({"StudentPK": std.pk})
+
+class LectureRequestView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        serializer = LectureRequestSerializer(data=request.data)
+
+        if serializer.is_valid():
+
+            std = StudentProfile.objects.get(user=request.user)
+            reqList = Lecture.objects.get(pk=serializer.validated_data['id'])
+
+            record = LectureReceiveCard.objects.filter(target_lecture=reqList, card_owner=std)
+            if record:
+                result = {
+                    'fail': True,
+                }
+                return Response(result)
+
+            std = StudentProfile.objects.get(user=request.user)
+            reqList = Lecture.objects.get(title=serializer.validated_data['title'])
+
+            lec = LectureReceiveCard.objects.create(
+                target_lecture=reqList,
+                card_owner=std,
+            )
+            lec.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 출석체크값 저장
 class LectureStuCheck(APIView):
