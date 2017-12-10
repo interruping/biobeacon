@@ -744,7 +744,11 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
     $scope.continueRealCheck = function() {
+            if($scope.realTime == null){
+               return;
+            }
             $scope.realTimeCheck();
+
     }
 
 
