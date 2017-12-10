@@ -423,7 +423,8 @@ app.controller('ProfileController', function($scope, $http){
                 'Authorization' : token
             }
         }).then(function(response){
-
+            $scope.lastname =response.data.last_name;
+            $scope.firstname = response.data.first_name;
             $scope.username = response.data.username;
             $scope.department = response.data.department;
             $scope.id = response.data.id;
