@@ -96,7 +96,7 @@ class LectureCheckedListViewSerializer(serializers.Serializer):
 
 class LectureBeaconCheckSerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
-    uuid_now = serializers.CharField(max_length=32, default='')
+    lectureUuid = serializers.CharField(max_length=32, default='')
 
 
 class DeleteLectureSerializer(serializers.Serializer):

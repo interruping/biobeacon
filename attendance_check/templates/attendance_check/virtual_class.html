@@ -370,12 +370,7 @@ function loadDataViewList(){
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
                         <input type="button" class="btn btn-success" style="margin-top:10px" value="저장" ng-click="save();">
-                            <!--인증시간
-                            <select ng-model="selectedTimeMin" style="margin-top:10px">
-                                {% verbatim %}
-                                <option ng-repeat="x in selectedTime" value="{{x.int}}"> {{x.str}} </option>
-                                {% endverbatim %}
-                            </select>-->
+
                         <ul class="navbar-form navbar-right">
                         <select ng-model="seletedLectureTime" style="margin-top:10px" ng-change="checkedListView()">
                             {% verbatim %}
@@ -383,10 +378,7 @@ function loadDataViewList(){
                             {% endverbatim %}
                         </select>
                         </ul>
-                            <!--남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
-                            <ul class="navbar-form navbar-right">
-                                <button type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="save" ng-click="save();">저장</button>
-                            </ul>-->
+
                             <hr>
                         <div class="panel panel-default">
                             <div class="panel-heading">일괄 출석</div>

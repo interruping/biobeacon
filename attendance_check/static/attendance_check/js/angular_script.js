@@ -22,6 +22,7 @@ app.controller('SaveLectureTime', function($scope, $http){
             }
 
         }).then(function(response){
+
                 if(response.data.result == 1)
                     $scope.loadProfile();
 
@@ -800,24 +801,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     }
 
 
-    $scope.save = function () {
-            $http.get('/attendance_check/api/lecture/fastest/view/',
-            {
-                headers: {
-                    'Authorization' : token
-                }
-
-            }).then(function(response){
-
-            }, function (response){
-
-            });
-        };
-
-
-
-
-
 
 });
 
@@ -1155,18 +1138,6 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
 
         }
-    };
-    $scope.startLecture = function () {
-        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "second" : $scope.selectedTimeMin},
-        {
-            headers: {
-                'Authorization' : token
-            }
-
-        }).then(function(response){
-            $scope.updateSelectedLectureTitle()
-        },function(response){
-        });
     };
 
     $scope.checkUUID = function () {
