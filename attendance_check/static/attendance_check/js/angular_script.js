@@ -22,16 +22,15 @@ app.controller('SaveLectureTime', function($scope, $http){
             }
 
         }).then(function(response){
-
                 if(response.data.result == 1)
-                    alert('변경되었습니다.');
-                    window.location.reload();
+                    $scope.loadProfile();
 
             },function(){
 
             })
 
     }
+
 });
 
 
@@ -244,6 +243,8 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
     $scope.doRegister = function () {
 
         var regist_form = {
+            "first_name" : $scope.reg_firstname,
+            "last_name" : $scope.reg_lastname,
             "username" : $scope.reg_username,
             "email" : $scope.email,
             "password" : $scope.reg_password,
@@ -253,6 +254,14 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
             "department" : $scope.selectedDepartment,
             "profile_image_id" : $scope.image_id,
         };
+
+        if($scope.reg_firstname ==""){
+            $scope.reg_firstname = null;
+            }
+
+        if($scope.reg_lastname ==""){
+            $scope.reg_lastname = null;
+            }
 
         if($scope.reg_username ==""){
             $scope.reg_username = null;
@@ -270,11 +279,13 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
             $scope.organization_id = null;
             }
 
-       if($scope.reg_username !=null && $scope.email != null && $scope.reg_password != null && $scope.reg_password_confirm != null && $scope.organization_id !=null && $scope.selectedDepartment != '0' ){
+       if($scope.reg_username !=null && $scope.email != null && $scope.reg_firstname != null&& $scope.reg_lastname !=null && $scope.reg_password != null && $scope.reg_password_confirm != null && $scope.organization_id !=null && $scope.selectedDepartment != '0' ){
             if($scope.reg_password == $scope.reg_password_confirm){
                 if($scope.profile_image  != null){
                    $http.put("/attendance_check/api/user_register/", regist_form)
                      .then(function(response){
+                      $scope.reg_firstname = '';
+                      $scope.reg_lastname = '';
                       $scope.reg_username = '';
                       $scope.email = '';
                       $scope.reg_password = '';
@@ -309,16 +320,38 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
             var subject_error="";
             var count = 0;
 
-            if( $scope.reg_username == null ||
+            if( $scope.reg_firstname == null ||
+                $scope.reg_lastname == null ||
+                $scope.reg_username == null ||
                 $scope.email == null ||
                 $scope.reg_password == null ||
                 $scope.reg_password_confirm == null ||
                  $scope.organization_id == null) {
 
+                if($scope.reg_lastname ==null){
+                    hole_error +="성";
+                    count=1;
+                    }
+
+                 if($scope.reg_firstname==null){
+                    if(count==1){
+                       hole_error +=",";
+                       }
+                    else{
+                        count =1;
+                        }
+                    hole_error +="이름";
+                 }
+
                 if($scope.reg_username ==null){
-                  hole_error +="아이디";
-                  count=1;
-                }
+                    if(count ==1){
+                       hole_error +=",";
+                       }
+                     else{
+                        count =1;
+                        }
+                    hole_error +="아이디";
+                  }
 
                 if($scope.email == null){
                   if(count ==1){
@@ -408,14 +441,14 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
 app.controller('ProfileController', function($scope, $http){
 
 
-
     $scope.loadProfile = function () {
         $http.get('/attendance_check/api/profile', {
             headers: {
                 'Authorization' : token
             }
         }).then(function(response){
-
+            $scope.lastname =response.data.last_name;
+            $scope.firstname = response.data.first_name;
             $scope.username = response.data.username;
             $scope.department = response.data.department;
             $scope.id = response.data.id;
@@ -472,6 +505,9 @@ app.controller('LectureController', function($scope, $http){
             }
 
         }).then(function(response){
+            if(response.data.result == 1){
+            alert("잘못된 입력입니다.");
+            }
             $scope.loadLectureList();
 
             var checkCompare = response.data.failedModal
@@ -568,6 +604,10 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
         }).then(function(response){
             $scope.realTimeReset(response.data.wait_time);
+            if (response.data.lecture_time_record)
+                $scope.lectureTimeRecord = "기록날짜:"+response.data.lecture_time_record;
+            else
+                $scope.lectureTimeRecord = "출석을 시작하지 않으셨습니다."
             myDataView.clearAll();
             var students = response.data.students;
 
@@ -705,7 +745,19 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     }
 
 
+    $scope.save = function () {
+            $http.get('/attendance_check/api/lecture/fastest/view/',
+            {
+                headers: {
+                    'Authorization' : token
+                }
 
+            }).then(function(response){
+
+            }, function (response){
+
+            });
+        };
 
 
 
@@ -783,10 +835,11 @@ function doLate() {
 
 
 
-function onEnterSubmit(){
+function onEnterSubmit(sw){
+    if( sw == true){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
-
+  }
 }
 function onEnter(){
         if(window.event.keyCode == 13)
@@ -816,7 +869,7 @@ function chulcheckJS() {
             $('#chul1').tab('show');
         });
     }
-        else if (myInfoInfo == "20132309") {
+    else if(chulCheckInfo == "20132309") {
         $(document).ready(function(){
             $('#chul3').tab('show');
         });
@@ -925,6 +978,19 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
             for ( index in students ) {
                 student = students[index];
+
+                if (student.std_status=='default'){
+                myDataViewList
+                .add({id: student.id,
+                ImgSRC: student.profile_image,
+                Name: student.name,
+                IdNum: student.student_id,
+                PanelStatus: absentStatus,
+                AttendanceCheckStatus: absentText});
+                }
+
+
+                else{
                 myDataViewList
                 .add({id: student.id,
                 ImgSRC: student.profile_image,
@@ -932,6 +998,7 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
                 IdNum: student.student_id,
                 PanelStatus: student.std_status,
                 AttendanceCheckStatus: student.std_text});
+                }
             }
 
             lecturesTime = response.data.lecturesTime;

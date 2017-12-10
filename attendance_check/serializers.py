@@ -6,9 +6,11 @@ from .models import Lecture, ProfessorProfile, StudentProfile
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'is_staff')
+        fields = ('last_name','first_name','username', 'password', 'email', 'is_staff')
     def create(self, validated_data):
         user = User.objects.create(
+            last_name=validated_data['last_name'],
+            first_name = validated_data['first_name'],
             email= validated_data['email'],
             username= validated_data['username'],
             password=make_password(self.validated_data['password']),
@@ -17,6 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 class RegistrationSerializer(serializers.Serializer):
+    last_name = serializers.CharField(max_length=128)
+    first_name = serializers.CharField(max_length=128)
     username = serializers.CharField(max_length=128)
     password = serializers.CharField(max_length=512)
     email = serializers.EmailField()
@@ -50,7 +54,7 @@ class LectureListSerializer(serializers.Serializer):
 
 class LectureCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=128)
-    lecture_num = serializers.CharField(max_length=5)
+    lecture_num = serializers.CharField(min_length=5, max_length=5)
 
 class IdCheckSerializer(serializers.Serializer):
     reg_username = serializers.CharField(max_length=128)
@@ -92,7 +96,8 @@ class LectureCheckedListViewSerializer(serializers.Serializer):
 
 class LectureBeaconCheckSerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
-    time = serializers.CharField(max_length=17)
+    uuid_now = serializers.CharField(max_length=32, default='')
+
 
 class DeleteLectureSerializer(serializers.Serializer):
     id = serializers.CharField()
