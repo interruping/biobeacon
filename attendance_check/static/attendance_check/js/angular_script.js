@@ -736,6 +736,61 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     };
 
 
+    var ainterval;
+
+    $scope.stopRealCheck = function() {
+            $interval.cancel(ainterval);
+    }
+
+
+    $scope.continueRealCheck = function() {
+            $scope.realTimeCheck();
+    }
+
+
+    $scope.realTimeCheck = function () {
+
+        $interval.cancel(ainterval);
+
+        ainterval = $interval(function () {
+
+
+
+
+                $http.post('/attendance_check/api/lecture/apply/list/', {"lecture": $scope.seletedLecture},
+                {
+                    headers: { 'Authorization' : token }
+
+                }).then(function(response){
+
+                        var students = response.data.students;
+
+                        for ( index in students ) {
+                            student = students[index];
+                            myDataView
+                            .update(student.id,
+                            {id: student.id,
+                            ImgSRC: student.profile_image,
+                            Name: student.name,
+                            IdNum: student.student_id,
+                            PanelStatus: student.std_status,
+                            AttendanceCheckStatus: student.std_text});
+                        }
+
+                    }, function(response){
+
+
+                    });
+
+
+
+
+        }, 1000,[$scope.realTime]);
+
+    };
+
+
+
     $scope.selectedTime = {
     0 : {str : "없음", int : 1},
     1 : {str : "1분", int : 60},
@@ -1149,7 +1204,6 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
         }, 1000,[timeset]);
         }
     };
-
 
     $scope.selectedTime = {
     0 : {str : "없음", int : 1},

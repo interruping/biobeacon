@@ -256,7 +256,7 @@ function loadDataViewList(){
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
 
-                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeReset(selectedTimeMin);checkUUID();">
+                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px" value="출석 시작" ng-click="startLecture();realTimeCheck(selectedTimeMin);realTimeReset(selectedTimeMin);checkUUID();">
                             인증시간
                             <select ng-model="selectedTimeMin" style="margin-top:10px">
                                 {% verbatim %}
@@ -282,7 +282,7 @@ function loadDataViewList(){
                                 </select>
                             </div>
                         </div>
-                        <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;"></div>
+                        <div ng-mouseover="stopRealCheck()" ng-mouseleave="continueRealCheck()" id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;"></div>
                         <div id="specificControl" class="hidden" ng-app="BioBeaconApp" ng-controller="specificControlController">
                             <div class="popover-heading">수동 출석</div>
                             <div class="popover-body">
