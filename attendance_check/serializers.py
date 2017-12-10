@@ -106,3 +106,5 @@ class DeleteLectureSerializer(serializers.Serializer):
 class ProfileTimeSetSerializer(serializers.Serializer):
     time_set = serializers.CharField()
 
+class LectureRequestSerializer(serializers.Serializer):
+    id = serializers.CharField()
