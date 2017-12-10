@@ -1399,3 +1399,30 @@ class LectureFastestView(APIView):
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 
 
+class LectureListCheckedView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+
+        if request.user.is_staff:
+            prof = ProfessorProfile.objects.get(user=request.user)
+            lecture_set = Lecture.objects.filter(lecturer=prof)
+
+            lectures = []
+
+            for lecture in lecture_set:
+                if AttendanceRecord.objects.filter(lecture = lecture):
+                    lectures.append({
+                        "id": lecture.pk,
+                        "title": lecture.title,
+                        "lecture_num": lecture.lecture_num
+                    })
+
+            result = {"lectures": lectures}
+            return Response(result)
+        else:
+
+            lectures = { "lectures" : Lecture.objects.values()}
+
+            return Response(lectures)

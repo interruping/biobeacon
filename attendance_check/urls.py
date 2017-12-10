@@ -48,7 +48,8 @@ from .views import (
                     LectureCheckedSearchView,
                     LectureBeaconCheck,
                     StudentView,
-                    LectureFastestView)
+                    LectureFastestView,
+                    LectureListCheckedView)
 
 
 from rest_framework_jwt.views import obtain_jwt_token
@@ -78,6 +79,7 @@ urlpatterns = [
     url(r'^api/department/list/$', DepartmentListView.as_view()),
 
     url(r'^api/lecture/list/$', LectureListView.as_view()),
+    url(r'^api/lecture/list/view/$', LectureListCheckedView.as_view()),
     url(r'^api/lecture/create/$', LectureCreateView.as_view()),
     url(r'^api/lecture/delete/$', LectureDeleteView.as_view()),
     url(r'^api/lecture/createUuid/$', LectureCreateuuidView.as_view()),

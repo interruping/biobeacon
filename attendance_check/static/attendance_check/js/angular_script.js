@@ -985,8 +985,8 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
 
 
-     $scope.loadLectureList = function () {
-        $http.get('/attendance_check/api/lecture/list/', {
+     $scope.loadLectureListView = function () {
+        $http.get('/attendance_check/api/lecture/list/view', {
             headers: {
                 'Authorization' : token
             }
