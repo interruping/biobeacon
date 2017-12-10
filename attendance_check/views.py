@@ -79,6 +79,8 @@ class RegistrationView(APIView):
         Crypt_rand_N = Create_rand_N()
         if serializer.is_valid():
             newUser = User.objects.create(
+                first_name=serializer.validated_data['first_name'],
+                last_name=serializer.validated_data['last_name'],
                 username=serializer.validated_data['username'],
                 email=serializer.validated_data['email'],
                 password=make_password(serializer.validated_data['password']),
@@ -125,6 +127,8 @@ class ProfileView(APIView):
             prof = ProfessorProfile.objects.get(user=request.user)
             prof_img = ProfileImage.objects.get(user=request.user)
             result = {
+                'last_name' : request.user.last_name,
+                'first_name': request.user.first_name,
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'교수',
@@ -140,6 +144,8 @@ class ProfileView(APIView):
             sdt = StudentProfile.objects.get(user=request.user)
             std_img = ProfileImage.objects.get(user=request.user)
             result = {
+                'lastname' : request.user.lastname,
+                'firstname': request.user.firstname,
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'학생',
