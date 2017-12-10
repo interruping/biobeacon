@@ -1130,17 +1130,6 @@ class LectureBeaconCheck(APIView):
         else:
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 
-                    student_info = {
-                        "student_id" : card.card_owner.student_id,
-                        "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
-                        "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text),
-                        "std_status":(std_status)
-                    }
-                    student_infos.append(student_info)
-
-
 class LectureFastestView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
