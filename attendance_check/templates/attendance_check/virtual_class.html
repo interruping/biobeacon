@@ -280,7 +280,7 @@ function loadDataViewList(){
                                 </select>
                             </div>
                         </div>
-                        <div id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;"></div>
+                        <div ng-mouseover="stopRealCheck()" ng-mouseleave="continueRealCheck()" id="data_container" style="border:1px solid #c0c0c0; background-color:white; width:100%;height:392px;"></div>
                         <div id="specificControl" class="hidden" ng-app="BioBeaconApp" ng-controller="specificControlController">
                             <div class="popover-heading">수동 출석</div>
                             <div class="popover-body">

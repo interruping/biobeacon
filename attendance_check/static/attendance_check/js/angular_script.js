@@ -696,12 +696,28 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         }
     };
 
+
     var ainterval;
-    $scope.realTimeCheck = function (timeset) {
+
+    $scope.stopRealCheck = function() {
+            $interval.cancel(ainterval);
+    }
+
+
+    $scope.continueRealCheck = function() {
+            $scope.realTimeCheck();
+    }
+
+
+    $scope.realTimeCheck = function () {
 
         $interval.cancel(ainterval);
 
         ainterval = $interval(function () {
+
+
+
+
                 $http.post('/attendance_check/api/lecture/apply/list/', {"lecture": $scope.seletedLecture},
                 {
                     headers: { 'Authorization' : token }
@@ -713,7 +729,8 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
                         for ( index in students ) {
                             student = students[index];
                             myDataView
-                            .update(student.id, {id: student.id,
+                            .update(student.id,
+                            {id: student.id,
                             ImgSRC: student.profile_image,
                             Name: student.name,
                             IdNum: student.student_id,
@@ -725,7 +742,11 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
                     });
-        }, 1000,[timeset]);
+
+
+
+
+        }, 1000,[$scope.realTime]);
 
     };
 
