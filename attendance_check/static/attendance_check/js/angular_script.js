@@ -24,14 +24,14 @@ app.controller('SaveLectureTime', function($scope, $http){
         }).then(function(response){
 
                 if(response.data.result == 1)
-                    alert('변경되었습니다.');
-                    window.location.reload();
+                    $scope.loadProfile();
 
             },function(){
 
             })
 
     }
+
 });
 
 
@@ -244,6 +244,8 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
     $scope.doRegister = function () {
 
         var regist_form = {
+            "first_name" : $scope.reg_firstname,
+            "last_name" : $scope.reg_lastname,
             "username" : $scope.reg_username,
             "email" : $scope.email,
             "password" : $scope.reg_password,
@@ -253,6 +255,14 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
             "department" : $scope.selectedDepartment,
             "profile_image_id" : $scope.image_id,
         };
+
+        if($scope.reg_firstname ==""){
+            $scope.reg_firstname = null;
+            }
+
+        if($scope.reg_lastname ==""){
+            $scope.reg_lastname = null;
+            }
 
         if($scope.reg_username ==""){
             $scope.reg_username = null;
@@ -270,11 +280,13 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
             $scope.organization_id = null;
             }
 
-       if($scope.reg_username !=null && $scope.email != null && $scope.reg_password != null && $scope.reg_password_confirm != null && $scope.organization_id !=null && $scope.selectedDepartment != '0' ){
+       if($scope.reg_username !=null && $scope.email != null && $scope.reg_firstname != null&& $scope.reg_lastname !=null && $scope.reg_password != null && $scope.reg_password_confirm != null && $scope.organization_id !=null && $scope.selectedDepartment != '0' ){
             if($scope.reg_password == $scope.reg_password_confirm){
                 if($scope.profile_image  != null){
                    $http.put("/attendance_check/api/user_register/", regist_form)
                      .then(function(response){
+                      $scope.reg_firstname = '';
+                      $scope.reg_lastname = '';
                       $scope.reg_username = '';
                       $scope.email = '';
                       $scope.reg_password = '';
@@ -309,16 +321,38 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
             var subject_error="";
             var count = 0;
 
-            if( $scope.reg_username == null ||
+            if( $scope.reg_firstname == null ||
+                $scope.reg_lastname == null ||
+                $scope.reg_username == null ||
                 $scope.email == null ||
                 $scope.reg_password == null ||
                 $scope.reg_password_confirm == null ||
                  $scope.organization_id == null) {
 
+                if($scope.reg_lastname ==null){
+                    hole_error +="성";
+                    count=1;
+                    }
+
+                 if($scope.reg_firstname==null){
+                    if(count==1){
+                       hole_error +=",";
+                       }
+                    else{
+                        count =1;
+                        }
+                    hole_error +="이름";
+                 }
+
                 if($scope.reg_username ==null){
-                  hole_error +="아이디";
-                  count=1;
-                }
+                    if(count ==1){
+                       hole_error +=",";
+                       }
+                     else{
+                        count =1;
+                        }
+                    hole_error +="아이디";
+                  }
 
                 if($scope.email == null){
                   if(count ==1){
@@ -408,14 +442,14 @@ app.controller('RegisterController',['$scope', '$http', 'Upload', function ($sco
 app.controller('ProfileController', function($scope, $http){
 
 
-
     $scope.loadProfile = function () {
         $http.get('/attendance_check/api/profile', {
             headers: {
                 'Authorization' : token
             }
         }).then(function(response){
-
+            $scope.lastname =response.data.last_name;
+            $scope.firstname = response.data.first_name;
             $scope.username = response.data.username;
             $scope.department = response.data.department;
             $scope.id = response.data.id;
@@ -472,6 +506,9 @@ app.controller('LectureController', function($scope, $http){
             }
 
         }).then(function(response){
+            if(response.data.result == 1){
+            alert("잘못된 입력입니다.");
+            }
             $scope.loadLectureList();
 
             var checkCompare = response.data.failedModal
@@ -700,6 +737,61 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     };
 
 
+    var ainterval;
+
+    $scope.stopRealCheck = function() {
+            $interval.cancel(ainterval);
+    }
+
+
+    $scope.continueRealCheck = function() {
+            $scope.realTimeCheck();
+    }
+
+
+    $scope.realTimeCheck = function () {
+
+        $interval.cancel(ainterval);
+
+        ainterval = $interval(function () {
+
+
+
+
+                $http.post('/attendance_check/api/lecture/apply/list/', {"lecture": $scope.seletedLecture},
+                {
+                    headers: { 'Authorization' : token }
+
+                }).then(function(response){
+
+                        var students = response.data.students;
+
+                        for ( index in students ) {
+                            student = students[index];
+                            myDataView
+                            .update(student.id,
+                            {id: student.id,
+                            ImgSRC: student.profile_image,
+                            Name: student.name,
+                            IdNum: student.student_id,
+                            PanelStatus: student.std_status,
+                            AttendanceCheckStatus: student.std_text});
+                        }
+
+                    }, function(response){
+
+
+                    });
+
+
+
+
+        }, 1000,[$scope.realTime]);
+
+    };
+
+
+
     $scope.selectedTime = {
     0 : {str : "없음", int : 1},
     1 : {str : "1분", int : 60},
@@ -781,10 +873,11 @@ function doLate() {
 
 
 
-function onEnterSubmit(){
+function onEnterSubmit(sw){
+    if( sw == true){
      var keyCode = window.event.keyCode;
      document.getElementById("login-submit").click();
-
+  }
 }
 function onEnter(){
         if(window.event.keyCode == 13)
@@ -814,7 +907,7 @@ function chulcheckJS() {
             $('#chul1').tab('show');
         });
     }
-        else if (myInfoInfo == "20132309") {
+    else if(chulCheckInfo == "20132309") {
         $(document).ready(function(){
             $('#chul3').tab('show');
         });
@@ -1060,6 +1153,36 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
         });
     };
+
+
+    var timeInterval;
+    $scope.realTimeReset = function (timeset) {
+        if ($scope.realTime=!null)
+            $interval.cancel(timeInterval);
+        $scope.realTime = timeset;
+        $scope.strColon = " : ";
+        if (timeset<=1){
+            $scope.realTimeMin = 0;
+            $scope.realTimeSec = 0;
+        }
+
+        else{
+            timeInterval = $interval(function () {
+                $scope.realTime = $scope.realTime -1;
+                $scope.realTimeMin = parseInt($scope.realTime/60);
+                $scope.realTimeSec = $scope.realTime%60;
+
+        }, 1000,[timeset]);
+        }
+    };
+
+    $scope.selectedTime = {
+    0 : {str : "없음", int : 1},
+    1 : {str : "1분", int : 60},
+    3 : {str : "3분", int : 180},
+    5 : {str : "5분", int : 300},
+    10 :{str : "10분", int : 600}
+    }
 
 });
 

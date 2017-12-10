@@ -18,13 +18,18 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            InfoCheckSerializer,
                                            DeleteLectureSerializer,
                                            LectureListSerializer,
+                                           ProfileTimeSetSerializer,
                                            ProfessorProfileSerializer,
                                            StudentProfileSerializer,
                                            LectureCreateUuidSerializer,
                                            LectureUuidSerializer,
                                            LectureCheckSerializer,
                                            LectureCheckedListViewSerializer,
-                                           LectureBeaconCheckSerializer)
+                                           LectureBeaconCheckSerializer,
+                                           LectureRequestSerializer,
+                                           LectureCheckedListViewSerializer)
+
+
 
 from django.utils import timezone
 from .models import ( ProfessorProfile,
@@ -79,6 +84,8 @@ class RegistrationView(APIView):
         Crypt_rand_N = Create_rand_N()
         if serializer.is_valid():
             newUser = User.objects.create(
+                first_name=serializer.validated_data['first_name'],
+                last_name=serializer.validated_data['last_name'],
                 username=serializer.validated_data['username'],
                 email=serializer.validated_data['email'],
                 password=make_password(serializer.validated_data['password']),
@@ -125,12 +132,15 @@ class ProfileView(APIView):
             prof = ProfessorProfile.objects.get(user=request.user)
             prof_img = ProfileImage.objects.get(user=request.user)
             result = {
+                'last_name' : request.user.last_name,
+                'first_name': request.user.first_name,
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'교수',
                 'id' : prof.employee_id,
                 'department' : prof.department.name,
                 'profile_image' : prof_img.image.url,
+                'time_set' : prof.absence_time_set,
             }
 
 
@@ -139,6 +149,8 @@ class ProfileView(APIView):
             sdt = StudentProfile.objects.get(user=request.user)
             std_img = ProfileImage.objects.get(user=request.user)
             result = {
+                'lastname' : request.user.lastname,
+                'firstname': request.user.firstname,
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'학생',
@@ -185,7 +197,11 @@ class LectureCreateView(APIView):
             lec.save()
 
             return Response(serializer.data)
-
+        else:
+            result = {
+            "result" : 1
+            }
+            return Response(result)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -517,6 +533,32 @@ class LectureDeleteView(APIView):
 
 
 
+class ProfileTimeSetView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+
+        serializer = ProfileTimeSetSerializer(data=request.data)
+
+        if serializer.is_valid():
+            time_set = serializer.validated_data['time_set']
+
+            if request.user.is_staff:
+                prof = ProfessorProfile.objects.get(user=request.user)
+                prof.absence_time_set = time_set
+                prof.save()
+
+                result = {
+                    "result": 1
+                }
+            return Response(result)
+
+        else:
+            return Response("Lecture Error.", status=status.HTTP_403_FORBIDDEN)
+
+
+
 class LectureReceiveApplyView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -623,7 +665,7 @@ class LectureReceiveApplyListView(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
 
@@ -739,6 +781,81 @@ class LectureCheckUUID(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LectureAvailableList(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+        availableList = Lecture.objects.all()
+
+        results = []
+        for list in availableList:
+            result = {
+                 "lectureList": list.title,
+                 "id": list.pk,
+            }
+            results.append(result)
+        return Response(results)
+
+class LectureRequestList (APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+
+        std = StudentProfile.objects.get(user=request.user)
+        reqLectureList = LectureReceiveCard.objects.filter(card_owner=std)
+
+        results = []
+        for list in reqLectureList:
+            result = {
+                "lecture":list.target_lecture.title,
+                "pk": list.pk,
+            }
+            results.append(result)
+
+        return Response({"result": results})
+
+class StudentView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        std = StudentProfile.objects.get(user=request.user)
+
+        return Response({"StudentPK": std.pk})
+
+class LectureRequestView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        serializer = LectureRequestSerializer(data=request.data)
+
+        if serializer.is_valid():
+
+            std = StudentProfile.objects.get(user=request.user)
+            reqList = Lecture.objects.get(pk=serializer.validated_data['id'])
+
+            record = LectureReceiveCard.objects.filter(target_lecture=reqList, card_owner=std)
+            if record:
+                result = {
+                    'fail': True,
+                }
+                return Response(result)
+
+            std = StudentProfile.objects.get(user=request.user)
+            reqList = Lecture.objects.get(title=serializer.validated_data['title'])
+
+            lec = LectureReceiveCard.objects.create(
+                target_lecture=reqList,
+                card_owner=std,
+            )
+            lec.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 출석체크값 저장
 class LectureStuCheck(APIView):
@@ -891,7 +1008,7 @@ class LectureListSearch(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -994,7 +1111,7 @@ class LectureCheckedSearchView(APIView):
                         "id" : card.card_owner.pk,
                         "name" : card.card_owner.user.username,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
-                        "std_text": (std_text.decode('utf-8')),
+                        "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
@@ -1247,7 +1364,6 @@ class LectureBeaconCheck(APIView):
         else:
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 
-
 class LectureFastestView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -1282,4 +1398,5 @@ class LectureFastestView(APIView):
                 return Response("You don't have lecture", status=status.HTTP_403_FORBIDDEN)
         else:
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
+
 

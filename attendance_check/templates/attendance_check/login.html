@@ -33,6 +33,18 @@
                         </form>
                         <form id="register-form" action="#" method="post" role="form" style="display: none;" ng-init="user_type='true'" ng-controller="RegisterController">
                             <h2>회원가입</h2>
+
+                            <div class="form-group">
+                                <div class = "row">
+                                    <div  class ="col-xs-6 tabs"class="form-group">
+                                        <input type="text" name="last_name" id="reg_lastname" class ="form-control" placeholder ="성" value="" ng-model="reg_lastname">
+                                    </div>
+                                    <div  class = "col-xs-6 tabs" class="form-group">
+                                        <input type="text" name="first_name" id="reg_firstname" class ="form-control"placeholder="이름" value="" ng-model="reg_firstname">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <input type="text" name="username" id="reg_username" data-toggle="popover" data-trigger="focus" tabindex="1" class="form-control" ng-keyup="doCheckId()" placeholder="아이디" value="" ng-model="reg_username">
                             </div>
