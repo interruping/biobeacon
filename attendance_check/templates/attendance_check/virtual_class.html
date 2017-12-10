@@ -145,7 +145,7 @@ function loadDataViewList(){
   			<div class="panel-body">
 			{% verbatim %}
                 <img ng-src="{{ profile_image }}" width="100px" height="120px"><br/>
-            구분 : {{ user_type }} <br/>
+            {{lastname}}{{firstname}} {{ user_type }} <br/>
             아이디 : {{ username }} <br/>
 			학번/사번 : {{ id }} <br/>
             소속학과 : {{ department }} <br/>
@@ -167,10 +167,10 @@ function loadDataViewList(){
                                placeholder="강의실 번호" ng-model="newLectureNum">
                     </div>
                     <div class="col-md-7">
-                        <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
+                        <input type="text" class=" form-control"id="subject_id" style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
                     </div>
                     <div class="col-md-2">
-                        <input type="button" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable();">
+                        <input type="button" id ="subject_submit" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable();">
                     </div>
 
                 </div>
@@ -264,7 +264,9 @@ function loadDataViewList(){
                                 {% endverbatim %}
                             </select>
                             남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
-                            <ul class="navbar-form navbar-right">
+
+                        <ul class="navbar-form navbar-right">
+                                {% verbatim %}{{lectureTimeRecord}}{% endverbatim %}
                                 <button type="button" class="btn btn-success" tyle="width:100px;margin-top:10px" value="save" ng-click="save();">저장</button>
                             </ul>
                             <hr>
@@ -306,6 +308,10 @@ function loadDataViewList(){
 			var keyID = (event.which) ? event.which : event.keyCode;
 			if ( (keyID >= 48 && keyID <= 57) || (keyID >= 96 && keyID <= 105) || keyID == 8 || keyID == 46 || keyID == 37 || keyID == 39 )
 				return;
+			else if( keyId == 9){
+			    var target = document.getElementById(subjcet_id);
+			    target.focus();
+			}
 			else
 				return false;
 		}
@@ -335,8 +341,9 @@ function loadDataViewList(){
                             }
                             event.target.value = event.target.value.replace(/[^0-9]/g, "");
 
-                 }
-		}
+            }
+    }
+
 
 
 
@@ -351,7 +358,7 @@ function loadDataViewList(){
     </div>
 
 
-    <-- 강좌 기록 -->
+    <!-- 강좌 기록 -->
     <div id="attendance_check_list" class="tab-pane fade" ng-controller="LectureAttendanceCheckController_list" ng-init="loadLectureList()">
         <div class="panel panel-default">
             <div class="panel-heading">강좌선택</div>
