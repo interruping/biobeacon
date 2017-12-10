@@ -709,24 +709,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     }
 
 
-    $scope.save = function () {
-            $http.get('/attendance_check/api/lecture/fastest/view/',
-            {
-                headers: {
-                    'Authorization' : token
-                }
-
-            }).then(function(response){
-
-            }, function (response){
-
-            });
-        };
-
-
-
-
-
 
 });
 
@@ -1064,18 +1046,6 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
         }
     };
-    $scope.startLecture = function () {
-        $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "second" : $scope.selectedTimeMin},
-        {
-            headers: {
-                'Authorization' : token
-            }
-
-        }).then(function(response){
-            $scope.updateSelectedLectureTitle()
-        },function(response){
-        });
-    };
 
     $scope.checkUUID = function () {
         $http.post('/attendance_check/api/lecture/apply/checkUUID/', {"id": $scope.seletedLecture},
@@ -1090,37 +1060,6 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
         });
     };
-
-
-    var timeInterval;
-    $scope.realTimeReset = function (timeset) {
-        if ($scope.realTime=!null)
-            $interval.cancel(timeInterval);
-        $scope.realTime = timeset;
-        $scope.strColon = " : ";
-        if (timeset<=1){
-            $scope.realTimeMin = 0;
-            $scope.realTimeSec = 0;
-        }
-
-        else{
-            timeInterval = $interval(function () {
-                $scope.realTime = $scope.realTime -1;
-                $scope.realTimeMin = parseInt($scope.realTime/60);
-                $scope.realTimeSec = $scope.realTime%60;
-
-        }, 1000,[timeset]);
-        }
-    };
-
-
-    $scope.selectedTime = {
-    0 : {str : "없음", int : 1},
-    1 : {str : "1분", int : 60},
-    3 : {str : "3분", int : 180},
-    5 : {str : "5분", int : 300},
-    10 :{str : "10분", int : 600}
-    }
 
 });
 

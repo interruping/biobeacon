@@ -599,16 +599,24 @@ class LectureReceiveApplyListView(APIView):
                             std_status = 'success'
 
                         elif std_card.is_late_checker == True:
-                            std_text = '지각'
-                            std_status = 'warning'
+                            if (std_card.beacon_checker == True):
+                                std_text = '지각(B)'
+                                std_status = 'warning'
+                            else:
+                                std_text = '지각'
+                                std_status = 'warning'
 
                         elif std_card.is_absent_checker == True:
                             std_text = '결석'
                             std_status = 'danger'
 
                         else:
-                            std_text = '출석'
-                            std_status = 'primary'
+                            if (std_card.beacon_checker == True):
+                                std_text = '출석(B)'
+                                std_status = 'primary'
+                            else:
+                                std_text = '출석'
+                                std_status = 'primary'
 
                     student_info = {
                         "student_id" : card.card_owner.student_id,
@@ -618,6 +626,8 @@ class LectureReceiveApplyListView(APIView):
                         "std_text": (std_text.decode('utf-8')),
                         "std_status":(std_status)
                     }
+
+
                     student_infos.append(student_info)
 
                 result = {
@@ -857,16 +867,24 @@ class LectureListSearch(APIView):
                             std_status = 'success'
 
                         elif std_card.is_late_checker == True:
-                            std_text = '지각'
-                            std_status = 'warning'
+                            if (std_card.beacon_checker == True):
+                                std_text = '지각(B)'
+                                std_status = 'warning'
+                            else:
+                                std_text = '지각'
+                                std_status = 'warning'
 
                         elif std_card.is_absent_checker == True:
                             std_text = '결석'
                             std_status = 'danger'
 
                         else:
-                            std_text = '출석'
-                            std_status = 'primary'
+                            if (std_card.beacon_checker == True):
+                                std_text = '출석(B)'
+                                std_status = 'primary'
+                            else:
+                                std_text = '출석'
+                                std_status = 'primary'
 
                     student_info = {
                         "student_id" : card.card_owner.student_id,
@@ -952,16 +970,24 @@ class LectureCheckedSearchView(APIView):
                             std_status = 'success'
 
                         elif std_card.is_late_checker == True:
-                            std_text = '지각'
-                            std_status = 'warning'
+                            if (std_card.beacon_checker == True):
+                                std_text = '지각(B)'
+                                std_status = 'warning'
+                            else:
+                                std_text = '지각'
+                                std_status = 'warning'
 
                         elif std_card.is_absent_checker == True:
                             std_text = '결석'
                             std_status = 'danger'
 
                         else:
-                            std_text = '출석'
-                            std_status = 'primary'
+                            if (std_card.beacon_checker == True):
+                                std_text = '출석(B)'
+                                std_status = 'primary'
+                            else:
+                                std_text = '출석'
+                                std_status = 'primary'
 
                     student_info = {
                         "student_id" : card.card_owner.student_id,
