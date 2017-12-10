@@ -147,8 +147,8 @@ class ProfileView(APIView):
             sdt = StudentProfile.objects.get(user=request.user)
             std_img = ProfileImage.objects.get(user=request.user)
             result = {
-                'lastname' : request.user.lastname,
-                'firstname': request.user.firstname,
+                'last_name' : request.user.last_name,
+                'first_name': request.user.first_name,
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'학생',
