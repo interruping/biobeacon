@@ -875,6 +875,8 @@ class LectureStuCheck(APIView):
 
             if AttendanceRecord.objects.filter(lecture = lecture):#최신 활성 강의기록
                 attendanceRecord = AttendanceRecord.objects.filter(lecture=lecture).last()
+            else:
+                return Response({"StoredLecture": 1})
 
             # 강의 활성화가 있으면
             if attendanceRecord:

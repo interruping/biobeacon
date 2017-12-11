@@ -925,7 +925,10 @@ app.controller('specificControlController', function($scope, $http){
             }
 
         }).then(function(response){
-
+            if (response.data.StoredLecture) {
+                $("#lecture-stored-modal").appendTo("body").modal();
+                $interval.cancel(ainterval);
+            }
         }, function (response){
         });
 
