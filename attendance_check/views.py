@@ -25,8 +25,10 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureUuidSerializer,
                                            LectureCheckSerializer,
                                            LectureCheckedListViewSerializer,
+                                           LectureBeaconCheckSerializer,
                                            LectureRequestSerializer,
                                            LectureCheckedListViewSerializer)
+
 
 
 from django.utils import timezone
@@ -147,8 +149,8 @@ class ProfileView(APIView):
             sdt = StudentProfile.objects.get(user=request.user)
             std_img = ProfileImage.objects.get(user=request.user)
             result = {
-                'lastname' : request.user.lastname,
-                'firstname': request.user.firstname,
+                'last_name' : request.user.last_name,
+                'first_name': request.user.first_name,
                 'username' : request.user.username,
                 'email' : request.user.email,
                 'user_type' : u'학생',
@@ -614,7 +616,7 @@ class LectureReceiveApplyListView(APIView):
                 wait_time = 1
                 if activate_lec_card:
                     lec_card = activate_lec_card.last()
-                    wait_time = (lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().minute*60+timezone.now().second)
+                    wait_time = (lec_card.end_time.hour*360+lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().hour*360+timezone.now().minute*60+timezone.now().second)
                     if wait_time<0:
                         wait_time = 1
                 #
@@ -639,16 +641,24 @@ class LectureReceiveApplyListView(APIView):
                             std_status = 'success'
 
                         elif std_card.is_late_checker == True:
-                            std_text = '지각'
-                            std_status = 'warning'
+                            if (std_card.beacon_checker == True):
+                                std_text = '지각(B)'
+                                std_status = 'warning'
+                            else:
+                                std_text = '지각'
+                                std_status = 'warning'
 
                         elif std_card.is_absent_checker == True:
                             std_text = '결석'
                             std_status = 'danger'
 
                         else:
-                            std_text = '출석'
-                            std_status = 'primary'
+                            if (std_card.beacon_checker == True):
+                                std_text = '출석(B)'
+                                std_status = 'primary'
+                            else:
+                                std_text = '출석'
+                                std_status = 'primary'
 
                     student_info = {
                         "student_id" : card.card_owner.student_id,
@@ -658,6 +668,8 @@ class LectureReceiveApplyListView(APIView):
                         "std_text": (std_text),
                         "std_status":(std_status)
                     }
+
+
                     student_infos.append(student_info)
 
                 result = {
@@ -863,6 +875,8 @@ class LectureStuCheck(APIView):
 
             if AttendanceRecord.objects.filter(lecture = lecture):#최신 활성 강의기록
                 attendanceRecord = AttendanceRecord.objects.filter(lecture=lecture).last()
+            else:
+                return Response({"StoredLecture": 1})
 
             # 강의 활성화가 있으면
             if attendanceRecord:
@@ -922,7 +936,6 @@ class LectureListSearch(APIView):
             if serializer.is_valid():
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
-
                 # 해당 강좌의 결석플래그 상태 조정
                 recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
                 if recordLate:
@@ -973,16 +986,24 @@ class LectureListSearch(APIView):
                             std_status = 'success'
 
                         elif std_card.is_late_checker == True:
-                            std_text = '지각'
-                            std_status = 'warning'
+                            if (std_card.beacon_checker == True):
+                                std_text = '지각(B)'
+                                std_status = 'warning'
+                            else:
+                                std_text = '지각'
+                                std_status = 'warning'
 
                         elif std_card.is_absent_checker == True:
                             std_text = '결석'
                             std_status = 'danger'
 
                         else:
-                            std_text = '출석'
-                            std_status = 'primary'
+                            if (std_card.beacon_checker == True):
+                                std_text = '출석(B)'
+                                std_status = 'primary'
+                            else:
+                                std_text = '출석'
+                                std_status = 'primary'
 
                     student_info = {
                         "student_id" : card.card_owner.student_id,
@@ -1032,17 +1053,13 @@ class LectureCheckedSearchView(APIView):
             if serializer.is_valid():
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
-
                 ######
                 # 해당 강의의 활성화 여부 찾기
                 record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
                 # 해당 강의의 활성화유무 판단 활성화되면
                 if record:
                     record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
-                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
-                    if (record.end_time < timezone.now()):
-                        record.activate = False
-                        record.save()
+
                 ######
 
                 #활성 강의 남은시간 계산
@@ -1072,16 +1089,24 @@ class LectureCheckedSearchView(APIView):
                             std_status = 'success'
 
                         elif std_card.is_late_checker == True:
-                            std_text = '지각'
-                            std_status = 'warning'
+                            if (std_card.beacon_checker == True):
+                                std_text = '지각(B)'
+                                std_status = 'warning'
+                            else:
+                                std_text = '지각'
+                                std_status = 'warning'
 
                         elif std_card.is_absent_checker == True:
                             std_text = '결석'
                             std_status = 'danger'
 
                         else:
-                            std_text = '출석'
-                            std_status = 'primary'
+                            if (std_card.beacon_checker == True):
+                                std_text = '출석(B)'
+                                std_status = 'primary'
+                            else:
+                                std_text = '출석'
+                                std_status = 'primary'
 
                     student_info = {
                         "student_id" : card.card_owner.student_id,
@@ -1115,14 +1140,225 @@ class LectureBeaconCheck(APIView):
 
     def post(self, request):
         if request.user:
-            serializer = LectureCheckedListViewSerializer(data = request.data)
+            serializer = LectureBeaconCheckSerializer(data = request.data)
             if serializer.is_valid():
-                #일단 출석 활성화 검사와 uuid값 검사가 이루어져야함
-                #받아야하는 값이 사용자 정보 UUID값 그리고ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ음 뭐가있을까 음 강의실 정보인데 거기에는 뭐가있을까 일단 수강신천한 강의 정보를 보내겠지
-                #그러면 으므으므믐 LectureReceiveCard에 대한 id값을 받고 보내온 id와 user가 일치하는지 확인 그게 향하는 lecture에서 검사가 가능
-                #거기서 뽑아온 강의실 번호로 uuid확인 여기서 어떤 값을 확인할지 정해야한다
-                # 결과값
+                #해당 강의
+                lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
 
+                # 해당 강좌의 결석플래그 상태 조정
+                recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
+                if recordLate:
+                    for list in recordLate:
+                        if list.absence_time < timezone.now():
+                            list.activate_absence = True
+                            list.save()
+
+                # 해당 강의의 활성화 여부 찾기
+                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+
+                # 해당 강의의 활성화유무 판단 활성화되면
+                if record:
+                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
+                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
+                    if (record.end_time < timezone.now()):
+                        record.activate = False
+                        record.save()
+
+
+
+                #요청한 강의의 uuid
+                lectureUuid = LectureUuidRecord.objects.get(lecture_num = lecture.lecture_num)
+
+
+                # 지정한 강의실 UUID 갱신기간이 넘어가면 수행
+                if lectureUuid.init_time <= timezone.now():
+                    secret_key = (int)(lectureUuid.secret_key)
+                    prime_num = (int)(lectureUuid.prime_num)
+
+                    # UUID값을 계산하여 저장 now현재 pre이전 next다음
+                    # UUID_calc(prime_num, secret_key, default_uuid, 강의실번호)
+                    lectureUuid.uuid_now = (uuidcalc.UUID_calc_now(prime_num, secret_key, lectureUuid.default_uuid,
+                                                                   lecture.lecture_num))
+                    lectureUuid.uuid_pre = (uuidcalc.UUID_calc_pre(prime_num, secret_key, lectureUuid.default_uuid,
+                                                                   lecture.lecture_num))
+                    lectureUuid.uuid_next = (
+                    uuidcalc.UUID_calc_next(prime_num, secret_key, lectureUuid.default_uuid,
+                                            lecture.lecture_num))
+                    # 다음 uuid값이 변경해야할 값을 저장
+                    lectureUuid.init_time = timezone.now() + datetime.timedelta(
+                        minutes=uuidcalc.addTime(timezone.now().minute)) - datetime.timedelta(
+                        seconds=timezone.now().second)
+                    lectureUuid.save()
+
+                if AttendanceRecord.objects.filter(lecture=lecture).last():
+                    activateRecord = AttendanceRecord.objects.filter(lecture=lecture).last()
+                    activateRecord = AttendanceRecord.objects.get(pk = activateRecord.pk)
+                # 해당 강좌가 결석 플레그가 있으면
+                if activateRecord.activate_absence == True:
+                    userInfo = User.objects.get(username=request.user)
+                    userprofile = StudentProfile.objects.get(user=userInfo)
+                    userLectureCard = AttendanceCard.objects.filter(checker=userprofile, record_to = activateRecord)
+
+                    if not userLectureCard:
+                        card = AttendanceCard.objects.create(
+                            checker=userprofile,
+                            record_to=activateRecord,
+                            check_time=timezone.now(),
+                            check_start_time=activateRecord.start_time,
+                            is_late_checker=True,
+                            is_reasonableabsent_checker=False,
+                            is_absent_checker=True
+                        )
+                        card.save()
+
+                #활성화되고 결석플래그가 없는 강좌가 있으면
+                elif  activateRecord.activate==True:
+                    if lectureUuid.uuid_now == serializer.validated_data['lectureUuid']:
+                        userInfo = User.objects.get(username=request.user)
+                        userprofile = StudentProfile.objects.get(user=userInfo)
+                        userLectureCard = AttendanceCard.objects.filter(checker=userprofile, record_to = activateRecord)
+
+
+
+                        #시차 차이에 의한 UUID값의 허용 중단플래그 설정
+                        if (((timezone.now() > lectureUuid.init_time - datetime.timedelta(minutes=1)) or (
+                        timezone.now() < lectureUuid.init_time - datetime.timedelta(minutes=9)))):
+                            if lectureUuid.time_difference_check_flag == True:
+                                lectureUuid.time_difference_check_flag = False
+                                lectureUuid.time_difference = False
+                        else:
+                            lectureUuid.time_difference_check_flag = False
+                            lectureUuid.time_difference = True
+                        lectureUuid.save()
+
+
+                        #학생 출결이 이미 있으면
+                        if userLectureCard:
+                            userLectureCard = AttendanceCard.objects.get(checker=userprofile,record_to=activateRecord)
+                            userLectureCard.beacon_checker = True
+                            userLectureCard.is_late_checker = False
+                            userLectureCard.is_reasonableabsent_checker = False
+                            userLectureCard.is_absent_checker = False
+                            userLectureCard.save()
+                        # 없으면 생성
+                        else:
+                            card = AttendanceCard.objects.create(
+                                checker=userprofile,
+                                record_to=activateRecord,
+                                check_time=timezone.now(),
+                                check_start_time=activateRecord.start_time,
+                                beacon_checker = True,
+                            )
+                            card.save()
+                    else:
+                        if (((timezone.now() > lectureUuid.init_time - datetime.timedelta(minutes=1)) or (timezone.now() < lectureUuid.init_time - datetime.timedelta(minutes=9))) and (lectureUuid.time_difference == True)):
+                            userInfo = User.objects.get(username=request.user)
+                            userprofile = StudentProfile.objects.get(user=userInfo)
+                            userLectureCard = AttendanceCard.objects.filter(checker=userprofile,record_to=activateRecord)
+
+                            #이전, 다음 UUID와 일치하는지
+                            if lectureUuid.uuid_pre == serializer.validated_data['lectureUuid'] or lectureUuid.uuid_next == serializer.validated_data['lectureUuid']:
+                                lectureUuid.time_difference_check_flag = True
+                                lectureUuid.save()
+                                # 학생 출결이 이미 있으면
+                                if userLectureCard:
+                                    userLectureCard = AttendanceCard.objects.get(checker=userprofile,record_to=activateRecord)
+                                    userLectureCard.beacon_checker = True
+                                    userLectureCard.is_late_checker = False
+                                    userLectureCard.is_reasonableabsent_checker = False
+                                    userLectureCard.is_absent_checker = False
+                                    userLectureCard.save()
+                                # 없으면 생성
+                                else:
+
+                                    card = AttendanceCard.objects.create(
+                                        checker=userprofile,
+                                        record_to=activateRecord,
+                                        check_time=timezone.now(),
+                                        check_start_time=activateRecord.start_time,
+                                        beacon_checker = True
+                                    )
+                                    card.save()
+
+
+
+                #강좌의 인증시간이 끝나 지각처리를 받을 때
+                elif activateRecord.activate==False:
+                    if lectureUuid.uuid_now == serializer.validated_data['lectureUuid']:
+                        userInfo = User.objects.get(username=request.user)
+                        userprofile = StudentProfile.objects.get(user=userInfo)
+                        userLectureCard = AttendanceCard.objects.filter(checker=userprofile,record_to=activateRecord)
+
+
+
+                        # 시차 차이에 의한 UUID값의 허용 중단플래그 설정
+                        if (((timezone.now() > lectureUuid.init_time - datetime.timedelta(minutes=1)) or (
+                                    timezone.now() < lectureUuid.init_time - datetime.timedelta(minutes=9)))):
+                            if lectureUuid.time_difference_check_flag == True:
+                                lectureUuid.time_difference_check_flag = False
+                                lectureUuid.time_difference = False
+                        else:
+                            lectureUuid.time_difference_check_flag = False
+                            lectureUuid.time_difference = True
+                        lectureUuid.save()
+
+                        # 학생 기록이 없으면
+                        if not userLectureCard:
+                            card = AttendanceCard.objects.create(
+                                beacon_checker = True,
+                                checker=userprofile,
+                                record_to=activateRecord,
+                                check_time=timezone.now(),
+                                check_start_time=activateRecord.start_time,
+                                is_late_checker=True,
+                                is_reasonableabsent_checker=False,
+                                is_absent_checker=False
+                            )
+                            card.save()
+
+                        # 학생 출결이 이미 있으면 결석 > 지각
+                        elif userLectureCard.last().is_absent_checker== True:
+                            userLectureCard = AttendanceCard.objects.get(checker=userprofile,record_to=activateRecord)
+                            userLectureCard.beacon_checker = True
+                            userLectureCard.is_late_checker = True
+                            userLectureCard.is_reasonableabsent_checker = False
+                            userLectureCard.is_absent_checker = False
+                            userLectureCard.save()
+
+
+                    else:
+                        if (((timezone.now() > lectureUuid.init_time - datetime.timedelta(minutes=1)) or (timezone.now() < lectureUuid.init_time - datetime.timedelta(minutes=9))) and (lectureUuid.time_difference == True)):
+
+                            userInfo = User.objects.get(username=request.user)
+                            userprofile = StudentProfile.objects.get(user=userInfo)
+                            userLectureCard = AttendanceCard.objects.filter(checker=userprofile,record_to=activateRecord)
+
+                            #이전, 다음 UUID와 일치
+                            if lectureUuid.uuid_pre == serializer.validated_data['lectureUuid'] or lectureUuid.uuid_next == serializer.validated_data['lectureUuid']:
+                                lectureUuid.time_difference_check_flag = True
+                                activateRecord.save()
+                                # 학생 기록이 없으면
+                                if not userLectureCard:
+                                    card = AttendanceCard.objects.create(
+                                        beacon_checker = True,
+                                        checker=userprofile,
+                                        record_to=activateRecord,
+                                        check_time=timezone.now(),
+                                        check_start_time=activateRecord.start_time,
+                                        is_late_checker=True,
+                                        is_reasonableabsent_checker=False,
+                                        is_absent_checker=False
+                                    )
+                                    card.save()
+
+                                # 학생 출결이 이미 있으면 결석 > 지각
+                                elif userLectureCard.last().is_absent_checker == True:
+                                    userLectureCard = AttendanceCard.objects.get(checker=userprofile, record_to=activateRecord)
+                                    userLectureCard.beacon_checker = True
+                                    userLectureCard.is_late_checker = True
+                                    userLectureCard.is_reasonableabsent_checker = False
+                                    userLectureCard.is_absent_checker = False
+                                    userLectureCard.save()
 
                 return Response()
             else:
@@ -1157,7 +1393,7 @@ class LectureFastestView(APIView):
                             "lecture_title" : card.target_lecture.title
                        }
                         listcach.append(cardList)
-                print (listcach)
+
                 return Response(listcach)
 
             else:

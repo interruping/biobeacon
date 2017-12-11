@@ -46,6 +46,8 @@ from .views import (
                     LectureStuCheck,
                     LectureListSearch,
                     LectureCheckedSearchView,
+                    LectureFastestView,
+                    LectureBeaconCheck,
                     StudentView,
                     LectureFastestView)
 
@@ -92,6 +94,7 @@ urlpatterns = [
     url(r'^api/lecture/apply/check/status/$', LectureStuCheck.as_view()),
     url(r'^api/lecture/list/search/$', LectureListSearch.as_view()),
     url(r'^api/lecture/list/checked/view/$', LectureCheckedSearchView.as_view()),
+    url(r'^api/lecture/check/uuid/$', LectureBeaconCheck.as_view()),
     url(r'^api/lecture/request/view/$', LectureRequestView.as_view()),
     url(r'^api/student/view/$', StudentView.as_view()),
     url(r'^api/lecture/fastest/view/$', LectureFastestView.as_view()),
