@@ -1387,7 +1387,8 @@ class LectureFastestView(APIView):
 
                         cardList = {
                             "lecture_id" : card.target_lecture.pk,
-                            "lecture_title" : card.target_lecture.title
+                            "lecture_title" : card.target_lecture.title,
+                            "lecture_num" : card.target_lecture.lecture_num
                        }
                         listcach.append(cardList)
 
