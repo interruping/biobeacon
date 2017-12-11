@@ -247,7 +247,7 @@ function loadDataViewList(){
 	</div>
 	<div id="attendance_check" class="tab-pane fade" ng-controller="LectureAttendanceCheckController" ng-init="loadLectureList()">
         <div class="panel panel-default">
-            <div class="panel-heading">강좌선택</div>
+            <div class="panel-heading">강좌선택<i class="fa fa-cog fa-spin" ng-click="settingBeaconReach()" style="cursor:pointer;float: right; font-size:24px"></i></div>
             <div class="panel-body">
                 <div class="form-group">
                     <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()">
@@ -355,6 +355,35 @@ function loadDataViewList(){
                 </div>
             </div>
         </div>
+        <!--강의실 비콘거리 세팅-->
+    <div class="modal fade" id="beaconReachSetting" role="dialog" aria-labelledby="settingTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">닫기</span>
+                    </button>
+                    <h4 class="modal-title" id="settingTitle">비콘 탐지 거리 설정</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <input type="radio" name="val" value="1" ng-model="updateBeaconReach.val">1M<br>
+                        <input type="radio" name="val" value="3" ng-model="updateBeaconReach.val">3M<br>
+                        <input type="radio" name="val" value="4" ng-model="updateBeaconReach.val">4M<br>
+                        <input type="radio" name="val" value="5" ng-model="updateBeaconReach.val">5M<br>
+                        <input type="radio" name="val" value="7" ng-model="updateBeaconReach.val">7M<br>
+                        <input type="radio" name="val" value="10" ng-model="updateBeaconReach.val">10M<br>
+                    </form>
+                    <hr>
+                    {% verbatim %}{{reachLimiter}}{% endverbatim %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" ng-click="updateBeaconReach()">수정</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">종료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!------------------------------------------------------------------------------->
     </div>
 
 
@@ -408,6 +437,7 @@ function loadDataViewList(){
             </div>
         </div>
     </div>
+
 </div>
 
 <script>chulcheckJS();</script>
