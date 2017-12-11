@@ -176,10 +176,9 @@ function loadDataViewList(){
                 </div>
 			{% verbatim %}
                 <div class="well" ng-repeat="lecture in lectures">
-                    강좌명 : {{lecture.title}}<button type="button" class="btn btn-default" style="float: right;height:40px;margin-top:-9px;" onclick="clickdelete()">삭제</button>
+                    강좌명 : {{lecture.title}}<button id="{{lecture.id}}" type="button" class="btn btn-default" style="float: right;height:40px;margin-top:-9px;" ng-click="clickdelete($event.target)">삭제</button>
                     <div class="modal fade" id="deleteCheck" role="dialog">
               <div class="modal-dialog" >
-
                   <!-- Modal content-->
                   <div class="modal-content">
                       <div class="modal-header">
@@ -190,20 +189,13 @@ function loadDataViewList(){
                           <p>정말 삭제 하시겠습니까?</p>
                       </div>
                       <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="deleteLecture(lecture.id)">네</button>
+                          <button type="button" class="btn btn-default" id="pk" data-dismiss="modal" ng-click="deleteLecture()">네</button>
                           <button type="submit" class="btn btn-default" data-dismiss="modal">아니요</button>
                       </div>
                   </div>
 
               </div>
           </div>
-                    <script>
-             function clickdelete(){
-             $("#deleteCheck").css("z-index", "9999");
-            $("#deleteCheck").appendTo("body").modal();
-             }
-
-          </script>
                 </div>
 
                 <hr>

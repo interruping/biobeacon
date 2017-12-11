@@ -466,9 +466,16 @@ app.controller('ProfileController', function($scope, $http){
 });
 
 app.controller('LectureController', function($scope, $http){
+    var deleteId = 0;
 
-    $scope.deleteLecture = function(num){
-        $http.post('/attendance_check/api/lecture/delete/',{"id": num}, {
+      $scope.clickdelete = function(deleteTarget){
+            deleteId = deleteTarget.id;
+            $("#deleteCheck").css("z-index", "9999");
+            $("#deleteCheck").appendTo("body").modal();
+             }
+
+    $scope.deleteLecture = function(){
+        $http.post('/attendance_check/api/lecture/delete/',{"id": deleteId}, {
             headers: {
                 'Authorization' : token
             }
