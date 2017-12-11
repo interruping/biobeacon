@@ -97,7 +97,7 @@ class LectureCheckedListViewSerializer(serializers.Serializer):
 class LectureBeaconCheckSerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
     lectureUuid = serializers.CharField(max_length=32, default='')
-
+    reach = serializers.CharField(max_length=2)
 
 class DeleteLectureSerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -108,3 +108,7 @@ class ProfileTimeSetSerializer(serializers.Serializer):
 
 class LectureRequestSerializer(serializers.Serializer):
     id = serializers.CharField()
+
+class LectureBeaconReachSetSerializer(serializers.Serializer):
+    value = serializers.CharField(max_length=2)
+    lecture = serializers.IntegerField()

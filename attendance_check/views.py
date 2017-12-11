@@ -27,7 +27,8 @@ from attendance_check.serializers import ( RegistrationSerializer,
                                            LectureCheckedListViewSerializer,
                                            LectureBeaconCheckSerializer,
                                            LectureRequestSerializer,
-                                           LectureCheckedListViewSerializer)
+                                           LectureCheckedListViewSerializer,
+                                           LectureBeaconReachSetSerializer)
 
 
 
@@ -369,7 +370,7 @@ class LectureStartView(APIView):
             record.save()
 
             selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
-            check_start_time_record = ((str)(selectLecture.last().start_time + datetime.timedelta(hours=9)))[0:16]
+            check_start_time_record = ((str)(selectLecture.last().start_time))[0:16]
 
             result = {
                 "serializer.data": serializer.data,
@@ -616,17 +617,17 @@ class LectureReceiveApplyListView(APIView):
                 wait_time = 1
                 if activate_lec_card:
                     lec_card = activate_lec_card.last()
-                    wait_time = (lec_card.end_time.hour*360+lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().hour*360+timezone.now().minute*60+timezone.now().second)
+                    wait_time = (lec_card.end_time.hour*3600+lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().hour*3600+timezone.now().minute*60+timezone.now().second)
                     if wait_time<0:
                         wait_time = 1
-                #
+
 
 
                 student_infos = []
                 selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
                 check_start_time_record = ''
                 if selectLecture:
-                    check_start_time_record = ((str)(selectLecture.last().start_time+datetime.timedelta(hours=9)))[0:16]
+                    check_start_time_record = ((str)(selectLecture.last().start_time))[0:16]
                 for card in cards:
                     std_text = ''
                     try :
@@ -663,7 +664,7 @@ class LectureReceiveApplyListView(APIView):
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
+                        "name" : card.card_owner.user.last_name+card.card_owner.user.first_name,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
                         "std_text": (std_text),
                         "std_status":(std_status)
@@ -1008,7 +1009,7 @@ class LectureListSearch(APIView):
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
+                        "name" : card.card_owner.user.last_name+card.card_owner.user.first_name,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
                         "std_text": (std_text),
                         "std_status":(std_status)
@@ -1020,7 +1021,7 @@ class LectureListSearch(APIView):
                     num = 1
                     for lecture in selectLecture:
                         lecturesTime.append({
-                                "date": (str)(lecture.start_time+datetime.timedelta(hours=9))[0:16],
+                                "date": (str)(lecture.start_time)[0:16],
                                 "id": lecture.pk,
                                 "num": num
                             })
@@ -1042,7 +1043,7 @@ class LectureListSearch(APIView):
             return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
 
 
-
+#강의기록 내역 불러오기
 class LectureCheckedSearchView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -1111,13 +1112,12 @@ class LectureCheckedSearchView(APIView):
                     student_info = {
                         "student_id" : card.card_owner.student_id,
                         "id" : card.card_owner.pk,
-                        "name" : card.card_owner.user.username,
+                        "name" : card.card_owner.user.last_name+card.card_owner.user.first_name,
                         "profile_image": (ProfileImage.objects.get(user=card.card_owner.user)).image.url,
                         "std_text": (std_text),
                         "std_status":(std_status)
                     }
                     student_infos.append(student_info)
-
 
 
                 # 결과값
@@ -1145,6 +1145,14 @@ class LectureBeaconCheck(APIView):
                 #해당 강의
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
 
+                # 요청한 강의의 uuid
+                lectureUuid = LectureUuidRecord.objects.get(lecture_num=lecture.lecture_num)
+
+
+                if (lectureUuid.reachLimiter < serializer.validated_data['reach']):
+                    return Response("Beacon is too far", status=status.HTTP_403_FORBIDDEN)#비콘과의 거리가 멀음
+
+
                 # 해당 강좌의 결석플래그 상태 조정
                 recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
                 if recordLate:
@@ -1166,8 +1174,8 @@ class LectureBeaconCheck(APIView):
 
 
 
-                #요청한 강의의 uuid
-                lectureUuid = LectureUuidRecord.objects.get(lecture_num = lecture.lecture_num)
+
+
 
 
                 # 지정한 강의실 UUID 갱신기간이 넘어가면 수행
@@ -1210,6 +1218,8 @@ class LectureBeaconCheck(APIView):
                             is_absent_checker=True
                         )
                         card.save()
+                        return Response("Completed absence",status = status.HTTP_200_OK)#결석 완료
+
 
                 #활성화되고 결석플래그가 없는 강좌가 있으면
                 elif  activateRecord.activate==True:
@@ -1250,6 +1260,8 @@ class LectureBeaconCheck(APIView):
                                 beacon_checker = True,
                             )
                             card.save()
+
+                        return Response("Completed attendance", status=status.HTTP_200_OK)#출석 완료
                     else:
                         if (((timezone.now() > lectureUuid.init_time - datetime.timedelta(minutes=1)) or (timezone.now() < lectureUuid.init_time - datetime.timedelta(minutes=9))) and (lectureUuid.time_difference == True)):
                             userInfo = User.objects.get(username=request.user)
@@ -1268,6 +1280,8 @@ class LectureBeaconCheck(APIView):
                                     userLectureCard.is_reasonableabsent_checker = False
                                     userLectureCard.is_absent_checker = False
                                     userLectureCard.save()
+                                    return Response("Completed attendance", status=status.HTTP_200_OK)
+
                                 # 없으면 생성
                                 else:
 
@@ -1279,7 +1293,9 @@ class LectureBeaconCheck(APIView):
                                         beacon_checker = True
                                     )
                                     card.save()
+                                    return Response("Completed attendance", status=status.HTTP_200_OK)
 
+                        return Response("UUID values ​​do not match", status=status.HTTP_403_FORBIDDEN)#UUID값이 일치하지 않음
 
 
                 #강좌의 인증시간이 끝나 지각처리를 받을 때
@@ -1315,6 +1331,7 @@ class LectureBeaconCheck(APIView):
                                 is_absent_checker=False
                             )
                             card.save()
+                            return Response("Completed late", status=status.HTTP_200_OK)#지각 완료
 
                         # 학생 출결이 이미 있으면 결석 > 지각
                         elif userLectureCard.last().is_absent_checker== True:
@@ -1324,7 +1341,7 @@ class LectureBeaconCheck(APIView):
                             userLectureCard.is_reasonableabsent_checker = False
                             userLectureCard.is_absent_checker = False
                             userLectureCard.save()
-
+                            return Response("Completed late", status=status.HTTP_200_OK)
 
                     else:
                         if (((timezone.now() > lectureUuid.init_time - datetime.timedelta(minutes=1)) or (timezone.now() < lectureUuid.init_time - datetime.timedelta(minutes=9))) and (lectureUuid.time_difference == True)):
@@ -1350,6 +1367,7 @@ class LectureBeaconCheck(APIView):
                                         is_absent_checker=False
                                     )
                                     card.save()
+                                    return Response("Completed late", status=status.HTTP_200_OK)
 
                                 # 학생 출결이 이미 있으면 결석 > 지각
                                 elif userLectureCard.last().is_absent_checker == True:
@@ -1359,8 +1377,11 @@ class LectureBeaconCheck(APIView):
                                     userLectureCard.is_reasonableabsent_checker = False
                                     userLectureCard.is_absent_checker = False
                                     userLectureCard.save()
+                                    return Response("Completed late", status=status.HTTP_200_OK)
 
-                return Response()
+
+                        return Response("UUID values ​​do not match", status=status.HTTP_403_FORBIDDEN)
+                return Response("Activate lecture is not found", status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -1390,7 +1411,8 @@ class LectureFastestView(APIView):
 
                         cardList = {
                             "lecture_id" : card.target_lecture.pk,
-                            "lecture_title" : card.target_lecture.title
+                            "lecture_title" : card.target_lecture.title,
+                            "lecture_num" : card.target_lecture.lecture_num
                        }
                         listcach.append(cardList)
 
@@ -1402,3 +1424,76 @@ class LectureFastestView(APIView):
             return Response("Unknown User request", status=status.HTTP_403_FORBIDDEN)
 
 
+class LectureListCheckedView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def get(self, request):
+
+        if request.user.is_staff:
+            prof = ProfessorProfile.objects.get(user=request.user)
+            lecture_set = Lecture.objects.filter(lecturer=prof)
+
+            lectures = []
+
+            for lecture in lecture_set:
+                if AttendanceRecord.objects.filter(lecture = lecture):
+                    lectures.append({
+                        "id": lecture.pk,
+                        "title": lecture.title,
+                        "lecture_num": lecture.lecture_num
+                    })
+
+            result = {"lectures": lectures}
+            return Response(result)
+        else:
+
+            lectures = { "lectures" : Lecture.objects.values()}
+
+            return Response(lectures)
+
+
+class LectureBeaconReachSet(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if request.user.is_staff:
+            serializer = LectureBeaconReachSetSerializer(data=request.data)
+            if serializer.is_valid():
+                lecture = Lecture.objects.get(pk = serializer.validated_data['lecture'])
+                uuidRecord = LectureUuidRecord.objects.get(lecture_num=lecture.lecture_num)
+                uuidRecord.reachLimiter = serializer.validated_data['value']
+                uuidRecord.save()
+
+                result = {
+                    "reachLimiter": uuidRecord.reachLimiter,
+                    "lecture_num": lecture.lecture_num,
+                }
+                return Response(result, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response("Beacon reach only can set by student", status=status.HTTP_403_FORBIDDEN)
+
+class LectureBeaconReachView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        if request.user.is_staff:
+            serializer = LectureReceiveApplySerializer(data=request.data)
+            if serializer.is_valid():
+                lecture = Lecture.objects.get(pk = serializer.validated_data['lecture'])
+                uuidRecord = LectureUuidRecord.objects.get(lecture_num=lecture.lecture_num)
+
+
+                result = {
+                    "reachLimiter": uuidRecord.reachLimiter,
+                    "lecture_num" : lecture.lecture_num,
+                }
+                return Response(result, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response("Beacon reach view only can set by student", status=status.HTTP_403_FORBIDDEN)

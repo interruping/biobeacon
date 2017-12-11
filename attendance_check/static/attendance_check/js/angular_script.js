@@ -802,7 +802,39 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
     };
 
+    $scope.settingBeaconReach = function () {
+            $http.post('/attendance_check/api/lecture/apply/beacon/reach/view/', {"lecture": $scope.seletedLecture},
+            {
+                headers: {
+                    'Authorization' : token
+                }
 
+            }).then(function(response){
+                $scope.reachLimiter = "현재 "+response.data.lecture_num+"강의실 비콘인식범위 :"+response.data.reachLimiter+"M";
+                $("#beaconReachSetting").appendTo('body').modal();
+
+            }, function (response){
+            });
+
+
+
+        };
+
+
+    $scope.updateBeaconReach = function () {
+        $http.post('/attendance_check/api/lecture/apply/beacon/reach/set/', {"lecture": $scope.seletedLecture,"value": $scope.updateBeaconReach.val},
+        {
+            headers: {
+                'Authorization' : token
+            }
+
+        }).then(function(response){
+            $scope.reachLimiter = "현재 "+response.data.lecture_num+"강의실 비콘인식범위 :"+response.data.reachLimiter+"M";
+            alert("설정이 완료되었습니다.");
+        }, function (response){
+        });
+
+    };
 
     $scope.selectedTime = {
     0 : {str : "없음", int : 1},
@@ -1000,8 +1032,8 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
 
 
-     $scope.loadLectureList = function () {
-        $http.get('/attendance_check/api/lecture/list/', {
+     $scope.loadLectureListView = function () {
+        $http.get('/attendance_check/api/lecture/list/view', {
             headers: {
                 'Authorization' : token
             }

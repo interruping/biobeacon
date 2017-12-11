@@ -78,6 +78,7 @@ class AttendanceCard(models.Model):
 class LectureUuidRecord(models.Model):
     time_difference = models.BooleanField(default=True)
     time_difference_check_flag = models.BooleanField(default=False)
+    reachLimiter = models.CharField(max_length=2, default=4)
     default_uuid = models.CharField(max_length=15, default='4a4ece607eb011e')
     lecture_num = models.CharField(max_length=6, default='', primary_key=True)
     prime_num = models.CharField(max_length=10, default=99991)
