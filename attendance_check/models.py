@@ -66,6 +66,7 @@ class LectureReceiveCard(models.Model):
     card_owner = models.ForeignKey(StudentProfile)
 
 class AttendanceCard(models.Model):
+    beacon_checker = models.BooleanField(default=False)
     check_time = models.DateTimeField(editable=False, null=True)
     check_start_time = models.DateTimeField(editable=True, null=True)
     checker = models.ForeignKey(StudentProfile)
@@ -75,6 +76,8 @@ class AttendanceCard(models.Model):
     is_absent_checker = models.BooleanField(default=False)
 
 class LectureUuidRecord(models.Model):
+    time_difference = models.BooleanField(default=True)
+    time_difference_check_flag = models.BooleanField(default=False)
     default_uuid = models.CharField(max_length=15, default='4a4ece607eb011e')
     lecture_num = models.CharField(max_length=6, default='', primary_key=True)
     prime_num = models.CharField(max_length=10, default=99991)
@@ -83,5 +86,6 @@ class LectureUuidRecord(models.Model):
     uuid_now = models.CharField(max_length=32, default='')
     uuid_pre = models.CharField(max_length=32, default='')
     uuid_next = models.CharField(max_length=32, default='')
+
 
 
