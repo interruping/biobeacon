@@ -467,9 +467,16 @@ app.controller('ProfileController', function($scope, $http){
 });
 
 app.controller('LectureController', function($scope, $http){
+    var deleteId = 0;
 
-    $scope.deleteLecture = function(num){
-        $http.post('/attendance_check/api/lecture/delete/',{"id": num}, {
+      $scope.clickdelete = function(deleteTarget){
+            deleteId = deleteTarget.id;
+            $("#deleteCheck").css("z-index", "9999");
+            $("#deleteCheck").appendTo("body").modal();
+             }
+
+    $scope.deleteLecture = function(){
+        $http.post('/attendance_check/api/lecture/delete/',{"id": deleteId}, {
             headers: {
                 'Authorization' : token
             }
@@ -507,7 +514,8 @@ app.controller('LectureController', function($scope, $http){
 
         }).then(function(response){
             if(response.data.result == 1){
-            alert("잘못된 입력입니다.");
+              $("#failednumber").css("z-index", "9999");
+            $("#failednumber").appendTo("body").modal();
             }
             $scope.loadLectureList();
 
@@ -745,7 +753,11 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
 
     $scope.continueRealCheck = function() {
+            if($scope.realTime == null){
+               return;
+            }
             $scope.realTimeCheck();
+
     }
 
 
@@ -957,7 +969,10 @@ app.controller('specificControlController', function($scope, $http){
             }
 
         }).then(function(response){
-
+            if (response.data.StoredLecture) {
+                $("#lecture-stored-modal").appendTo("body").modal();
+                $interval.cancel(ainterval);
+            }
         }, function (response){
         });
 

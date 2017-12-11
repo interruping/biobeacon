@@ -46,6 +46,7 @@ from .views import (
                     LectureStuCheck,
                     LectureListSearch,
                     LectureCheckedSearchView,
+                    LectureFastestView,
                     LectureBeaconCheck,
                     StudentView,
                     LectureFastestView,
