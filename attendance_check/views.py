@@ -369,7 +369,7 @@ class LectureStartView(APIView):
             record.save()
 
             selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
-            check_start_time_record = ((str)(selectLecture.last().start_time + datetime.timedelta(hours=9)))[0:16]
+            check_start_time_record = ((str)(selectLecture.last().start_time))[0:16]
 
             result = {
                 "serializer.data": serializer.data,
@@ -617,6 +617,12 @@ class LectureReceiveApplyListView(APIView):
                 if activate_lec_card:
                     lec_card = activate_lec_card.last()
                     wait_time = (lec_card.end_time.hour*360+lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().hour*360+timezone.now().minute*60+timezone.now().second)
+                    print(lec_card.end_time.hour)
+                    print(lec_card.end_time.minute)
+                    print(lec_card.end_time.second)
+                    print(timezone.now().hour)
+                    print(timezone.now().minute)
+                    print(timezone.now().second)
                     if wait_time<0:
                         wait_time = 1
                 #
@@ -626,7 +632,7 @@ class LectureReceiveApplyListView(APIView):
                 selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
                 check_start_time_record = ''
                 if selectLecture:
-                    check_start_time_record = ((str)(selectLecture.last().start_time+datetime.timedelta(hours=9)))[0:16]
+                    check_start_time_record = ((str)(selectLecture.last().start_time))[0:16]
                 for card in cards:
                     std_text = ''
                     try :
@@ -1018,7 +1024,7 @@ class LectureListSearch(APIView):
                     num = 1
                     for lecture in selectLecture:
                         lecturesTime.append({
-                                "date": (str)(lecture.start_time+datetime.timedelta(hours=9))[0:16],
+                                "date": (str)(lecture.start_time)[0:16],
                                 "id": lecture.pk,
                                 "num": num
                             })
