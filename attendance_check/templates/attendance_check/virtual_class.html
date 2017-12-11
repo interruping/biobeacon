@@ -120,17 +120,14 @@ function loadDataViewList(){
                   <div class="modal-content">
                       <div class="modal-header">
                           <button type="button" class="close" data-dismiss="modal">&times;</button>
-                          <h4 class="modal-title">설정</h4>
+                          <h4 class="modal-title">강의 만료 시간 설정</h4>
                       </div>
                       <div class="modal-body">
-                          <p> 강의 만료 시간 설정 <BR>
-                              ---------------------------<br>
                               <input type="radio" name="e" value="20" ng-model="formData.e"> 20분<br>
                               <input type="radio" name="e" value="30" ng-model="formData.e"> 30분<br>
                               <input type="radio" name="e" value="40" ng-model="formData.e"> 40분<br>
                               <input type="radio" name="e" value="50" ng-model="formData.e"> 50분<br>
                               <input type="radio" name="e" value="60" ng-model="formData.e"> 60분<br>
-                          </p>
                       </div>
                       <div class="modal-footer">
                           <button type="submit" class="btn btn-default" data-dismiss="modal">취소</button>
@@ -257,13 +254,13 @@ function loadDataViewList(){
                         {% endverbatim %}
 
                         <input type="button" class="btn btn-success" style="width:100px;margin-top:10px;" value="출석 시작" ng-click="startLecture();realTimeCheck(selectedTimeMin);realTimeReset(selectedTimeMin);checkUUID();">
-                        인증시간
-                        <select ng-model="selectedTimeMin" style="margin-top:10px">
+                            &nbsp;&nbsp;인증시간&nbsp;
+                        <select ng-model="selectedTimeMin" style="margin-top:10px;height:25px;">
                             {% verbatim %}
                             <option ng-repeat="x in selectedTime" value="{{x.int}}"> {{x.str}} </option>
                             {% endverbatim %}
                         </select>
-                            남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
+                            &nbsp;&nbsp;남은시간 : {% verbatim %}{{realTimeMin}}{{strColon}}{{realTimeSec}}{% endverbatim %}
                         <ul class="navbar-form navbar-right">
                             {% verbatim %}{{lectureTimeRecord}}{% endverbatim %}
                             <button type="button" class="btn btn-success" style="width:100px;margin-top:5px;" value="save" ng-click="save();">저장</button>
