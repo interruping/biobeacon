@@ -92,8 +92,8 @@ function loadDataViewList(){
                           <p>정말 로그아웃 하시겠습니까?</p>
                       </div>
                       <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="doLogout()">네</button>
-                          <button type="submit" class="btn btn-default" data-dismiss="modal">아니요</button>
+                          <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="doLogout()">Logout</button>
                       </div>
                   </div>
 
@@ -132,8 +132,8 @@ function loadDataViewList(){
                           </p>
                       </div>
                       <div class="modal-footer">
-                          <button type="submit" class="btn btn-default" data-dismiss="modal">취소</button>
-                          <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="formData()">수정</button>
+                          <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="formData()">Save Change</button>
                       </div>
                   </div>
 
@@ -422,8 +422,8 @@ function loadDataViewList(){
                     {% verbatim %}{{reachLimiter}}{% endverbatim %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" ng-click="updateBeaconReach()">수정</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">종료</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" ng-click="updateBeaconReach()">Save Change</button>
                 </div>
             </div>
         </div>
