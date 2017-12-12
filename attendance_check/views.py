@@ -812,7 +812,7 @@ class LectureRequestList (APIView):
         for list in reqLectureList:
             result = {
                 "lecture":list.target_lecture.title,
-                "pk": list.pk,
+                "pk": list.target_lecture.id,
             }
             results.append(result)
 
@@ -844,17 +844,17 @@ class LectureRequestView(APIView):
                 result = {
                     'fail': True,
                 }
-                return Response(result)
+                return Response(result, status=status.HTTP_403_FORBIDDEN)
 
             std = StudentProfile.objects.get(user=request.user)
-            reqList = Lecture.objects.get(title=serializer.validated_data['title'])
+            reqList = Lecture.objects.get(pk=serializer.validated_data['id'])
 
             lec = LectureReceiveCard.objects.create(
                 target_lecture=reqList,
                 card_owner=std,
             )
             lec.save()
-            return Response(status=status.HTTP_200_OK)
+            return Response({"result": True},status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 출석체크값 저장
