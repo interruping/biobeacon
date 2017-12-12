@@ -92,8 +92,8 @@ function loadDataViewList(){
                           <p>정말 로그아웃 하시겠습니까?</p>
                       </div>
                       <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="doLogout()">네</button>
-                          <button type="submit" class="btn btn-default" data-dismiss="modal">아니요</button>
+                          <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="doLogout()">Logout</button>
                       </div>
                   </div>
 
@@ -122,9 +122,8 @@ function loadDataViewList(){
                           <button type="button" class="close" data-dismiss="modal">&times;</button>
                           <h4 class="modal-title">설정</h4>
                       </div>
-                      <div class="modal-body">
-                          <p> 강의 만료 시간 설정 <BR>
-                              ---------------------------<br>
+                      <div class="modal-body"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                          <p><h4> 강의 결석 시간 설정 <i class="fa fa-question-circle-o" data-toggle="explainIcon1" data-html="true" data-trigger="hover" title="강의 결석 시간이란?" data-content="설정된 시간값이 지나고 들어온 학생은<br /> 전부 자동으로 결석 처리해주는 기능<br /><br /> 단. 수동으로는 지각으로 변경 가능" data-placement="right"></i> </h4>
                               <input type="radio" name="e" value="20" ng-model="formData.e"> 20분<br>
                               <input type="radio" name="e" value="30" ng-model="formData.e"> 30분<br>
                               <input type="radio" name="e" value="40" ng-model="formData.e"> 40분<br>
@@ -133,8 +132,8 @@ function loadDataViewList(){
                           </p>
                       </div>
                       <div class="modal-footer">
-                          <button type="submit" class="btn btn-default" data-dismiss="modal">취소</button>
-                          <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="formData()">수정</button>
+                          <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="formData()">Save Change</button>
                       </div>
                   </div>
 
@@ -175,7 +174,12 @@ function loadDataViewList(){
                           <h4 class="modal-title">경고</h4>
                       </div>
                       <div class="modal-body">
-                          강의실번호는 5글자를 입력하셔야 합니다.
+                          강의실 번호 혹은 새로운 강좌를 다시 확인하여 주십시요.<br>
+                          <br>
+                          조건:<br>
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  강의실번호 : 5개의 숫자입력.<br>
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  새로운강좌 : 1개이상 글자입력.
+
                       </div>
                       <div class="modal-footer">
                           <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -388,9 +392,14 @@ function loadDataViewList(){
             }
     }
 
+  $(document).ready(function(){
+    $('[data-toggle="explainIcon1"]').popover();
+});
 
 
-
+  $(document).ready(function(){
+    $('[data-toggle="explainIcon2"]').popover();
+});
 
 
 
@@ -405,8 +414,8 @@ function loadDataViewList(){
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">닫기</span>
-                    </button>
-                    <h4 class="modal-title" id="settingTitle">비콘 탐지 거리 설정</h4>
+                    </button><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                    <h4 class="modal-title" id="settingTitle">비콘 탐지 거리 설정 <i class="fa fa-question-circle-o" data-toggle="explainIcon2" data-trigger="hover" title="비콘 탐지 거리란?" data-html="true" data-content="설정한 거리값을 벗어난 학생은 <br />출석 비콘 인식을 못하게 합니다." data-placement="right"></i> </h4>
                 </div>
                 <div class="modal-body">
                     <form>
@@ -421,8 +430,8 @@ function loadDataViewList(){
                     {% verbatim %}{{reachLimiter}}{% endverbatim %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" ng-click="updateBeaconReach()">수정</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">종료</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" ng-click="updateBeaconReach()">Save Change</button>
                 </div>
             </div>
         </div>
@@ -437,7 +446,7 @@ function loadDataViewList(){
             <div class="panel-heading">강좌선택</div>
             <div class="panel-body">
                 <div class="form-group">
-                    <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLectureTitle()" ng-mouseover="loadLectureList()">
+                    <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLectureTitle()" ng-mouseover="loadLectureListView()">
 
                         <option ng-selected="selected" value="0">강좌를 선택하여 주세요</option>
                         {% verbatim %}
