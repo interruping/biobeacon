@@ -122,9 +122,8 @@ function loadDataViewList(){
                           <button type="button" class="close" data-dismiss="modal">&times;</button>
                           <h4 class="modal-title">설정</h4>
                       </div>
-                      <div class="modal-body">
-                          <p> 강의 만료 시간 설정 <BR>
-                              ---------------------------<br>
+                      <div class="modal-body"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                          <p><h4> 강의 결석 시간 설정 <i class="fa fa-question-circle-o" data-toggle="explainIcon1" data-trigger="hover" title="강의 결석 시간이란?" data-content="교수님이 설정한 시간값이 지나고 들어온 학생들은 전부 자동으로 결석처리 되게 만드는 기능입니다. 단. 수동으로는 지각으로 변경가능합니다." data-placement="right"></i> </h4>
                               <input type="radio" name="e" value="20" ng-model="formData.e"> 20분<br>
                               <input type="radio" name="e" value="30" ng-model="formData.e"> 30분<br>
                               <input type="radio" name="e" value="40" ng-model="formData.e"> 40분<br>
@@ -388,7 +387,9 @@ function loadDataViewList(){
             }
     }
 
-
+  $(document).ready(function(){
+    $('[data-toggle="explainIcon1"]').popover();
+});
 
 
 
