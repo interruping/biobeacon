@@ -830,7 +830,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
         }).then(function(response){
             $scope.reachLimiter = "현재 "+response.data.lecture_num+"강의실 비콘인식범위 :"+response.data.reachLimiter+"M";
-            alert("설정이 완료되었습니다.");
         }, function (response){
         });
 
