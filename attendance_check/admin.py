@@ -7,7 +7,8 @@ from attendance_check.models import (Lecture,
                                      LectureReceiveCard,
                                      Department,
                                      ProfileImage,
-                                     LectureUuidRecord)
+                                     Beacon
+                                     )
 
 # Register your models here.
 admin.site.register(Lecture)
@@ -18,4 +19,4 @@ admin.site.register(AttendanceRecord)
 admin.site.register(AttendanceCard)
 admin.site.register(LectureReceiveCard)
 admin.site.register(ProfileImage)
-admin.site.register(LectureUuidRecord)
+admin.site.register(Beacon)

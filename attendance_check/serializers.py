@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from .models import Lecture, ProfessorProfile, StudentProfile
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -18,6 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.save()
         return user
+
+
 class RegistrationSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=128)
     first_name = serializers.CharField(max_length=128)
@@ -28,6 +31,7 @@ class RegistrationSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     department = serializers.IntegerField()
     profile_image_id = serializers.IntegerField()
+
 
 class ProfessorProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,26 +48,33 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 class LectureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
-        fields = ('title', 'lecturer_num')
+        fields = ('title', 'lecture_num')
 
     def create(self, validated_data):
 
         return validated_data
+
+
 class LectureListSerializer(serializers.Serializer):
     lecturer = serializers.IntegerField()
+
 
 class LectureCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=128)
     lecture_num = serializers.CharField(min_length=5, max_length=5)
 
+
 class IdCheckSerializer(serializers.Serializer):
     reg_username = serializers.CharField(max_length=128)
+
 
 class IdNumberCheckSerializer(serializers.Serializer):
     organization_id = serializers.IntegerField()
 
+
 class InfoCheckSerializer(serializers.Serializer):
     login_username = serializers.CharField(max_length=128)
+
 
 class LectureCreateUuidSerializer(serializers.Serializer):
     lecture_num = serializers.CharField(max_length=5)
@@ -73,12 +84,15 @@ class LectureStartSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     second = serializers.IntegerField()
 
+
 class LectureUuidSerializer(serializers.Serializer):
     id = serializers.IntegerField()
+
 
 class LectureRequestAttendanceCheckSerializer(serializers.Serializer):
     user = serializers.IntegerField(required=False)
     lecture = serializers.IntegerField()
+
 
 class LectureReceiveApplySerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
@@ -94,10 +108,12 @@ class LectureCheckedListViewSerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
     time = serializers.CharField(max_length=17)
 
+
 class LectureBeaconCheckSerializer(serializers.Serializer):
     lecture = serializers.IntegerField()
     lectureUuid = serializers.CharField(max_length=32, default='')
     reach = serializers.CharField(max_length=2)
+
 
 class DeleteLectureSerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -106,8 +122,10 @@ class DeleteLectureSerializer(serializers.Serializer):
 class ProfileTimeSetSerializer(serializers.Serializer):
     time_set = serializers.CharField()
 
+
 class LectureRequestSerializer(serializers.Serializer):
     id = serializers.CharField()
+
 
 class LectureBeaconReachSetSerializer(serializers.Serializer):
     value = serializers.CharField(max_length=2)

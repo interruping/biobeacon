@@ -506,37 +506,25 @@ app.controller('LectureController', function($scope, $http){
     };
 
     $scope.registNewLecture = function () {
-        $http.post('/attendance_check/api/lecture/create/', {"title": $scope.newLectureTitle, "lecture_num": $scope.newLectureNum},
+        $http.post('/attendance_check/api/lecture/create/',
+            {
+                "title": $scope.newLectureTitle,
+                "lecture_num": $scope.newLectureNum,
+                "beacon_uuid": $scope.beaconUUID,
+                "beacon_major": $scope.beaconMajor,
+                "beacon_minor": $scope.beaconMinor,
+            },
         {
             headers: {
                 'Authorization' : token
             }
 
         }).then(function(response){
-            if(response.data.result == 1){
-              $("#failednumber").css("z-index", "9999");
-            $("#failednumber").appendTo("body").modal();
-            }
             $scope.loadLectureList();
-
-            var checkCompare = response.data.failedModal
-            if (checkCompare) {
-                $("#lecture-failed-modal").appendTo("body").modal();
-            }
         }, function (response){
-        });
-    };
-
-    $scope.createUuidTable = function () {
-        $http.post('/attendance_check/api/lecture/createUuid/', {"lecture_num": $scope.newLectureNum},
-        {
-            headers: {
-                'Authorization' : token
-            }
-
-        }).then(function(response){
-
-        }, function (response){
+            $("#fail_modal").css("z-index", "9999");
+            $("#fail_msg").html(response.data);
+            $("#fail_modal").appendTo("body").modal();
         });
     };
 });
@@ -605,6 +593,12 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
     };
 
     $scope.updateSelectedLecture = function () {
+        if ($scope.seletedLecture == 0) {
+            $("#start_atn_btn").prop('disabled', true)
+        } else {
+            $("#start_atn_btn").prop('disabled', false)
+        }
+
         $http.post('/attendance_check/api/lecture/apply/list/', {"lecture": $scope.seletedLecture},
         {
             headers: {
@@ -612,11 +606,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
             }
 
         }).then(function(response){
-            $scope.realTimeReset(response.data.wait_time);
-            if (response.data.lecture_time_record)
-                $scope.lectureTimeRecord = "기록날짜:"+response.data.lecture_time_record;
-            else
-                $scope.lectureTimeRecord = "출석을 시작하지 않으셨습니다."
             myDataView.clearAll();
             var students = response.data.students;
 
@@ -696,6 +685,11 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         }
     };
     $scope.startLecture = function () {
+        $("#lecture_selector").prop('disabled', true);
+        $("#start_atn_btn").removeClass('btn-success');
+        $("#start_atn_btn").addClass('btn-warning');
+        $("#start_atn_btn").attr('value', '출석 중');
+        $("#start_atn_btn").prop('disabled', true);
         $http.post('/attendance_check/api/lecture/apply/start/', {"id": $scope.seletedLecture, "second" : $scope.selectedTimeMin},
         {
             headers: {
@@ -708,38 +702,72 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
         });
     };
 
-    $scope.checkUUID = function () {
-        $http.post('/attendance_check/api/lecture/apply/checkUUID/', {"id": $scope.seletedLecture},
+
+    $scope.stopLecture = function () {
+        $interval.cancel(ainterval);
+
+        $("#start_atn_btn").prop('disabled', true);
+        $("#stop_atn_btn").prop('disabled', true);
+        $("#lecture_selector").prop('disabled', false);
+
+        $http.post('/attendance_check/api/lecture/apply/stop/', {"id": $scope.seletedLecture, "second": 0},
         {
-            headers: {
-                'Authorization' : token
-            }
+            headers: { 'Authorization' : token }
 
         }).then(function(response){
+            $("#lecture_selector").prop('disabled', false)
+            $scope.seletedLecture = "0";
+            //$("#lecture_selector").val(0).change()
+            myDataView.clearAll();
+        }, function(response){
 
-        }, function (response){
 
         });
     };
 
 
+    // $scope.checkUUID = function () {
+    //     $http.post('/attendance_check/api/lecture/apply/checkUUID/', {"id": $scope.seletedLecture},
+    //     {
+    //         headers: {
+    //             'Authorization' : token
+    //         }
+    //
+    //     }).then(function(response){
+    //
+    //     }, function (response){
+    //
+    //     });
+    // };
+
+
     var timeInterval;
     $scope.realTimeReset = function (timeset) {
+
         if ($scope.realTime=!null)
             $interval.cancel(timeInterval);
-        $scope.realTime = timeset;
-        $scope.strColon = " : ";
+            $scope.realTime = timeset;
+            $scope.strColon = " : ";
+
         if (timeset<=1){
             $scope.realTimeMin = 0;
             $scope.realTimeSec = 0;
         }
-
         else{
             timeInterval = $interval(function () {
                 $scope.realTime = $scope.realTime -1;
                 $scope.realTimeMin = parseInt($scope.realTime/60);
                 $scope.realTimeSec = $scope.realTime%60;
+                if ($scope.realTime == 0) {
 
+                    $("#start_atn_btn").removeClass('btn-warning')
+                    $("#start_atn_btn").addClass('btn-success')
+                    $("#start_atn_btn").attr('value', '출석 시작')
+                    $("#start_atn_btn").prop('disabled', true)
+
+                    $("#stop_atn_btn").prop('disabled', false)
+
+                }
         }, 1000,[timeset]);
         }
     };
@@ -767,9 +795,6 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
         ainterval = $interval(function () {
 
-
-
-
                 $http.post('/attendance_check/api/lecture/apply/list/', {"lecture": $scope.seletedLecture},
                 {
                     headers: { 'Authorization' : token }
@@ -795,11 +820,7 @@ app.controller('LectureAttendanceCheckController', function($scope, $http, $inte
 
                     });
 
-
-
-
         }, 1000,[$scope.realTime]);
-
     };
 
     $scope.settingBeaconReach = function () {
@@ -1049,6 +1070,8 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
 
 
     $scope.updateSelectedLectureTitle = function () {
+
+
         $http.post('/attendance_check/api/lecture/list/search/', {"lecture": $scope.seletedLecture},
         {
             headers: {
@@ -1056,7 +1079,7 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
             }
 
         }).then(function(response){
-            $scope.realTimeReset(response.data.wait_time);
+            //$scope.realTimeReset(response.data.wait_time == undefined ? 0: response.data.wait_time);
             myDataViewList.clearAll();
             var students = response.data.students;
 
@@ -1108,7 +1131,7 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
             }
 
         }).then(function(response){
-            $scope.realTimeReset(response.data.wait_time);
+            //$scope.realTimeReset(response.data.wait_time);
             myDataViewList.clearAll();
             var students = response.data.students;
 
@@ -1198,28 +1221,6 @@ app.controller('LectureAttendanceCheckController_list', function($scope, $http, 
         }, function (response){
 
         });
-    };
-
-
-    var timeInterval;
-    $scope.realTimeReset = function (timeset) {
-        if ($scope.realTime=!null)
-            $interval.cancel(timeInterval);
-        $scope.realTime = timeset;
-        $scope.strColon = " : ";
-        if (timeset<=1){
-            $scope.realTimeMin = 0;
-            $scope.realTimeSec = 0;
-        }
-
-        else{
-            timeInterval = $interval(function () {
-                $scope.realTime = $scope.realTime -1;
-                $scope.realTimeMin = parseInt($scope.realTime/60);
-                $scope.realTimeSec = $scope.realTime%60;
-
-        }, 1000,[timeset]);
-        }
     };
 
     $scope.selectedTime = {

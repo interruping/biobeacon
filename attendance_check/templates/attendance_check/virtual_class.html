@@ -156,45 +156,46 @@ function loadDataViewList(){
         <div class="panel panel-default" ng-controller="LectureController" ng-init="loadLectureList()">
   			<div class="panel-heading">담당 강좌
             </div>
-  			<div class="panel-body">
+            <div class="panel-body">
+                <div class="modal fade" id="fail_modal" role="dialog">
+                    <div class="modal-dialog" >
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">에러</h4>
+                            </div>
+                            <div id='fail_msg' class="modal-body">
+                                알 수 없는 에러 </br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
                 <div class="row" >
-                    <div class="col-md-3">
-                      <!-- <input type="text" class=" form-control"style="margin-bottom:10px" placeholder="강의실 번호" ng-model="newLectureNum"> -->
+                    <div class="col-md-2">
                         <input type="text" id="lectureroom_number" data-toggle="onlyNumber" title="주의" data-content="오직 숫자만 입력해주십시오." onkeydown='return onlyNumber(event)'
                                data-placement="top"
-                               onkeyup='removeChar(event)' style='ime-mode:disabled;'  class=" form-control"style="margin-bottom:10px"
+                               onkeyup='removeChar(event)' style='ime-mode:disabled; margin-bottom:10px;'  class=" form-control"
                                placeholder="강의실 번호" ng-model="newLectureNum">
-                            <div class="modal fade" id="failednumber" role="dialog">
-              <div class="modal-dialog" >
-
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                      <div class="modal-header">
-                          <button type="button" class="close" data-dismiss="modal">&times;</button>
-                          <h4 class="modal-title">경고</h4>
-                      </div>
-                      <div class="modal-body">
-                          강의실 번호 혹은 새로운 강좌를 다시 확인하여 주십시요.<br>
-                          <br>
-                          조건:<br>
-                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  강의실번호 : 5개의 숫자입력.<br>
-                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  새로운강좌 : 1개이상 글자입력.
-
-                      </div>
-                      <div class="modal-footer">
-                          <button type="submit" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                  </div>
-
-              </div>
-          </div>
-
-                    </div>
-                    <div class="col-md-7">
-                        <input type="text" class=" form-control"id="subject_id" style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
                     </div>
                     <div class="col-md-2">
-                        <input type="button" id ="subject_submit" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="새 강좌 개설" ng-click="registNewLecture();createUuidTable();">
+                        <input type="text" class=" form-control"id="subject_id" style="margin-bottom:10px" placeholder="새로운 강좌" ng-model="newLectureTitle">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class=" form-control"id="beacon_uuid" style="margin-bottom:10px" placeholder="비콘 UUID" ng-model="beaconUUID">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class=" form-control"id="beacon_major" style="margin-bottom:10px" placeholder="비콘 MAJOR" ng-model="beaconMajor">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class=" form-control"id="beacon_minor" style="margin-bottom:10px" placeholder="비콘 MINOR" ng-model="beaconMinor">
+                    </div>
+                    <div class="col-md-1">
+                        <input type="button" id ="subject_submit" class="btn btn-primary" style="width:100%;margin-bottom:10px" value="강좌개설" ng-click="registNewLecture();">
                     </div>
 
                 </div>
@@ -267,13 +268,14 @@ function loadDataViewList(){
             <div class="panel-body">
                 <div class="form-group">
 
-                    <select ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()" ng-mouseover="loadLectureList()">
+                    <select id="lecture_selector" ng-model="seletedLecture" style="width:100%;" ng-change="updateSelectedLecture()" ng-mouseover="loadLectureList()">
                         <option ng-selected="selected" value="0">강좌를 선택하여 주세요</option>
                         {% verbatim %}
                         <option ng-repeat="lecture in lectures" value="{{lecture.id}}">[{{lecture.lecture_num}}] {{ lecture.title }}</option>
                         {% endverbatim %}
 
-                        <input type="button" class="btn btn-success" style="width:100px;margin-top:10px;" value="출석 시작" ng-click="startLecture();realTimeCheck(selectedTimeMin);realTimeReset(selectedTimeMin);checkUUID();">
+                        <input id="start_atn_btn" type="button" class="btn btn-success" style="width:100px;margin-top:10px;" value="출석 시작" ng-click="startLecture();realTimeCheck(selectedTimeMin);realTimeReset(selectedTimeMin);" disabled>
+                        <input id="stop_atn_btn" type="button" class="btn btn-info" style="width:100px;margin-top:10px;" value="수업 종료" ng-click="stopLecture()" disabled>
                         인증시간
                         <select ng-model="selectedTimeMin" style="margin-top:10px">
                             {% verbatim %}

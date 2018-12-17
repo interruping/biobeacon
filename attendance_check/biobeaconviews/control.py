@@ -10,12 +10,10 @@ from attendance_check.serializers import ( LectureCreateSerializer,
                                            LectureReceiveApplySerializer,
                                            DeleteLectureSerializer,
                                            ProfileTimeSetSerializer,
-                                           LectureCreateUuidSerializer,
-                                           LectureUuidSerializer,
                                            LectureCheckSerializer,
                                            LectureRequestSerializer,
-                                           LectureCheckedListViewSerializer,
-                                           LectureBeaconReachSetSerializer)
+                                           LectureCheckedListViewSerializer
+                                           )
 
 from attendance_check.models import ( ProfessorProfile,
                                       Lecture,
@@ -24,9 +22,8 @@ from attendance_check.models import ( ProfessorProfile,
                                       AttendanceCard,
                                       LectureReceiveCard,
                                       ProfileImage,
-                                      LectureUuidRecord,
+                                      Beacon,
                                       )
-from attendance_check import uuidcalc
 from django.utils import timezone
 import datetime
 
@@ -42,35 +39,41 @@ class LectureCreateView(APIView):
         serializer = LectureCreateSerializer(data=request.data)
 
         if serializer.is_valid():
+            lecturer = ProfessorProfile.objects.get(user=request.user)
             lecture = Lecture.objects.filter(title=serializer.validated_data['title'],
-                                             lecture_num=serializer.validated_data['lecture_num'])
+                                             lecture_num=serializer.validated_data['lecture_num'],
+                                             lecturer=lecturer)
+            if len(lecture) > 0:
+                return Response("이미 개설된 강의거나 잘 못된 강의 정보입니다.", status=status.HTTP_400_BAD_REQUEST)
+            uuid = request.data['beacon_uuid']
+            major = request.data['beacon_major']
+            minor = request.data['beacon_minor']
 
-            if lecture:
-                lectureL = lecture.reverse()[0]
-                lecturer = ProfessorProfile.objects.get(user=request.user)
+            if len(uuid) != 32:
+                return Response("비콘의 UUID가 32자리이여야 합니다.", status=status.HTTP_400_BAD_REQUEST)
 
-                # 강의명, 강의실 번호, 등록자(lecturer) 확인
-                record = Lecture.objects.filter(title=lectureL, lecturer=lecturer)
-                if record:
-                    result = {
-                        'failedModal': True,
-                    }
-                    return Response(result)
+            if not major or not minor:
+                return Response("비콘의 major또는 minor값이 잘 못 되었습니다.", status=status.HTTP_400_BAD_REQUEST)
 
             professorProfile = ProfessorProfile.objects.get(user=request.user)
+            beacon = Beacon.objects.create(
+                uuid=request.data['beacon_uuid'],
+                major=request.data['beacon_major'],
+                minor=request.data['beacon_minor']
+            )
+
             lec = Lecture.objects.create(
                 title=serializer.validated_data['title'],
                 lecture_num=serializer.validated_data['lecture_num'],
                 lecturer=professorProfile,
+                beacon=beacon
             )
+
             lec.save()
 
             return Response(serializer.data)
         else:
-            result = {
-            "result" : 1
-            }
-            return Response(result)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -103,6 +106,7 @@ class LectureListView(APIView):
 
             return Response(lectures)
 
+
 class LectureStartView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -116,55 +120,25 @@ class LectureStartView(APIView):
             lecture = Lecture.objects.get(pk=serializer.validated_data['id'])
 
             # 해당 강좌의 결석플래그 상태 조정
-            recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
-            if recordLate:
-                for list in recordLate:
-                    if list.absence_time < timezone.now():
-                        list.activate_absence = True
-                        list.save()
+            check_activate_lecture = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+            if check_activate_lecture:
+                return Response("이미 강의 중입니다.", status=status.HTTP_400_BAD_REQUEST)
 
-            # 해당 강의의 활성화 여부 찾기
-            record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+            lecture_professor = ProfessorProfile.objects.get(user=request.user)
 
-            #해당 강의의 활성화유무 판단 활성화되면
-            if record:
-                record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
-                # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
-                if (record.end_time<timezone.now()):
-                    record.activate = False
-                    record.save()
-
-            #해당 강의의 활성화 여부 재검색
-            record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
-            # 활성화된 강좌가 있으면
-            if record:
-                record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
-                record.end_time=timezone.now() + datetime.timedelta(seconds = serializer.validated_data['second'])
-
-            #활성화된 강좌가 없으면
-            else:
-                lecturer = ProfessorProfile.objects.get(user = request.user)
-                record = AttendanceRecord.objects.create(
-                    activate = True,
-                    start_time = timezone.now(),
-                    end_time = timezone.now()  + datetime.timedelta(seconds = serializer.validated_data['second']),
-                    lecture = lecture,
-                    absence_time=timezone.now() + datetime.timedelta(minutes=(int)(lecturer.absence_time_set))
-                )
+            record = AttendanceRecord.objects.create(
+                activate = True,
+                start_time = timezone.now(),
+                end_time = timezone.now() + datetime.timedelta(seconds = serializer.validated_data['second']),
+                lecture = lecture,
+                absence_time=timezone.now() + datetime.timedelta(minutes=(int)(lecture_professor.absence_time_set))
+            )
 
             record.save()
-
-            selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
-            check_start_time_record = ((str)(selectLecture.last().start_time))[0:16]
-
-            result = {
-                "serializer.data": serializer.data,
-                "check_start_time_record": check_start_time_record
-            }
-
-            return Response(result)
+            return Response(status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LectureStopView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -175,13 +149,22 @@ class LectureStopView(APIView):
             return Response("Lecture only can stopped by staff user.", status=status.HTTP_403_FORBIDDEN)
 
         serializer = LectureStartSerializer(data=request.data)
+
         if serializer.is_valid():
             lecture = Lecture.objects.get(pk=serializer.validated_data['id'])
-            record = AttendanceRecord.objects.get(lecture=lecture)
+            records = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+
+            if len(records) == 0:
+                return Response('종료할 강의가 없습니다.', status=status.HTTP_400_BAD_REQUEST)
+
+            if not len(records) == 1:
+                return Response('강의 데이터에 문제가 발생하였습니다.', status=status.HTTP_400_BAD_REQUEST)
+
+            record = records[0]
             record.activate = False
             record.save()
 
-            return Response(serializer.data)
+            return Response(status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -321,71 +304,6 @@ class ProfileTimeSetView(APIView):
         else:
             return Response("Lecture Error.", status=status.HTTP_403_FORBIDDEN)
 
-#강의생성 시 해당 강의실의 uuid데이터베이스 테이블이 없으면 생성함
-class LectureCreateuuidView(APIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (JSONWebTokenAuthentication,)
-
-    def post(self, request):
-        if not request.user.is_staff:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = LectureCreateUuidSerializer(data=request.data)
-        if serializer.is_valid():
-            lectureuuidtest = LectureUuidRecord.objects.filter(lecture_num = serializer.validated_data['lecture_num'])
-            if not lectureuuidtest:
-                record = LectureUuidRecord.objects.create(
-                    lecture_num=serializer.validated_data['lecture_num']
-                )
-                record.save()
-
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-#UUID갱신 확인
-class LectureCheckUUID(APIView):
-
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (JSONWebTokenAuthentication,)
-
-    def post(self, request):
-        if not request.user.is_staff:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = LectureUuidSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                #강의실 번호에따른 강의실 UUID데이터베이스 가져옴
-                lecture = Lecture.objects.get(id = serializer.validated_data['id'])
-                lectureuuid = LectureUuidRecord.objects.get(lecture_num=lecture.lecture_num)
-
-                #지정한 강의실 UUID 갱신기간이 넘어가면 수행
-                if lectureuuid.init_time <= timezone.now():
-                    secret_key = (int)(lectureuuid.secret_key)
-                    prime_num = (int)(lectureuuid.prime_num)
-
-                    # UUID값을 계산하여 저장 now현재 pre이전 next다음
-                    # UUID_calc(prime_num, secret_key, default_uuid, 강의실번호)
-                    lectureuuid.uuid_now =  (uuidcalc.UUID_calc_now(prime_num, secret_key, lectureuuid.default_uuid,
-                                                  lecture.lecture_num))
-                    lectureuuid.uuid_pre =  (uuidcalc.UUID_calc_pre(prime_num, secret_key, lectureuuid.default_uuid,
-                                                  lecture.lecture_num))
-                    lectureuuid.uuid_next =  (uuidcalc.UUID_calc_next(prime_num, secret_key, lectureuuid.default_uuid,
-                                                  lecture.lecture_num))
-                    #다음 uuid값이 변경해야할 값을 저장
-                    lectureuuid.init_time = timezone.now() + datetime.timedelta(minutes=uuidcalc.addTime(timezone.now().minute)) - datetime.timedelta(seconds=timezone.now().second)
-                    lectureuuid.save()
-
-            except:
-                return Response()
-
-
-
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LectureAvailableList(APIView):
     permission_classes = (IsAuthenticated,)
@@ -423,50 +341,25 @@ class LectureRequestList (APIView):
         return Response({"result": results})
 
 
-class LectureBeaconReachSet(APIView):
+class LectureGetUUID(APIView):
+
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
 
     def post(self, request):
-        if request.user.is_staff:
-            serializer = LectureBeaconReachSetSerializer(data=request.data)
-            if serializer.is_valid():
-                lecture = Lecture.objects.get(pk = serializer.validated_data['lecture'])
-                uuidRecord = LectureUuidRecord.objects.get(lecture_num=lecture.lecture_num)
-                uuidRecord.reachLimiter = serializer.validated_data['value']
-                uuidRecord.save()
 
-                result = {
-                    "reachLimiter": uuidRecord.reachLimiter,
-                    "lecture_num": lecture.lecture_num,
-                }
-                return Response(result, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        lecture = Lecture.objects.get(pk=request.data['lec_id'])
+        if not lecture:
+            return Response("잘못된 강의 ID", status=status.HTTP_400_BAD_REQUEST)
+        beacon = lecture.beacon
 
-        else:
-            return Response("Beacon reach only can set by student", status=status.HTTP_403_FORBIDDEN)
+        beacon_info = {
+            'uuid': beacon.uuid,
+            'major': beacon.major,
+            'minor': beacon.minor
+        }
 
-class LectureBeaconReachView(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (JSONWebTokenAuthentication,)
-
-    def post(self, request):
-        if request.user.is_staff:
-            serializer = LectureReceiveApplySerializer(data=request.data)
-            if serializer.is_valid():
-                lecture = Lecture.objects.get(pk = serializer.validated_data['lecture'])
-                uuidRecord = LectureUuidRecord.objects.get(lecture_num=lecture.lecture_num)
-
-
-                result = {
-                    "reachLimiter": uuidRecord.reachLimiter,
-                    "lecture_num" : lecture.lecture_num,
-                }
-                return Response(result, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        else:
-            return Response("Beacon reach view only can set by student", status=status.HTTP_403_FORBIDDEN)
+        return Response(beacon_info, status=status.HTTP_200_OK)
 
 # 출석체크값 저장
 class LectureStuCheck(APIView):
@@ -653,6 +546,7 @@ class LectureListSearch(APIView):
             return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
 
 
+# 수강 신청
 class LectureRequestView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -666,6 +560,7 @@ class LectureRequestView(APIView):
             reqList = Lecture.objects.get(pk=serializer.validated_data['id'])
 
             record = LectureReceiveCard.objects.filter(target_lecture=reqList, card_owner=std)
+
             if record:
                 result = {
                     'fail': True,
@@ -683,7 +578,7 @@ class LectureRequestView(APIView):
             return Response({"result": True},status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+## 강의 별 수강 학생 상태 및 리스트 반환
 class LectureReceiveApplyListView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (JSONWebTokenAuthentication,)
@@ -694,46 +589,12 @@ class LectureReceiveApplyListView(APIView):
             if serializer.is_valid():
                 lecture = Lecture.objects.get(pk=serializer.validated_data['lecture'])
                 cards = LectureReceiveCard.objects.filter(target_lecture=lecture)
-
-                # 해당 강좌의 결석플래그 상태 조정
-                recordLate = AttendanceRecord.objects.filter(lecture=lecture, activate_absence=False)
-                if recordLate:
-                    for list in recordLate:
-                        if list.absence_time < timezone.now():
-                            list.activate_absence = True
-                            list.save()
-                ######
-                # 해당 강의의 활성화 여부 찾기
-                record = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
-                # 해당 강의의 활성화유무 판단 활성화되면
-                if record:
-                    record = AttendanceRecord.objects.get(lecture=lecture, activate=True)
-                    # 해당강의의 시작시간과 종료시간을 보고 활성화 변경
-                    if (record.end_time < timezone.now()):
-                        record.activate = False
-                        record.save()
-                ######
-
-                #활성 강의 남은시간 계산
-                activate_lec_card = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
-                wait_time = 1
-                if activate_lec_card:
-                    lec_card = activate_lec_card.last()
-                    wait_time = (lec_card.end_time.hour*3600+lec_card.end_time.minute*60+lec_card.end_time.second) - (timezone.now().hour*3600+timezone.now().minute*60+timezone.now().second)
-                    if wait_time<0:
-                        wait_time = 1
-
-
-
                 student_infos = []
-                selectLecture = AttendanceRecord.objects.filter(lecture=lecture)
-                check_start_time_record = ''
-                if selectLecture:
-                    check_start_time_record = ((str)(selectLecture.last().start_time))[0:16]
+                activated_lectures = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
                 for card in cards:
                     std_text = ''
                     try :
-                        std_card = AttendanceCard.objects.get(checker = card.card_owner, record_to=selectLecture.last())
+                        std_card = AttendanceCard.objects.get(checker=card.card_owner, record_to=activated_lectures[0])
                     except:
                         std_text = "출석대기 중"
                         std_status = 'default'
@@ -772,16 +633,46 @@ class LectureReceiveApplyListView(APIView):
                         "std_status":(std_status)
                     }
 
-
                     student_infos.append(student_info)
 
                 result = {
-                    "wait_time" : wait_time,
                     "students" : student_infos,
-                    "lecture_time_record" : check_start_time_record
                 }
                 return Response(result)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("Lecture Receive Apply List only can read by student", status=status.HTTP_403_FORBIDDEN)
+
+class LectureRequestAttendance(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JSONWebTokenAuthentication,)
+
+    def post(self, request):
+        std = StudentProfile.objects.get(user=request.user)
+        lecture = Lecture.objects.get(pk=request.data['lec_id'])
+        attendanceRecords = AttendanceRecord.objects.filter(lecture=lecture, activate=True)
+
+        if len(attendanceRecords) != 1:
+            return Response("강의가 시작되지 않았습니다.")
+
+        attendanceRecord = attendanceRecords[0]
+
+
+        createCard = AttendanceCard.objects.create(
+            checker=std,
+            record_to=attendanceRecord,
+            check_time=timezone.now(),
+            check_start_time=attendanceRecord.start_time,
+        )
+
+
+        if attendanceRecord.absence_time < timezone.now():
+            createCard.is_absent_checker = True;
+
+        createCard.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+
+
